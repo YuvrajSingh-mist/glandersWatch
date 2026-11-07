@@ -1,165 +1,141 @@
 """Front matter and chapters 1-2 of the full technical report.
 
+FRONT_MATTER reproduces the institutional template used by the department's
+project reports verbatim: title page with the institute emblem at top right,
+Certificate, Declaration, Acknowledgments, Abstract and Contents. Only the
+project-specific fields (title, author, roll number, supervisor) differ.
+
 Plain raw strings with @TOKEN@ placeholders, substituted by src/09_make_full_report.py.
 No f-strings, so LaTeX braces need no escaping.
 """
 
 FRONT_MATTER = r"""
 % ============================== TITLE PAGE ==============================
+% Layout measured from the department template: title flush with the top margin,
+% the emblem centred below the supervisor block at 3.2 cm, department block at foot.
 \begin{titlepage}
-\centering
-\vspace*{0.5cm}
+\thispagestyle{empty}
+\begin{center}
 
-{\Large\bfseries INDIAN INSTITUTE OF INFORMATION TECHNOLOGY,\\[0.15em]
-BHUBANESWAR\par}
+{\huge\bfseries GlandersWatch: A Chained\\[6pt]
+Multi-Level Machine Learning\\[6pt]
+Framework for Population-Level\\[6pt]
+Glanders Risk Prediction\par}
 
-\vspace{1.3cm}
+\vspace{1.0cm}
 
-{\LARGE\bfseries GlandersWatch\par}
-\vspace{0.45cm}
-{\Large\bfseries A Chained Multi-Level Machine Learning Framework for\\[0.15em]
-Population-Level Glanders Risk Prediction\par}
+{\large Project Report Submitted\par}
+\vspace{0.5em}
+{\normalsize in partial fulfillment of the requirements for the award of the\par}
 
-\vspace{1.1cm}
-{\large\itshape Project Report\par}
-\vspace{0.3cm}
-{\normalsize submitted in partial fulfilment of the requirements for the award of the degree\par}
-\vspace{0.3cm}
+\vspace{0.9cm}
 {\large\bfseries Bachelor of Technology\par}
-\vspace{0.15cm}
-{\normalsize in\par}
-\vspace{0.15cm}
-{\large\bfseries Computer Science and Engineering\par}
+\vspace{0.3em}
+{\large in\par}
+\vspace{0.25em}
+{\large\bfseries Computer Engineering\par}
 
-\vspace{1.1cm}
-{\normalsize by\par}
-\vspace{0.3cm}
-{\large\bfseries Yuvraj Singh \quad (Roll No.\ \textit{@ROLLNO@})\par}
+\vspace{1.15cm}
+{\large by\par}
+\vspace{0.35em}
+{\large\bfseries Yuvraj Singh \quad @ROLLNO@\par}
 
-\vspace{1.1cm}
-{\normalsize Under the supervision of\par}
-\vspace{0.25cm}
+\vspace{1.05cm}
+{\large Under the supervision of\par}
+\vspace{0.35em}
 {\large\bfseries @SUPERVISOR@\par}
 
+\vspace{1.25cm}
+\includegraphics[width=3.19cm]{iiit_logo.png}\par
+
 \vfill
-{\normalsize Department of Computer Science and Engineering\\
-Indian Institute of Information Technology, Bhubaneswar\\
-Odisha, India\par}
-\vspace{0.25cm}
+
+{\normalsize Department of Computer Science and Engineering\par}
+\vspace{0.35em}
+{\normalsize International Institute of Information Technology, Bhubaneswar\par}
+\vspace{0.35em}
 {\normalsize @MONTHYEAR@\par}
+
+\vspace*{0.85cm}
+
+\end{center}
 \end{titlepage}
 
 % ============================== CERTIFICATE ==============================
 \newpage
-\thispagestyle{plain}
-\begin{center}
-{\Large\bfseries INDIAN INSTITUTE OF INFORMATION TECHNOLOGY,\\ BHUBANESWAR\par}
-\vspace{0.35cm}
-{\Large\bfseries CERTIFICATE\par}
-\end{center}
+\thispagestyle{empty}
+\noindent\underline{\textbf{Certificate}}
 
-\vspace{0.7cm}
+\vspace{0.9cm}
 \noindent
-This is to certify that the report entitled \textbf{``GlandersWatch: A Chained Multi-Level
-Machine Learning Framework for Population-Level Glanders Risk Prediction''}, submitted by
-\textbf{Yuvraj Singh} (Roll No.\ \textit{@ROLLNO@}) to the Indian Institute of Information
-Technology, Bhubaneswar, in partial fulfilment of the requirements for the award of the degree
-of Bachelor of Technology in Computer Science and Engineering, is a bona fide record of the
-work carried out by him under my supervision and guidance.
+{\sloppy
+This is to certify that the report entitled ``GlandersWatch: A Chained Multi-Level Machine
+Learning Framework for Population-Level Glanders Risk Prediction'' submitted by
+Yuvraj Singh (@ROLLNO@) to International Institute of Information Technology, Bhubaneswar is a
+record of bonafide project work under my supervision, and the report is submitted for the
+evaluation of the BTech Degree Final-Semester Project.\par}
 
-\vspace{0.4em}
+\vspace{1.6cm}
 \noindent
-The work has not been submitted elsewhere, in part or in full, for the award of any other
-degree or diploma. The help and support received during the course of this work has been duly
-acknowledged.
-
-\vspace{2.4cm}
-\begin{flushright}
-\rule{5cm}{0.4pt}\\
-@SUPERVISOR@\\
-Supervisor\\
-Department of CSE, IIIT Bhubaneswar
-\end{flushright}
-
-\vfill
-\noindent
-Date: \rule{3cm}{0.4pt}\hfill Place: Bhubaneswar
+\underline{(Supervisor)}\\[0.25em]
+@SUPERVISOR@
 
 % ============================== DECLARATION ==============================
 \newpage
-\thispagestyle{plain}
-\begin{center}
-{\Large\bfseries DECLARATION\par}
-\end{center}
+\thispagestyle{empty}
+\noindent\underline{\textbf{Declaration}}
 
-\vspace{0.7cm}
+\vspace{0.9cm}
 \noindent
-I hereby declare that the work contained in this report is my own and that I have not
-reproduced any material from any other source, except where this has been acknowledged or cited
-in the text.
+I certify that
 
-\vspace{0.4em}
+\begin{enumerate}
+  \item The work contained in the report has been done by myself under the general supervision of
+        my supervisor.
+  \item The work has not been submitted to any other Institute for any degree or diploma.
+  \item I have followed the guidelines provided by the Institute in writing the report.
+  \item I have conformed to the norms and guidelines given in the Ethical Code of Conduct of the
+        Institute.
+  \item Whenever I have used materials (data, theoretical analysis, and text) from other sources,
+        I have given due credit to them by citing them in the text of the report and giving their
+        details in the references.
+  \item Whenever I have quoted written materials from other sources, I have put them under
+        quotation marks and given due credit to the sources by citing them and giving required
+        details in the references.
+\end{enumerate}
+
+\vspace{1.6cm}
 \noindent
-All data used in this study are publicly available and every source is identified in
-Chapter~\ref{ch:method} and listed in the References. All code written for this project is
-original, and every reported number can be reproduced from that code.
-
-\vspace{0.4em}
-\noindent
-I further declare that this report has not been submitted, in whole or in part, to any other
-institution for any degree or diploma.
-
-\vspace{2.4cm}
-\begin{flushright}
-\rule{5cm}{0.4pt}\\
 Yuvraj Singh\\
-Roll No.\ \textit{@ROLLNO@}\\
-Department of CSE, IIIT Bhubaneswar
-\end{flushright}
-
-\vfill
-\noindent
-Date: \rule{3cm}{0.4pt}\hfill Place: Bhubaneswar
+@ROLLNO@
 
 % ============================== ACKNOWLEDGMENTS ==============================
 \newpage
-\thispagestyle{plain}
-\begin{center}
-{\Large\bfseries ACKNOWLEDGMENTS\par}
-\end{center}
+\thispagestyle{empty}
+\noindent\underline{\textbf{Acknowledgments}}
 
-\vspace{0.7cm}
+\vspace{0.9cm}
 \noindent
-I would like to express my sincere gratitude to my supervisor, @SUPERVISOR@, for the guidance
-and support extended throughout this project. The suggestions on framing the evaluation, and on
-reporting negative results honestly, improved the work considerably.
+I would like to express my sincere gratitude to my respected supervisor, @SUPERVISOR@, for the
+invaluable guidance, support and encouragement given throughout this project. Their insights and
+expertise were instrumental in shaping this work and helped me overcome numerous challenges. I am
+also thankful to the faculty and staff of the Department of Computer Science and Engineering,
+International Institute of Information Technology, Bhubaneswar, for providing the resources and a
+conducive learning environment. Finally, I would like to thank my family and friends for their
+unwavering support and understanding during the course of this project.
 
-\vspace{0.4em}
+\vspace{1.6cm}
 \noindent
-I am grateful to the Department of Computer Science and Engineering at IIIT Bhubaneswar for the
-computing facilities used for the experiments, and to the faculty who reviewed earlier versions
-of this work and identified weaknesses in the evaluation design.
-
-\vspace{0.4em}
-\noindent
-This study relies entirely on open data. I acknowledge the World Organisation for Animal Health,
-the Department of Animal Husbandry and Dairying of the Government of India, the Food and
-Agriculture Organization, the World Bank, the NASA POWER project and Europe PMC, whose publicly
-accessible datasets made the work possible.
-
-\vspace{2.2cm}
-\begin{flushright}
-Yuvraj Singh
-\end{flushright}
+Yuvraj Singh\\
+@ROLLNO@
 
 % ============================== ABSTRACT ==============================
 \newpage
-\thispagestyle{plain}
-\begin{center}
-{\Large\bfseries ABSTRACT\par}
-\end{center}
+\pagestyle{plain}
+\noindent\underline{\textbf{Abstract}}
+\addcontentsline{toc}{chapter}{Abstract}
 
-\vspace{0.6cm}
+\vspace{0.7cm}
 \noindent
 Glanders is a bacterial zoonosis of equids caused by \textit{Burkholderia mallei}. It is
 notifiable, frequently fatal, and remains endemic in parts of Africa, Asia and South America.
@@ -168,7 +144,7 @@ districts, with strong geographic concentration. The published machine learning 
 this disease is confined to laboratory identification of the organism by spectroscopic methods.
 No population-level geographic risk model has been reported.
 
-\vspace{0.35em}
+\vspace{0.5em}
 \noindent
 This project develops such a model. Four public datasets that had not previously been applied to
 glanders are combined into a country-year panel: a text-mined occurrence corpus from Europe PMC,
@@ -176,12 +152,12 @@ FAOSTAT livestock stocks, World Bank development indicators and NASA POWER reana
 climatology. The panel contains 3,078 country-year observations across 162 equine-holding
 countries for the years 2005 to 2023, with 172 positive labels and 44 engineered features.
 
-\vspace{0.35em}
+\vspace{0.5em}
 \noindent
-Six model families are trained under three validation schemes, and a three-stage chained
-pipeline is evaluated in which animal population is forecast before occurrence is predicted. On
-a forward temporal holdout the strongest model reaches a precision-recall AUC of 0.554 against a
-base rate of 0.056, an approximately ten-fold lift, with an expected calibration error of 0.016.
+Six model families are trained under three validation schemes, and a three-stage chained pipeline
+is evaluated in which animal population is forecast before occurrence is predicted. On a forward
+temporal holdout the strongest model reaches a precision-recall AUC of 0.554 against a base rate
+of 0.056, an approximately ten-fold lift, with an expected calibration error of 0.016.
 Performance falls to 0.304 under leave-country-out validation, which is the honest estimate for
 an unseen country. Chaining produces no measurable gain in discrimination. An ablation shows that
 climate covariates transfer poorly across countries, and the model performs least well in
@@ -189,11 +165,11 @@ low-income regions. The dominant limitation is that the label reflects documente
 than true incidence, so the model largely learns which countries report disease. Reporting effort
 is identified as the principal confounder for future work.
 
-\vspace{0.5em}
+\vspace{0.7em}
 \noindent
-\textbf{Keywords:} glanders, \textit{Burkholderia mallei}, zoonosis, risk prediction, class
-imbalance, gradient boosting, probability calibration, SHAP, text mining, animal health
-surveillance.
+\textbf{Keywords:} Glanders, \textit{Burkholderia mallei}, Zoonosis, Risk Prediction, Class
+Imbalance, Gradient Boosting, Probability Calibration, SHAP, Text Mining, Animal Health
+Surveillance.
 """
 
 BODY_INTRO = r"""

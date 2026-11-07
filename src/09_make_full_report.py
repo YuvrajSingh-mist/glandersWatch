@@ -279,14 +279,20 @@ PREAMBLE = r"""\documentclass[11pt,openany]{report}
   urlcolor=blue!45!black,
   pdftitle={GlandersWatch: A Chained Multi-Level Machine Learning Framework for Population-Level Glanders Risk Prediction},
   pdfauthor={Yuvraj Singh},
-  pdfsubject={B.Tech Project Report, IIIT Bhubaneswar}
+  pdfsubject={B.Tech Project Report, International Institute of Information Technology, Bhubaneswar}
 }
 
 \graphicspath{{../figures/}}
 \captionsetup{font=small,labelfont=bf,skip=6pt}
 \setlength{\parskip}{0.35em}
 \setlength{\parindent}{0pt}
-\onehalfspacing
+\setlength{\emergencystretch}{1.5em}
+% single spacing, as in the department template
+
+% Section numbering follows the department template: sections are "1.", "2." within
+% each chapter (counter resets per chapter) and subsections are "1.1", "1.2".
+\renewcommand{\thesection}{\arabic{section}.}
+\renewcommand{\thesubsection}{\arabic{section}.\arabic{subsection}}
 
 % chapter-based numbering for floats and equations
 \counterwithin{figure}{chapter}
@@ -295,30 +301,31 @@ PREAMBLE = r"""\documentclass[11pt,openany]{report}
 \renewcommand{\thetable}{\thechapter.\arabic{table}}
 
 \begin{document}
-\pagenumbering{roman}
+% The department template numbers continuously in arabic from the Certificate page,
+% with the title page carrying no number, so Abstract falls on page 4.
+\pagenumbering{arabic}
+\setcounter{page}{0}
 """
 
 MIDDLE = r"""
 % ============================== CONTENTS ==============================
 \newpage
 \pagestyle{plain}
-\tableofcontents
+\noindent\underline{\textbf{Contents}}
+\vspace{0.55cm}
 
-\newpage
-\listoffigures
-
-\newpage
-\listoftables
-
-\newpage
-\pagenumbering{arabic}
+% \tableofcontents would insert its own chapter-style heading and a page break;
+% \@starttoc typesets the entries alone, under the heading above.
+\makeatletter
+\@starttoc{toc}
+\makeatother
 """
 
 BACK = r"""
 % ============================== REFERENCES ==============================
 \newpage
-\chapter*{References}
-\addcontentsline{toc}{chapter}{References}
+\chapter*{Bibliography}
+\addcontentsline{toc}{chapter}{Bibliography}
 \renewcommand{\bibname}{}
 @BIBLIOGRAPHY@
 
