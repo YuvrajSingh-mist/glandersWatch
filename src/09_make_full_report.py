@@ -25,8 +25,12 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 import diagrams as DG  # noqa: E402
+import diagrams_platform as DP  # noqa: E402
 import related_works as RW  # noqa: E402
+import report_arch as RA  # noqa: E402
 import report_body as RB  # noqa: E402
+import report_mlops as MO  # noqa: E402
+import report_rag as RG  # noqa: E402
 import report_front as RF  # noqa: E402
 import report_results as RR  # noqa: E402
 
@@ -339,8 +343,11 @@ def build() -> pathlib.Path:
         + RF.FRONT_MATTER
         + MIDDLE
         + RF.BODY_INTRO
+        + RA.BODY_ARCH
         + RB.BODY_METHOD
-        + RB.BODY_IMPL
+        + MO.BODY_MLOPS
+        + RG.BODY_RAG
+        + RG.BODY_ALERT
         + RR.BODY_RESULTS
         + RR.BODY_CONCL
         + BACK
@@ -358,6 +365,11 @@ def build() -> pathlib.Path:
         print("WARNING: unresolved tokens:", sorted(set(leftover))[:10])
 
     (OUT / "diagstyles.tex").write_text(DG.STYLES, encoding="utf-8")
+    for name, tex in [("fig_architecture", DP.ARCHITECTURE),
+                      ("fig_serving", DP.SERVING),
+                      ("fig_rag", DP.RAG),
+                      ("fig_alertflow", DP.ALERT)]:
+        (OUT / f"{name}.tex").write_text(tex, encoding="utf-8")
     path = OUT / "GlandersWatch_Full_Report.tex"
     path.write_text(doc, encoding="utf-8")
     print(f"wrote {path.relative_to(ROOT)} ({len(doc):,} chars)")

@@ -139,37 +139,48 @@ Yuvraj Singh\\
 \noindent
 Glanders is a bacterial zoonosis of equids caused by \textit{Burkholderia mallei}. It is
 notifiable, frequently fatal, and remains endemic in parts of Africa, Asia and South America.
-Indian surveillance between 2019 and 2023 identified 728 seropositive equids across 138
-districts, with strong geographic concentration. The published machine learning literature on
-this disease is confined to laboratory identification of the organism by spectroscopic methods.
-No population-level geographic risk model has been reported.
+Indian surveillance between 2019 and 2023 identified 728 seropositive equids across 138 districts,
+with strong geographic concentration. The published machine learning literature on this disease is
+confined to laboratory identification of the organism by spectroscopic methods, and no
+population-level geographic risk model has been reported.
 
 \vspace{0.5em}
 \noindent
-This project develops such a model. Four public datasets that had not previously been applied to
-glanders are combined into a country-year panel: a text-mined occurrence corpus from Europe PMC,
-FAOSTAT livestock stocks, World Bank development indicators and NASA POWER reanalysis
-climatology. The panel contains 3,078 country-year observations across 162 equine-holding
-countries for the years 2005 to 2023, with 172 positive labels and 44 engineered features.
+This report presents GlandersWatch, a platform built from three independently deployable components:
+a calibrated machine learning risk engine, a retrieval-augmented layer that explains each
+prediction with citations to official guidance, and an alert service that delivers the result to
+equine owners. The decomposition is the contribution as much as the model is. Each component
+communicates through a versioned schema rather than shared internals, none hardcodes the disease,
+and each degrades without failing the others.
 
 \vspace{0.5em}
 \noindent
-Six model families are trained under three validation schemes, and a three-stage chained pipeline
-is evaluated in which animal population is forecast before occurrence is predicted. On a forward
-temporal holdout the strongest model reaches a precision-recall AUC of 0.554 against a base rate
-of 0.056, an approximately ten-fold lift, with an expected calibration error of 0.016.
-Performance falls to 0.304 under leave-country-out validation, which is the honest estimate for
-an unseen country. Chaining produces no measurable gain in discrimination. An ablation shows that
-climate covariates transfer poorly across countries, and the model performs least well in
-low-income regions. The dominant limitation is that the label reflects documented activity rather
-than true incidence, so the model largely learns which countries report disease. Reporting effort
-is identified as the principal confounder for future work.
+The risk engine combines four public datasets not previously applied to glanders into a country-year
+panel: a text-mined occurrence corpus from Europe PMC, FAOSTAT livestock stocks, World Bank
+development indicators and NASA POWER reanalysis climatology. The panel contains 3,078 country-year
+observations across 162 equine-holding countries from 2005 to 2023, with 172 positive labels and 44
+engineered features. Six model families are trained under three validation schemes, and a
+three-stage chained pipeline is evaluated in which animal population is forecast before occurrence
+is predicted.
+
+\vspace{0.5em}
+\noindent
+On a forward temporal holdout the strongest model reaches a precision-recall AUC of 0.554 against a
+base rate of 0.056, roughly a ten-fold lift, with an expected calibration error of 0.016. Performance
+falls to 0.304 under leave-country-out validation, which is the estimate to quote for an unseen
+country. Chaining produces no measurable gain in discrimination. An ablation shows climate
+covariates transfer poorly across countries, and the model performs least well in low-income
+regions. The dominant limitation is that the label reflects documented activity rather than true
+incidence, so the model largely learns where disease is reported. Reporting effort is the principal
+confounder and the main target for future work. The explanation and alert components are specified
+to the level of their interfaces, rule semantics and evaluation protocol, and are not reported as
+measured results because they are not deployed.
 
 \vspace{0.7em}
 \noindent
-\textbf{Keywords:} Glanders, \textit{Burkholderia mallei}, Zoonosis, Risk Prediction, Class
-Imbalance, Gradient Boosting, Probability Calibration, SHAP, Text Mining, Animal Health
-Surveillance.
+\textbf{Keywords:} Glanders, \textit{Burkholderia mallei}, Risk Prediction, Gradient Boosting,
+Probability Calibration, SHAP, Retrieval-Augmented Generation, Citation Grounding, Alert Fatigue,
+Modular System Design, MLOps, Animal Health Surveillance.
 """
 
 BODY_INTRO = r"""
@@ -230,28 +241,36 @@ The problem has four parts.
 
 \section{Objectives}
 
-The objectives of the project are:
+The project has one research objective and three engineering objectives. The research objective is
+the prediction problem; the engineering objectives are the three components that turn the
+prediction into something a person can use.
 
 \begin{enumerate}
-  \item To assemble a country-year panel for glanders from public sources not previously applied
-        to this disease, covering animal history, animal population and environment.
-  \item To engineer and select features using statistical evidence rather than assumption, and to
-        document which evidence was used and why.
-  \item To train and compare six model families under three validation schemes, with the harder
-        scheme governing model selection.
-  \item To design and evaluate a chained pipeline in which animal population is forecast as an
-        intermediate step.
-  \item To produce calibrated probabilities and an alert operating curve, so that the output can
-        support a warning decision rather than only a ranking.
-  \item To report limitations and negative results explicitly, including any component that failed
-        to improve performance.
+  \item \textbf{Research.} To assemble a country-year panel for glanders from public sources not
+        previously applied to this disease, train and compare six model families under three
+        validation schemes, and report the achievable skill honestly, including negative results.
+  \item \textbf{Component 1, prediction as a service.} To package the trained model as a versioned,
+        portable artefact and expose it through a REST interface, so that the risk engine can be
+        called by any consumer without that consumer knowing how the model works.
+  \item \textbf{Component 2, cited explanation.} To build a retrieval-augmented layer that explains
+        a prediction using official guidance, cites every claim, and refuses rather than guesses
+        when the corpus does not support an answer.
+  \item \textbf{Component 3, owner alerts.} To build a notification service that converts a
+        calibrated probability into a small number of messages, using threshold, suppression and
+        deduplication rules so that a rare disease does not train its users to ignore warnings.
 \end{enumerate}
+
+A cross-cutting requirement applies to all four: each component must be independently testable,
+independently replaceable, and free of any hardcoded reference to glanders, so that the platform
+can be repointed at another disease without altering the components themselves.
 
 \section{Scope and Limitations}
 
-The study is scoped to country-year resolution. District-level modelling, which the original
-project proposal envisaged for India, is not attempted here because the required district-level
-covariates could not be assembled from public sources within the project period.
+The prediction study is scoped to country-year resolution. District-level modelling, which the
+original project proposal envisaged for India, is not attempted here because the required
+district-level covariates could not be assembled from public sources within the project period.
+The explanation and alert layers are specified at area level and are resolution-agnostic, so they
+apply unchanged once a district-level model exists.
 
 The model is a population-level risk tool. It does not diagnose an individual animal and is not
 a substitute for laboratory confirmation or clinical examination.
@@ -266,11 +285,13 @@ quantified rather than hidden.
 \section{Organisation of the Report}
 
 Chapter~\ref{ch:lit} reviews the epidemiological and machine learning literature and identifies
-the gap addressed here. Chapter~\ref{ch:method} describes the data, the panel construction, the
-feature engineering and the modelling approach. Chapter~\ref{ch:impl} covers the implementation,
-including the software architecture and both computational pipelines.
-Chapter~\ref{ch:results} presents and discusses the results. Chapter~\ref{ch:concl} concludes and
-sets out future work.
+the gap addressed here. Chapter~\ref{ch:arch} sets out the system architecture and the three
+components the platform is built from. Chapter~\ref{ch:method} describes the data, the panel
+construction, the feature engineering and the modelling approach for the risk engine.
+Chapter~\ref{ch:mlops} covers model serving and the operational layer that turns the trained model
+into a callable component. Chapter~\ref{ch:rag} specifies the retrieval-augmented explanation layer
+and Chapter~\ref{ch:alerts} the alert service. Chapter~\ref{ch:results} presents and discusses the
+evaluation results. Chapter~\ref{ch:concl} concludes and sets out future work.
 
 % =====================================================================
 \chapter{Literature Review and Gap Analysis}
