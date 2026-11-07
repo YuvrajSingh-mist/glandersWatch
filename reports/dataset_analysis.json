@@ -1,0 +1,1439 @@
+{
+  "labels": {
+    "rows": 3078,
+    "positives": 172,
+    "negatives": 2906,
+    "prevalence": 0.05588044184535412,
+    "imbalance_ratio": 16.895348837209305,
+    "countries": 162,
+    "positive_countries": 56,
+    "single_year_positive_countries": 26,
+    "repeat_positive_countries": 30,
+    "repeat_positive_rate": 0.5357142857142857,
+    "top5_country_share": 0.3546511627906977,
+    "top10_country_share": 0.5406976744186046,
+    "prevalence_by_year": {
+      "2005": 0.018518518518518517,
+      "2006": 0.006172839506172839,
+      "2007": 0.043209876543209874,
+      "2008": 0.030864197530864196,
+      "2009": 0.04938271604938271,
+      "2010": 0.037037037037037035,
+      "2011": 0.08024691358024691,
+      "2012": 0.05555555555555555,
+      "2013": 0.043209876543209874,
+      "2014": 0.06172839506172839,
+      "2015": 0.04938271604938271,
+      "2016": 0.07407407407407407,
+      "2017": 0.05555555555555555,
+      "2018": 0.06790123456790123,
+      "2019": 0.07407407407407407,
+      "2020": 0.09259259259259259,
+      "2021": 0.09876543209876543,
+      "2022": 0.037037037037037035,
+      "2023": 0.08641975308641975
+    },
+    "positives_by_year": {
+      "2005": 3,
+      "2006": 1,
+      "2007": 7,
+      "2008": 5,
+      "2009": 8,
+      "2010": 6,
+      "2011": 13,
+      "2012": 9,
+      "2013": 7,
+      "2014": 10,
+      "2015": 8,
+      "2016": 12,
+      "2017": 9,
+      "2018": 11,
+      "2019": 12,
+      "2020": 15,
+      "2021": 16,
+      "2022": 6,
+      "2023": 14
+    },
+    "prevalence_by_region": {
+      "East Asia & Pacific": {
+        "n": 456,
+        "pos": 48,
+        "rate": 0.10526315789473684
+      },
+      "Europe & Central Asia": {
+        "n": 912,
+        "pos": 31,
+        "rate": 0.03399122807017544
+      },
+      "Latin America & Caribbean": {
+        "n": 551,
+        "pos": 12,
+        "rate": 0.021778584392014518
+      },
+      "Middle East, North Africa, Afghanistan & Pakistan": {
+        "n": 380,
+        "pos": 23,
+        "rate": 0.060526315789473685
+      },
+      "North America": {
+        "n": 38,
+        "pos": 15,
+        "rate": 0.39473684210526316
+      },
+      "South Asia": {
+        "n": 57,
+        "pos": 16,
+        "rate": 0.2807017543859649
+      },
+      "Sub-Saharan Africa": {
+        "n": 665,
+        "pos": 27,
+        "rate": 0.0406015037593985
+      }
+    },
+    "count_target": {
+      "mean_given_event": 1.3488372093023255,
+      "median_given_event": 1.0,
+      "max": 5.0,
+      "share_of_events_with_1": 0.7790697674418605
+    }
+  },
+  "univariate": [
+    {
+      "feature": "lon",
+      "spearman": 0.10088475593719118,
+      "p_value": 2.2479595089101182e-08,
+      "n": 3059,
+      "missing_pct": 0.6172839506172839,
+      "mutual_info": 0.07935784908428811
+    },
+    {
+      "feature": "abs_lat",
+      "spearman": 0.03786231760354633,
+      "p_value": 0.036260640253406765,
+      "n": 3059,
+      "missing_pct": 0.6172839506172839,
+      "mutual_info": 0.07545085277568386
+    },
+    {
+      "feature": "pop_total",
+      "spearman": 0.2797097224261754,
+      "p_value": 4.27629663103399e-56,
+      "n": 3059,
+      "missing_pct": 0.6172839506172839,
+      "mutual_info": 0.06388083717421389
+    },
+    {
+      "feature": "log_livestock",
+      "spearman": 0.2514597009794863,
+      "p_value": 1.3349925591066743e-45,
+      "n": 3078,
+      "missing_pct": 0.0,
+      "mutual_info": 0.057142681496076486
+    },
+    {
+      "feature": "occ_count_5y",
+      "spearman": 0.3812684491309665,
+      "p_value": 4.508582253872114e-107,
+      "n": 3078,
+      "missing_pct": 0.0,
+      "mutual_info": 0.055574934365577144
+    },
+    {
+      "feature": "sheep",
+      "spearman": 0.1995367926224615,
+      "p_value": 5.205473096453915e-29,
+      "n": 3078,
+      "missing_pct": 0.0,
+      "mutual_info": 0.05118359134442385
+    },
+    {
+      "feature": "cattle",
+      "spearman": 0.2470979681937668,
+      "p_value": 4.80555814603376e-44,
+      "n": 3078,
+      "missing_pct": 0.0,
+      "mutual_info": 0.051176498450588026
+    },
+    {
+      "feature": "years_since_last",
+      "spearman": -0.35188243189007495,
+      "p_value": 2.0802792159714994e-90,
+      "n": 3078,
+      "missing_pct": 0.0,
+      "mutual_info": 0.04861740103467427
+    },
+    {
+      "feature": "log_equids",
+      "spearman": 0.15255101311266786,
+      "p_value": 1.7407959290190864e-17,
+      "n": 3078,
+      "missing_pct": 0.0,
+      "mutual_info": 0.04256101534056733
+    },
+    {
+      "feature": "goats",
+      "spearman": 0.18938814423926778,
+      "p_value": 3.0120998311616963e-26,
+      "n": 3078,
+      "missing_pct": 0.0,
+      "mutual_info": 0.04222750083220239
+    },
+    {
+      "feature": "asses",
+      "spearman": 0.08860037930718226,
+      "p_value": 8.513492661397222e-07,
+      "n": 3078,
+      "missing_pct": 0.0,
+      "mutual_info": 0.03650623690675303
+    },
+    {
+      "feature": "horses",
+      "spearman": 0.16337160116493907,
+      "p_value": 7.410794496881944e-20,
+      "n": 3078,
+      "missing_pct": 0.0,
+      "mutual_info": 0.03258531440588697
+    },
+    {
+      "feature": "agri_land_pct",
+      "spearman": 0.05989938044854648,
+      "p_value": 0.0009468402328235936,
+      "n": 3043,
+      "missing_pct": 1.1371020142949968,
+      "mutual_info": 0.03139119964143555
+    },
+    {
+      "feature": "occ_lag2",
+      "spearman": 0.33458675348692407,
+      "p_value": 2.1395501489708535e-81,
+      "n": 3078,
+      "missing_pct": 0.0,
+      "mutual_info": 0.029448660682418915
+    },
+    {
+      "feature": "equid_density",
+      "spearman": -0.07626415810295596,
+      "p_value": 2.5379795703238357e-05,
+      "n": 3043,
+      "missing_pct": 1.1371020142949968,
+      "mutual_info": 0.028282845292759262
+    },
+    {
+      "feature": "occ_count_lag1",
+      "spearman": 0.3196968335562873,
+      "p_value": 4.3416665574063496e-74,
+      "n": 3078,
+      "missing_pct": 0.0,
+      "mutual_info": 0.028221245103634773
+    },
+    {
+      "feature": "occ_lag1",
+      "spearman": 0.3164771278392486,
+      "p_value": 1.4594439947272489e-72,
+      "n": 3078,
+      "missing_pct": 0.0,
+      "mutual_info": 0.027947758220409735
+    },
+    {
+      "feature": "equid_share",
+      "spearman": -0.09499441233685509,
+      "p_value": 1.2913676066282586e-07,
+      "n": 3078,
+      "missing_pct": 0.0,
+      "mutual_info": 0.027054342308834745
+    },
+    {
+      "feature": "rural_pct",
+      "spearman": -0.06857518189123787,
+      "p_value": 0.00014723324790338058,
+      "n": 3059,
+      "missing_pct": 0.6172839506172839,
+      "mutual_info": 0.025996094489995514
+    },
+    {
+      "feature": "pop_density",
+      "spearman": 0.046710312040952315,
+      "p_value": 0.009964831480267531,
+      "n": 3043,
+      "missing_pct": 1.1371020142949968,
+      "mutual_info": 0.025602376406346217
+    },
+    {
+      "feature": "mules",
+      "spearman": 0.08481458813980423,
+      "p_value": 2.4521192671968135e-06,
+      "n": 3078,
+      "missing_pct": 0.0,
+      "mutual_info": 0.02451226971363374
+    },
+    {
+      "feature": "region_occ_share",
+      "spearman": 0.12083038704494281,
+      "p_value": 2.017359960269756e-11,
+      "n": 3059,
+      "missing_pct": 0.6172839506172839,
+      "mutual_info": 0.02110247205976301
+    },
+    {
+      "feature": "wind",
+      "spearman": -0.07878939432487758,
+      "p_value": 1.2846479052132734e-05,
+      "n": 3059,
+      "missing_pct": 0.6172839506172839,
+      "mutual_info": 0.020986579983069742
+    },
+    {
+      "feature": "temp_min",
+      "spearman": -0.0576883026002092,
+      "p_value": 0.0014129521804143955,
+      "n": 3059,
+      "missing_pct": 0.6172839506172839,
+      "mutual_info": 0.01944375306771584
+    },
+    {
+      "feature": "gdp_pc",
+      "spearman": 0.06679291313928272,
+      "p_value": 0.00023957352476041026,
+      "n": 3020,
+      "missing_pct": 1.8843404808317088,
+      "mutual_info": 0.01388625080331285
+    },
+    {
+      "feature": "equid_growth_1y",
+      "spearman": -0.04391806907644039,
+      "p_value": 0.014819985234699648,
+      "n": 3078,
+      "missing_pct": 0.0,
+      "mutual_info": 0.009517123445656583
+    },
+    {
+      "feature": "temp_mean",
+      "spearman": -0.02651757605387183,
+      "p_value": 0.1425669772977975,
+      "n": 3059,
+      "missing_pct": 0.6172839506172839,
+      "mutual_info": 0.009377376003198545
+    },
+    {
+      "feature": "fertilizer_pct",
+      "spearman": 0.0835429525467805,
+      "p_value": 4.083373355854537e-06,
+      "n": 3033,
+      "missing_pct": 1.461988304093567,
+      "mutual_info": 0.00824414189525835
+    },
+    {
+      "feature": "equid_growth_3y",
+      "spearman": -0.05751868527988571,
+      "p_value": 0.0014106265551941182,
+      "n": 3078,
+      "missing_pct": 0.0,
+      "mutual_info": 0.008047183349576104
+    },
+    {
+      "feature": "agri_va_pct_gdp",
+      "spearman": -0.024174840942458094,
+      "p_value": 0.18854682033767692,
+      "n": 2960,
+      "missing_pct": 3.833658219623132,
+      "mutual_info": 0.007940046162464576
+    },
+    {
+      "feature": "livestock_prod_index",
+      "spearman": 0.03748883670062161,
+      "p_value": 0.03868249034403685,
+      "n": 3042,
+      "missing_pct": 1.1695906432748537,
+      "mutual_info": 0.007007318598948986
+    },
+    {
+      "feature": "global_occ_share",
+      "spearman": 0.045082714088793566,
+      "p_value": 0.012369202342650758,
+      "n": 3078,
+      "missing_pct": 0.0,
+      "mutual_info": 0.006956802863256506
+    },
+    {
+      "feature": "humidity_anom",
+      "spearman": 0.02284925400482882,
+      "p_value": 0.21881865320699972,
+      "n": 2898,
+      "missing_pct": 5.847953216374268,
+      "mutual_info": 0.006593117974476925
+    },
+    {
+      "feature": "life_expectancy",
+      "spearman": 0.07968530866650617,
+      "p_value": 1.0219814347715058e-05,
+      "n": 3059,
+      "missing_pct": 0.6172839506172839,
+      "mutual_info": 0.005770203617586622
+    },
+    {
+      "feature": "temp_max",
+      "spearman": 0.021936741459499347,
+      "p_value": 0.22515568575206843,
+      "n": 3059,
+      "missing_pct": 0.6172839506172839,
+      "mutual_info": 0.004691243396734768
+    },
+    {
+      "feature": "humidity",
+      "spearman": -0.05519580157746434,
+      "p_value": 0.002259157259897589,
+      "n": 3059,
+      "missing_pct": 0.6172839506172839,
+      "mutual_info": 0.004635029526416368
+    },
+    {
+      "feature": "precip_sum",
+      "spearman": 0.009745020644610046,
+      "p_value": 0.5900439630156894,
+      "n": 3059,
+      "missing_pct": 0.6172839506172839,
+      "mutual_info": 0.002275304214040208
+    },
+    {
+      "feature": "internet_pct",
+      "spearman": 0.08914283577035426,
+      "p_value": 1.2701948219282472e-06,
+      "n": 2944,
+      "missing_pct": 4.353476283300845,
+      "mutual_info": 0.0015353266673905352
+    },
+    {
+      "feature": "temp_mean_anom",
+      "spearman": -0.003609166541921446,
+      "p_value": 0.8460119654576781,
+      "n": 2898,
+      "missing_pct": 5.847953216374268,
+      "mutual_info": 0.0012159031908882678
+    },
+    {
+      "feature": "precip_cv",
+      "spearman": -0.00648757368077993,
+      "p_value": 0.7198394875940001,
+      "n": 3059,
+      "missing_pct": 0.6172839506172839,
+      "mutual_info": 0.0006134406084199462
+    },
+    {
+      "feature": "camels",
+      "spearman": NaN,
+      "p_value": NaN,
+      "n": 3078,
+      "missing_pct": 0.0,
+      "mutual_info": 0.0
+    },
+    {
+      "feature": "precip_sum_anom",
+      "spearman": 0.008346582650531531,
+      "p_value": 0.6533334152902454,
+      "n": 2898,
+      "missing_pct": 5.847953216374268,
+      "mutual_info": 0.0
+    }
+  ],
+  "categorical": [
+    {
+      "feature": "region",
+      "levels": 7,
+      "chi2": 180.85396576277932,
+      "p_value": 2.2347608421024635e-36,
+      "cramers_v": 0.24315000325040756,
+      "strength": "small"
+    },
+    {
+      "feature": "income",
+      "levels": 4,
+      "chi2": 6.637588841286553,
+      "p_value": 0.08439144219664689,
+      "cramers_v": 0.046581710824702215,
+      "strength": "negligible"
+    }
+  ],
+  "vif_top10": [
+    {
+      "feature": "temp_mean",
+      "r2_against_rest": 0.9956057622753969,
+      "vif": 227.57075576522607
+    },
+    {
+      "feature": "temp_min",
+      "r2_against_rest": 0.9920109616573825,
+      "vif": 125.17151090206902
+    },
+    {
+      "feature": "temp_max",
+      "r2_against_rest": 0.9720985343720037,
+      "vif": 35.840411157347944
+    },
+    {
+      "feature": "goats",
+      "r2_against_rest": 0.9628246263327961,
+      "vif": 26.899527868961254
+    },
+    {
+      "feature": "sheep",
+      "r2_against_rest": 0.9249848211157423,
+      "vif": 13.330635411040193
+    },
+    {
+      "feature": "asses",
+      "r2_against_rest": 0.9186439969430223,
+      "vif": 12.291655961756753
+    },
+    {
+      "feature": "abs_lat",
+      "r2_against_rest": 0.8826046857327722,
+      "vif": 8.518227548023702
+    },
+    {
+      "feature": "cattle",
+      "r2_against_rest": 0.8534334029134079,
+      "vif": 6.822836989312073
+    },
+    {
+      "feature": "occ_count_lag1",
+      "r2_against_rest": 0.8235179997537506,
+      "vif": 5.666300238011112
+    },
+    {
+      "feature": "equid_density",
+      "r2_against_rest": 0.8233211941424686,
+      "vif": 5.659988447094049
+    }
+  ],
+  "high_corr_clusters": [
+    [
+      "occ_count_lag1",
+      "occ_lag1"
+    ],
+    [
+      "cattle",
+      "log_livestock"
+    ],
+    [
+      "temp_mean",
+      "temp_min"
+    ]
+  ],
+  "importance_agreement": {
+    "spearman_mi_vs_shap": -0.02846153846153846,
+    "spearman_rho_vs_shap": 0.007692307692307692,
+    "n_features": 25,
+    "top10_mi": [
+      "lon",
+      "pop_total",
+      "log_livestock",
+      "occ_count_5y",
+      "sheep",
+      "cattle",
+      "years_since_last",
+      "goats",
+      "equid_share",
+      "pop_density"
+    ],
+    "top10_shap": [
+      "pop_total",
+      "internet_pct",
+      "temp_mean_anom",
+      "log_livestock",
+      "humidity_anom",
+      "years_since_last",
+      "wind",
+      "sheep",
+      "livestock_prod_index",
+      "pop_density"
+    ],
+    "top10_overlap": 5
+  },
+  "importance": [
+    {
+      "feature": "pop_total",
+      "spearman": 0.2797097224261754,
+      "p_value": 4.27629663103399e-56,
+      "n": 3059,
+      "missing_pct": 0.6172839506172839,
+      "mutual_info": 0.06388083717421389,
+      "mean_abs_shap": 1.1442387104034424,
+      "shap_rank": 1.0,
+      "mi_rank": 3.0,
+      "vif": 4.03206793436481,
+      "abs_rho": 0.2797097224261754,
+      "abs_rho_rank": 6.0
+    },
+    {
+      "feature": "internet_pct",
+      "spearman": 0.08914283577035426,
+      "p_value": 1.2701948219282472e-06,
+      "n": 2944,
+      "missing_pct": 4.353476283300845,
+      "mutual_info": 0.0015353266673905352,
+      "mean_abs_shap": 0.5419551730155945,
+      "shap_rank": 2.0,
+      "mi_rank": 38.0,
+      "vif": 4.771964287905309,
+      "abs_rho": 0.08914283577035426,
+      "abs_rho_rank": 16.0
+    },
+    {
+      "feature": "temp_mean_anom",
+      "spearman": -0.003609166541921446,
+      "p_value": 0.8460119654576781,
+      "n": 2898,
+      "missing_pct": 5.847953216374268,
+      "mutual_info": 0.0012159031908882678,
+      "mean_abs_shap": 0.4690783619880676,
+      "shap_rank": 3.0,
+      "mi_rank": 39.0,
+      "vif": 1.8254295938557055,
+      "abs_rho": 0.003609166541921446,
+      "abs_rho_rank": 41.0
+    },
+    {
+      "feature": "log_livestock",
+      "spearman": 0.2514597009794863,
+      "p_value": 1.3349925591066743e-45,
+      "n": 3078,
+      "missing_pct": 0.0,
+      "mutual_info": 0.057142681496076486,
+      "mean_abs_shap": 0.45756033062934875,
+      "shap_rank": 4.0,
+      "mi_rank": 4.0,
+      "vif": 3.485393006683279,
+      "abs_rho": 0.2514597009794863,
+      "abs_rho_rank": 7.0
+    },
+    {
+      "feature": "humidity_anom",
+      "spearman": 0.02284925400482882,
+      "p_value": 0.21881865320699972,
+      "n": 2898,
+      "missing_pct": 5.847953216374268,
+      "mutual_info": 0.006593117974476925,
+      "mean_abs_shap": 0.3697332441806793,
+      "shap_rank": 5.0,
+      "mi_rank": 33.0,
+      "vif": 2.184284087102489,
+      "abs_rho": 0.02284925400482882,
+      "abs_rho_rank": 36.0
+    },
+    {
+      "feature": "years_since_last",
+      "spearman": -0.35188243189007495,
+      "p_value": 2.0802792159714994e-90,
+      "n": 3078,
+      "missing_pct": 0.0,
+      "mutual_info": 0.04861740103467427,
+      "mean_abs_shap": 0.35331791639328003,
+      "shap_rank": 6.0,
+      "mi_rank": 8.0,
+      "vif": 2.0810217572555643,
+      "abs_rho": 0.35188243189007495,
+      "abs_rho_rank": 2.0
+    },
+    {
+      "feature": "wind",
+      "spearman": -0.07878939432487758,
+      "p_value": 1.2846479052132734e-05,
+      "n": 3059,
+      "missing_pct": 0.6172839506172839,
+      "mutual_info": 0.020986579983069742,
+      "mean_abs_shap": 0.3464059829711914,
+      "shap_rank": 7.0,
+      "mi_rank": 23.0,
+      "vif": 2.9571856980138937,
+      "abs_rho": 0.07878939432487758,
+      "abs_rho_rank": 21.0
+    },
+    {
+      "feature": "sheep",
+      "spearman": 0.1995367926224615,
+      "p_value": 5.205473096453915e-29,
+      "n": 3078,
+      "missing_pct": 0.0,
+      "mutual_info": 0.05118359134442385,
+      "mean_abs_shap": 0.3444002866744995,
+      "shap_rank": 8.0,
+      "mi_rank": 6.0,
+      "vif": 13.330635411040193,
+      "abs_rho": 0.1995367926224615,
+      "abs_rho_rank": 9.0
+    },
+    {
+      "feature": "livestock_prod_index",
+      "spearman": 0.03748883670062161,
+      "p_value": 0.03868249034403685,
+      "n": 3042,
+      "missing_pct": 1.1695906432748537,
+      "mutual_info": 0.007007318598948986,
+      "mean_abs_shap": 0.3168911933898926,
+      "shap_rank": 9.0,
+      "mi_rank": 31.0,
+      "vif": 1.258712894537276,
+      "abs_rho": 0.03748883670062161,
+      "abs_rho_rank": 33.0
+    },
+    {
+      "feature": "pop_density",
+      "spearman": 0.046710312040952315,
+      "p_value": 0.009964831480267531,
+      "n": 3043,
+      "missing_pct": 1.1371020142949968,
+      "mutual_info": 0.025602376406346217,
+      "mean_abs_shap": 0.30275747179985046,
+      "shap_rank": 10.0,
+      "mi_rank": 20.0,
+      "vif": 1.6499377482532793,
+      "abs_rho": 0.046710312040952315,
+      "abs_rho_rank": 29.0
+    },
+    {
+      "feature": "goats",
+      "spearman": 0.18938814423926778,
+      "p_value": 3.0120998311616963e-26,
+      "n": 3078,
+      "missing_pct": 0.0,
+      "mutual_info": 0.04222750083220239,
+      "mean_abs_shap": 0.26900628209114075,
+      "shap_rank": 11.0,
+      "mi_rank": 10.0,
+      "vif": 26.899527868961254,
+      "abs_rho": 0.18938814423926778,
+      "abs_rho_rank": 10.0
+    },
+    {
+      "feature": "precip_cv",
+      "spearman": -0.00648757368077993,
+      "p_value": 0.7198394875940001,
+      "n": 3059,
+      "missing_pct": 0.6172839506172839,
+      "mutual_info": 0.0006134406084199462,
+      "mean_abs_shap": 0.2564849555492401,
+      "shap_rank": 12.0,
+      "mi_rank": 40.0,
+      "vif": 2.226040771217987,
+      "abs_rho": 0.00648757368077993,
+      "abs_rho_rank": 40.0
+    },
+    {
+      "feature": "equid_growth_1y",
+      "spearman": -0.04391806907644039,
+      "p_value": 0.014819985234699648,
+      "n": 3078,
+      "missing_pct": 0.0,
+      "mutual_info": 0.009517123445656583,
+      "mean_abs_shap": 0.23543263971805573,
+      "shap_rank": 13.0,
+      "mi_rank": 26.0,
+      "vif": 1.4953090909871243,
+      "abs_rho": 0.04391806907644039,
+      "abs_rho_rank": 31.0
+    },
+    {
+      "feature": "precip_sum",
+      "spearman": 0.009745020644610046,
+      "p_value": 0.5900439630156894,
+      "n": 3059,
+      "missing_pct": 0.6172839506172839,
+      "mutual_info": 0.002275304214040208,
+      "mean_abs_shap": 0.22228921949863434,
+      "shap_rank": 14.0,
+      "mi_rank": 37.0,
+      "vif": 4.012893540757203,
+      "abs_rho": 0.009745020644610046,
+      "abs_rho_rank": 38.0
+    },
+    {
+      "feature": "gdp_pc",
+      "spearman": 0.06679291313928272,
+      "p_value": 0.00023957352476041026,
+      "n": 3020,
+      "missing_pct": 1.8843404808317088,
+      "mutual_info": 0.01388625080331285,
+      "mean_abs_shap": 0.220845028758049,
+      "shap_rank": 15.0,
+      "mi_rank": 25.0,
+      "vif": 2.308026542175323,
+      "abs_rho": 0.06679291313928272,
+      "abs_rho_rank": 24.0
+    },
+    {
+      "feature": "global_occ_share",
+      "spearman": 0.045082714088793566,
+      "p_value": 0.012369202342650758,
+      "n": 3078,
+      "missing_pct": 0.0,
+      "mutual_info": 0.006956802863256506,
+      "mean_abs_shap": 0.20993898808956146,
+      "shap_rank": 16.0,
+      "mi_rank": 32.0,
+      "vif": 1.7871202766711964,
+      "abs_rho": 0.045082714088793566,
+      "abs_rho_rank": 30.0
+    },
+    {
+      "feature": "precip_sum_anom",
+      "spearman": 0.008346582650531531,
+      "p_value": 0.6533334152902454,
+      "n": 2898,
+      "missing_pct": 5.847953216374268,
+      "mutual_info": 0.0,
+      "mean_abs_shap": 0.20566889643669128,
+      "shap_rank": 17.0,
+      "mi_rank": 41.5,
+      "vif": 2.353220625128,
+      "abs_rho": 0.008346582650531531,
+      "abs_rho_rank": 39.0
+    },
+    {
+      "feature": "equid_share",
+      "spearman": -0.09499441233685509,
+      "p_value": 1.2913676066282586e-07,
+      "n": 3078,
+      "missing_pct": 0.0,
+      "mutual_info": 0.027054342308834745,
+      "mean_abs_shap": 0.19290322065353394,
+      "shap_rank": 18.0,
+      "mi_rank": 18.0,
+      "vif": 3.0943774060155063,
+      "abs_rho": 0.09499441233685509,
+      "abs_rho_rank": 15.0
+    },
+    {
+      "feature": "temp_max",
+      "spearman": 0.021936741459499347,
+      "p_value": 0.22515568575206843,
+      "n": 3059,
+      "missing_pct": 0.6172839506172839,
+      "mutual_info": 0.004691243396734768,
+      "mean_abs_shap": 0.18568921089172363,
+      "shap_rank": 19.0,
+      "mi_rank": 35.0,
+      "vif": 35.840411157347944,
+      "abs_rho": 0.021936741459499347,
+      "abs_rho_rank": 37.0
+    },
+    {
+      "feature": "temp_min",
+      "spearman": -0.0576883026002092,
+      "p_value": 0.0014129521804143955,
+      "n": 3059,
+      "missing_pct": 0.6172839506172839,
+      "mutual_info": 0.01944375306771584,
+      "mean_abs_shap": 0.17349864542484283,
+      "shap_rank": 20.0,
+      "mi_rank": 24.0,
+      "vif": 125.17151090206902,
+      "abs_rho": 0.0576883026002092,
+      "abs_rho_rank": 26.0
+    },
+    {
+      "feature": "occ_count_5y",
+      "spearman": 0.3812684491309665,
+      "p_value": 4.508582253872114e-107,
+      "n": 3078,
+      "missing_pct": 0.0,
+      "mutual_info": 0.055574934365577144,
+      "mean_abs_shap": 0.1700936108827591,
+      "shap_rank": 21.0,
+      "mi_rank": 5.0,
+      "vif": 4.459613843702947,
+      "abs_rho": 0.3812684491309665,
+      "abs_rho_rank": 1.0
+    },
+    {
+      "feature": "cattle",
+      "spearman": 0.2470979681937668,
+      "p_value": 4.80555814603376e-44,
+      "n": 3078,
+      "missing_pct": 0.0,
+      "mutual_info": 0.051176498450588026,
+      "mean_abs_shap": 0.16972219944000244,
+      "shap_rank": 22.0,
+      "mi_rank": 7.0,
+      "vif": 6.822836989312073,
+      "abs_rho": 0.2470979681937668,
+      "abs_rho_rank": 8.0
+    },
+    {
+      "feature": "equid_growth_3y",
+      "spearman": -0.05751868527988571,
+      "p_value": 0.0014106265551941182,
+      "n": 3078,
+      "missing_pct": 0.0,
+      "mutual_info": 0.008047183349576104,
+      "mean_abs_shap": 0.16693192720413208,
+      "shap_rank": 23.0,
+      "mi_rank": 29.0,
+      "vif": 1.584827349023014,
+      "abs_rho": 0.05751868527988571,
+      "abs_rho_rank": 27.0
+    },
+    {
+      "feature": "life_expectancy",
+      "spearman": 0.07968530866650617,
+      "p_value": 1.0219814347715058e-05,
+      "n": 3059,
+      "missing_pct": 0.6172839506172839,
+      "mutual_info": 0.005770203617586622,
+      "mean_abs_shap": 0.16442875564098358,
+      "shap_rank": 24.0,
+      "mi_rank": 34.0,
+      "vif": 4.182649493939329,
+      "abs_rho": 0.07968530866650617,
+      "abs_rho_rank": 20.0
+    },
+    {
+      "feature": "lon",
+      "spearman": 0.10088475593719118,
+      "p_value": 2.2479595089101182e-08,
+      "n": 3059,
+      "missing_pct": 0.6172839506172839,
+      "mutual_info": 0.07935784908428811,
+      "mean_abs_shap": 0.1609831154346466,
+      "shap_rank": 25.0,
+      "mi_rank": 1.0,
+      "vif": 1.7289642887405894,
+      "abs_rho": 0.10088475593719118,
+      "abs_rho_rank": 14.0
+    },
+    {
+      "feature": "abs_lat",
+      "spearman": 0.03786231760354633,
+      "p_value": 0.036260640253406765,
+      "n": 3059,
+      "missing_pct": 0.6172839506172839,
+      "mutual_info": 0.07545085277568386,
+      "mean_abs_shap": NaN,
+      "shap_rank": NaN,
+      "mi_rank": 2.0,
+      "vif": 8.518227548023702,
+      "abs_rho": 0.03786231760354633,
+      "abs_rho_rank": 32.0
+    },
+    {
+      "feature": "agri_land_pct",
+      "spearman": 0.05989938044854648,
+      "p_value": 0.0009468402328235936,
+      "n": 3043,
+      "missing_pct": 1.1371020142949968,
+      "mutual_info": 0.03139119964143555,
+      "mean_abs_shap": NaN,
+      "shap_rank": NaN,
+      "mi_rank": 13.0,
+      "vif": 1.6090605778607243,
+      "abs_rho": 0.05989938044854648,
+      "abs_rho_rank": 25.0
+    },
+    {
+      "feature": "agri_va_pct_gdp",
+      "spearman": -0.024174840942458094,
+      "p_value": 0.18854682033767692,
+      "n": 2960,
+      "missing_pct": 3.833658219623132,
+      "mutual_info": 0.007940046162464576,
+      "mean_abs_shap": NaN,
+      "shap_rank": NaN,
+      "mi_rank": 30.0,
+      "vif": 2.7357818488661323,
+      "abs_rho": 0.024174840942458094,
+      "abs_rho_rank": 35.0
+    },
+    {
+      "feature": "asses",
+      "spearman": 0.08860037930718226,
+      "p_value": 8.513492661397222e-07,
+      "n": 3078,
+      "missing_pct": 0.0,
+      "mutual_info": 0.03650623690675303,
+      "mean_abs_shap": NaN,
+      "shap_rank": NaN,
+      "mi_rank": 11.0,
+      "vif": 12.291655961756753,
+      "abs_rho": 0.08860037930718226,
+      "abs_rho_rank": 17.0
+    },
+    {
+      "feature": "camels",
+      "spearman": NaN,
+      "p_value": NaN,
+      "n": 3078,
+      "missing_pct": 0.0,
+      "mutual_info": 0.0,
+      "mean_abs_shap": NaN,
+      "shap_rank": NaN,
+      "mi_rank": 41.5,
+      "vif": 1.0,
+      "abs_rho": NaN,
+      "abs_rho_rank": NaN
+    },
+    {
+      "feature": "equid_density",
+      "spearman": -0.07626415810295596,
+      "p_value": 2.5379795703238357e-05,
+      "n": 3043,
+      "missing_pct": 1.1371020142949968,
+      "mutual_info": 0.028282845292759262,
+      "mean_abs_shap": NaN,
+      "shap_rank": NaN,
+      "mi_rank": 15.0,
+      "vif": 5.659988447094049,
+      "abs_rho": 0.07626415810295596,
+      "abs_rho_rank": 22.0
+    },
+    {
+      "feature": "fertilizer_pct",
+      "spearman": 0.0835429525467805,
+      "p_value": 4.083373355854537e-06,
+      "n": 3033,
+      "missing_pct": 1.461988304093567,
+      "mutual_info": 0.00824414189525835,
+      "mean_abs_shap": NaN,
+      "shap_rank": NaN,
+      "mi_rank": 28.0,
+      "vif": 1.4479241567061742,
+      "abs_rho": 0.0835429525467805,
+      "abs_rho_rank": 19.0
+    },
+    {
+      "feature": "horses",
+      "spearman": 0.16337160116493907,
+      "p_value": 7.410794496881944e-20,
+      "n": 3078,
+      "missing_pct": 0.0,
+      "mutual_info": 0.03258531440588697,
+      "mean_abs_shap": NaN,
+      "shap_rank": NaN,
+      "mi_rank": 12.0,
+      "vif": 4.3816333295913275,
+      "abs_rho": 0.16337160116493907,
+      "abs_rho_rank": 11.0
+    },
+    {
+      "feature": "humidity",
+      "spearman": -0.05519580157746434,
+      "p_value": 0.002259157259897589,
+      "n": 3059,
+      "missing_pct": 0.6172839506172839,
+      "mutual_info": 0.004635029526416368,
+      "mean_abs_shap": NaN,
+      "shap_rank": NaN,
+      "mi_rank": 36.0,
+      "vif": 5.634627948639433,
+      "abs_rho": 0.05519580157746434,
+      "abs_rho_rank": 28.0
+    },
+    {
+      "feature": "log_equids",
+      "spearman": 0.15255101311266786,
+      "p_value": 1.7407959290190864e-17,
+      "n": 3078,
+      "missing_pct": 0.0,
+      "mutual_info": 0.04256101534056733,
+      "mean_abs_shap": NaN,
+      "shap_rank": NaN,
+      "mi_rank": 9.0,
+      "vif": 3.4565228417020046,
+      "abs_rho": 0.15255101311266786,
+      "abs_rho_rank": 12.0
+    },
+    {
+      "feature": "mules",
+      "spearman": 0.08481458813980423,
+      "p_value": 2.4521192671968135e-06,
+      "n": 3078,
+      "missing_pct": 0.0,
+      "mutual_info": 0.02451226971363374,
+      "mean_abs_shap": NaN,
+      "shap_rank": NaN,
+      "mi_rank": 21.0,
+      "vif": 2.5997807138641424,
+      "abs_rho": 0.08481458813980423,
+      "abs_rho_rank": 18.0
+    },
+    {
+      "feature": "occ_count_lag1",
+      "spearman": 0.3196968335562873,
+      "p_value": 4.3416665574063496e-74,
+      "n": 3078,
+      "missing_pct": 0.0,
+      "mutual_info": 0.028221245103634773,
+      "mean_abs_shap": NaN,
+      "shap_rank": NaN,
+      "mi_rank": 16.0,
+      "vif": 5.666300238011112,
+      "abs_rho": 0.3196968335562873,
+      "abs_rho_rank": 4.0
+    },
+    {
+      "feature": "occ_lag1",
+      "spearman": 0.3164771278392486,
+      "p_value": 1.4594439947272489e-72,
+      "n": 3078,
+      "missing_pct": 0.0,
+      "mutual_info": 0.027947758220409735,
+      "mean_abs_shap": NaN,
+      "shap_rank": NaN,
+      "mi_rank": 17.0,
+      "vif": 4.741792243960793,
+      "abs_rho": 0.3164771278392486,
+      "abs_rho_rank": 5.0
+    },
+    {
+      "feature": "occ_lag2",
+      "spearman": 0.33458675348692407,
+      "p_value": 2.1395501489708535e-81,
+      "n": 3078,
+      "missing_pct": 0.0,
+      "mutual_info": 0.029448660682418915,
+      "mean_abs_shap": NaN,
+      "shap_rank": NaN,
+      "mi_rank": 14.0,
+      "vif": 1.8375767735961748,
+      "abs_rho": 0.33458675348692407,
+      "abs_rho_rank": 3.0
+    },
+    {
+      "feature": "region_occ_share",
+      "spearman": 0.12083038704494281,
+      "p_value": 2.017359960269756e-11,
+      "n": 3059,
+      "missing_pct": 0.6172839506172839,
+      "mutual_info": 0.02110247205976301,
+      "mean_abs_shap": NaN,
+      "shap_rank": NaN,
+      "mi_rank": 22.0,
+      "vif": 1.5161271583233458,
+      "abs_rho": 0.12083038704494281,
+      "abs_rho_rank": 13.0
+    },
+    {
+      "feature": "rural_pct",
+      "spearman": -0.06857518189123787,
+      "p_value": 0.00014723324790338058,
+      "n": 3059,
+      "missing_pct": 0.6172839506172839,
+      "mutual_info": 0.025996094489995514,
+      "mean_abs_shap": NaN,
+      "shap_rank": NaN,
+      "mi_rank": 19.0,
+      "vif": 3.347995143479834,
+      "abs_rho": 0.06857518189123787,
+      "abs_rho_rank": 23.0
+    },
+    {
+      "feature": "temp_mean",
+      "spearman": -0.02651757605387183,
+      "p_value": 0.1425669772977975,
+      "n": 3059,
+      "missing_pct": 0.6172839506172839,
+      "mutual_info": 0.009377376003198545,
+      "mean_abs_shap": NaN,
+      "shap_rank": NaN,
+      "mi_rank": 27.0,
+      "vif": 227.57075576522607,
+      "abs_rho": 0.02651757605387183,
+      "abs_rho_rank": 34.0
+    }
+  ],
+  "leakage": {
+    "history_cues": [
+      {
+        "feature": "occ_any",
+        "rho_vs_same_year": 0.9999999999999999,
+        "rho_vs_next_year": 0.3189607497152821
+      },
+      {
+        "feature": "occ_count",
+        "rho_vs_same_year": 0.9997473708614436,
+        "rho_vs_next_year": 0.3212291084756789
+      },
+      {
+        "feature": "occ_lag1",
+        "rho_vs_same_year": 0.3115707348943913,
+        "rho_vs_next_year": 0.3164771278392486
+      },
+      {
+        "feature": "occ_count_lag1",
+        "rho_vs_same_year": 0.313531533331315,
+        "rho_vs_next_year": 0.3196968335562873
+      }
+    ],
+    "stage1_autocorrelation": 0.9810407754172898,
+    "note": "Features are built only from t and earlier. The one deliberate exception is the target shift: y_* columns are the only columns derived from t+1."
+  },
+  "missingness": {
+    "overall_pct": 0.9924502614561095,
+    "max_feature_pct": 5.847953216374268,
+    "features_over_10pct": [],
+    "by_source": {
+      "FAOSTAT (population)": 0.0,
+      "World Bank (socio-economic)": 1.6829109811565952,
+      "NASA POWER (climate)": 2.1864847303443793
+    },
+    "per_feature": {
+      "occ_lag1": 0.0,
+      "occ_lag2": 0.0,
+      "occ_count_lag1": 0.0,
+      "occ_count_5y": 0.0,
+      "years_since_last": 0.0,
+      "global_occ_share": 0.0,
+      "region_occ_share": 0.6172839506172839,
+      "log_equids": 0.0,
+      "log_livestock": 0.0,
+      "equid_share": 0.0,
+      "equid_density": 1.1371020142949968,
+      "equid_growth_1y": 0.0,
+      "equid_growth_3y": 0.0,
+      "horses": 0.0,
+      "asses": 0.0,
+      "mules": 0.0,
+      "cattle": 0.0,
+      "goats": 0.0,
+      "sheep": 0.0,
+      "camels": 0.0,
+      "livestock_prod_index": 1.1695906432748537,
+      "temp_mean": 0.6172839506172839,
+      "temp_max": 0.6172839506172839,
+      "temp_min": 0.6172839506172839,
+      "precip_sum": 0.6172839506172839,
+      "precip_cv": 0.6172839506172839,
+      "humidity": 0.6172839506172839,
+      "wind": 0.6172839506172839,
+      "temp_mean_anom": 5.847953216374268,
+      "precip_sum_anom": 5.847953216374268,
+      "humidity_anom": 5.847953216374268,
+      "gdp_pc": 1.8843404808317088,
+      "rural_pct": 0.6172839506172839,
+      "agri_land_pct": 1.1371020142949968,
+      "agri_va_pct_gdp": 3.833658219623132,
+      "internet_pct": 4.353476283300845,
+      "fertilizer_pct": 1.461988304093567,
+      "life_expectancy": 0.6172839506172839,
+      "pop_total": 0.6172839506172839,
+      "pop_density": 1.1371020142949968,
+      "abs_lat": 0.6172839506172839,
+      "lon": 0.6172839506172839
+    }
+  },
+  "decisions": [
+    {
+      "feature": "pop_total",
+      "verdict": "kept",
+      "reason": "MI 0.0639, |rho| 0.280, SHAP rank 1"
+    },
+    {
+      "feature": "internet_pct",
+      "verdict": "kept",
+      "reason": "MI 0.0015, |rho| 0.089, SHAP rank 2"
+    },
+    {
+      "feature": "temp_mean_anom",
+      "verdict": "dropped",
+      "reason": "MI < 0.002 and |rho| < 0.02: no signal"
+    },
+    {
+      "feature": "log_livestock",
+      "verdict": "kept (representative)",
+      "reason": "Spearman >= 0.90 with cattle; cluster reduced to one member, the rest are redundant"
+    },
+    {
+      "feature": "humidity_anom",
+      "verdict": "kept",
+      "reason": "MI 0.0066, |rho| 0.023, SHAP rank 5"
+    },
+    {
+      "feature": "years_since_last",
+      "verdict": "kept",
+      "reason": "MI 0.0486, |rho| 0.352, SHAP rank 6"
+    },
+    {
+      "feature": "wind",
+      "verdict": "kept",
+      "reason": "MI 0.0210, |rho| 0.079, SHAP rank 7"
+    },
+    {
+      "feature": "sheep",
+      "verdict": "kept (trees only)",
+      "reason": "VIF 13 indicates collinearity; retained because tree splits are invariant to it, excluded from any linear claim"
+    },
+    {
+      "feature": "livestock_prod_index",
+      "verdict": "kept",
+      "reason": "MI 0.0070, |rho| 0.037, SHAP rank 9"
+    },
+    {
+      "feature": "pop_density",
+      "verdict": "kept",
+      "reason": "MI 0.0256, |rho| 0.047, SHAP rank 10"
+    },
+    {
+      "feature": "goats",
+      "verdict": "kept (trees only)",
+      "reason": "VIF 27 indicates collinearity; retained because tree splits are invariant to it, excluded from any linear claim"
+    },
+    {
+      "feature": "precip_cv",
+      "verdict": "dropped",
+      "reason": "MI < 0.002 and |rho| < 0.02: no signal"
+    },
+    {
+      "feature": "equid_growth_1y",
+      "verdict": "kept",
+      "reason": "MI 0.0095, |rho| 0.044, SHAP rank 13"
+    },
+    {
+      "feature": "precip_sum",
+      "verdict": "kept",
+      "reason": "MI 0.0023, |rho| 0.010, SHAP rank 14"
+    },
+    {
+      "feature": "gdp_pc",
+      "verdict": "kept",
+      "reason": "MI 0.0139, |rho| 0.067, SHAP rank 15"
+    },
+    {
+      "feature": "global_occ_share",
+      "verdict": "kept",
+      "reason": "MI 0.0070, |rho| 0.045, SHAP rank 16"
+    },
+    {
+      "feature": "precip_sum_anom",
+      "verdict": "dropped",
+      "reason": "MI < 0.002 and |rho| < 0.02: no signal"
+    },
+    {
+      "feature": "equid_share",
+      "verdict": "kept",
+      "reason": "MI 0.0271, |rho| 0.095, SHAP rank 18"
+    },
+    {
+      "feature": "temp_max",
+      "verdict": "kept (trees only)",
+      "reason": "VIF 36 indicates collinearity; retained because tree splits are invariant to it, excluded from any linear claim"
+    },
+    {
+      "feature": "temp_min",
+      "verdict": "kept (representative)",
+      "reason": "Spearman >= 0.90 with temp_mean; cluster reduced to one member, the rest are redundant"
+    },
+    {
+      "feature": "occ_count_5y",
+      "verdict": "kept",
+      "reason": "MI 0.0556, |rho| 0.381, SHAP rank 21"
+    },
+    {
+      "feature": "cattle",
+      "verdict": "kept (representative)",
+      "reason": "Spearman >= 0.90 with log_livestock; cluster reduced to one member, the rest are redundant"
+    },
+    {
+      "feature": "equid_growth_3y",
+      "verdict": "kept",
+      "reason": "MI 0.0080, |rho| 0.058, SHAP rank 23"
+    },
+    {
+      "feature": "life_expectancy",
+      "verdict": "kept",
+      "reason": "MI 0.0058, |rho| 0.080, SHAP rank 24"
+    },
+    {
+      "feature": "lon",
+      "verdict": "kept",
+      "reason": "MI 0.0794, |rho| 0.101, SHAP rank 25"
+    },
+    {
+      "feature": "abs_lat",
+      "verdict": "kept",
+      "reason": "MI 0.0755, |rho| 0.038, SHAP rank n/a"
+    },
+    {
+      "feature": "agri_land_pct",
+      "verdict": "kept",
+      "reason": "MI 0.0314, |rho| 0.060, SHAP rank n/a"
+    },
+    {
+      "feature": "agri_va_pct_gdp",
+      "verdict": "kept",
+      "reason": "MI 0.0079, |rho| 0.024, SHAP rank n/a"
+    },
+    {
+      "feature": "asses",
+      "verdict": "kept (trees only)",
+      "reason": "VIF 12 indicates collinearity; retained because tree splits are invariant to it, excluded from any linear claim"
+    },
+    {
+      "feature": "camels",
+      "verdict": "dropped",
+      "reason": "MI < 0.002 and |rho| < 0.02: no signal"
+    },
+    {
+      "feature": "equid_density",
+      "verdict": "kept",
+      "reason": "MI 0.0283, |rho| 0.076, SHAP rank n/a"
+    },
+    {
+      "feature": "fertilizer_pct",
+      "verdict": "kept",
+      "reason": "MI 0.0082, |rho| 0.084, SHAP rank n/a"
+    },
+    {
+      "feature": "horses",
+      "verdict": "kept",
+      "reason": "MI 0.0326, |rho| 0.163, SHAP rank n/a"
+    },
+    {
+      "feature": "humidity",
+      "verdict": "kept",
+      "reason": "MI 0.0046, |rho| 0.055, SHAP rank n/a"
+    },
+    {
+      "feature": "log_equids",
+      "verdict": "kept",
+      "reason": "MI 0.0426, |rho| 0.153, SHAP rank n/a"
+    },
+    {
+      "feature": "mules",
+      "verdict": "kept",
+      "reason": "MI 0.0245, |rho| 0.085, SHAP rank n/a"
+    },
+    {
+      "feature": "occ_count_lag1",
+      "verdict": "kept (representative)",
+      "reason": "Spearman >= 0.90 with occ_lag1; cluster reduced to one member, the rest are redundant"
+    },
+    {
+      "feature": "occ_lag1",
+      "verdict": "kept (representative)",
+      "reason": "Spearman >= 0.90 with occ_count_lag1; cluster reduced to one member, the rest are redundant"
+    },
+    {
+      "feature": "occ_lag2",
+      "verdict": "kept",
+      "reason": "MI 0.0294, |rho| 0.335, SHAP rank n/a"
+    },
+    {
+      "feature": "region_occ_share",
+      "verdict": "kept",
+      "reason": "MI 0.0211, |rho| 0.121, SHAP rank n/a"
+    },
+    {
+      "feature": "rural_pct",
+      "verdict": "kept",
+      "reason": "MI 0.0260, |rho| 0.069, SHAP rank n/a"
+    },
+    {
+      "feature": "temp_mean",
+      "verdict": "kept (representative)",
+      "reason": "Spearman >= 0.90 with temp_min; cluster reduced to one member, the rest are redundant"
+    }
+  ],
+  "internal_consistency": {
+    "equid_share_equals_equids_over_livestock": null,
+    "note": "equid_share and equid_density are deterministic transforms of counts"
+  }
+}
