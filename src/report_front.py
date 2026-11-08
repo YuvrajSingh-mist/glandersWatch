@@ -12,51 +12,54 @@ No f-strings, so LaTeX braces need no escaping.
 FRONT_MATTER = r"""
 % ============================== TITLE PAGE ==============================
 % Layout measured from the department template: title flush with the top margin,
-% the emblem centred below the supervisor block at 3.2 cm, department block at foot.
+% the emblem centred below the author block at 3.19 cm, department block at foot.
 \begin{titlepage}
 \thispagestyle{empty}
 \begin{center}
 
-{\huge\bfseries GlandersWatch: A Chained\\[6pt]
-Multi-Level Machine Learning\\[6pt]
-Framework for Population-Level\\[6pt]
-Glanders Risk Prediction\par}
+{\LARGE\bfseries GlandersWatch: A Modular Platform for\\[5pt]
+Glanders Risk Prediction, Retrieval-Augmented\\[5pt]
+Explanation and Owner Alerting\par}
 
-\vspace{1.0cm}
+\vspace{0.85cm}
 
 {\large Project Report Submitted\par}
-\vspace{0.5em}
+\vspace{0.45em}
 {\normalsize in partial fulfillment of the requirements for the award of the\par}
 
-\vspace{0.9cm}
+\vspace{0.75cm}
 {\large\bfseries Bachelor of Technology\par}
-\vspace{0.3em}
-{\large in\par}
 \vspace{0.25em}
+{\large in\par}
+\vspace{0.2em}
 {\large\bfseries Computer Engineering\par}
 
-\vspace{1.15cm}
+\vspace{0.85cm}
 {\large by\par}
-\vspace{0.35em}
-{\large\bfseries Yuvraj Singh \quad @ROLLNO@\par}
+\vspace{0.3em}
+{\large\bfseries Yuvraj Singh \quad @ROLLME@\par}
+\vspace{0.15em}
+{\large\bfseries Shaktimayee Mohanty \quad @ROLLSM@\par}
+\vspace{0.15em}
+{\large\bfseries Pedapatruni Shanmuk Vardhan \quad @ROLLPSV@\par}
 
-\vspace{1.05cm}
+\vspace{0.8cm}
 {\large Under the supervision of\par}
-\vspace{0.35em}
+\vspace{0.3em}
 {\large\bfseries @SUPERVISOR@\par}
 
-\vspace{1.25cm}
+\vspace{0.85cm}
 \includegraphics[width=3.19cm]{iiit_logo.png}\par
 
 \vfill
 
 {\normalsize Department of Computer Science and Engineering\par}
-\vspace{0.35em}
+\vspace{0.3em}
 {\normalsize International Institute of Information Technology, Bhubaneswar\par}
-\vspace{0.35em}
+\vspace{0.3em}
 {\normalsize @MONTHYEAR@\par}
 
-\vspace*{0.85cm}
+\vspace*{0.55cm}
 
 \end{center}
 \end{titlepage}
@@ -69,13 +72,14 @@ Glanders Risk Prediction\par}
 \vspace{0.9cm}
 \noindent
 {\sloppy
-This is to certify that the report entitled ``GlandersWatch: A Chained Multi-Level Machine
-Learning Framework for Population-Level Glanders Risk Prediction'' submitted by
-Yuvraj Singh (@ROLLNO@) to International Institute of Information Technology, Bhubaneswar is a
-record of bonafide project work under my supervision, and the report is submitted for the
-evaluation of the BTech Degree Final-Semester Project.\par}
+This is to certify that the report entitled ``GlandersWatch: A Modular Platform for Glanders Risk
+Prediction, Retrieval-Augmented Explanation and Owner Alerting'' submitted by Yuvraj Singh
+(@ROLLME@), Shaktimayee Mohanty (@ROLLSM@) and Pedapatruni Shanmuk Vardhan (@ROLLPSV@) to
+International Institute of Information Technology, Bhubaneswar is a record of bonafide project work
+under my supervision, and the report is submitted for the evaluation of the BTech
+Degree Final-Semester Project.\par}
 
-\vspace{1.6cm}
+\vspace{1.5cm}
 \noindent
 \underline{(Supervisor)}\\[0.25em]
 @SUPERVISOR@
@@ -87,27 +91,30 @@ evaluation of the BTech Degree Final-Semester Project.\par}
 
 \vspace{0.9cm}
 \noindent
-I certify that
+We certify that
 
 \begin{enumerate}
-  \item The work contained in the report has been done by myself under the general supervision of
-        my supervisor.
+  \item The work contained in the report has been done by ourselves under the general supervision
+        of our supervisor.
   \item The work has not been submitted to any other Institute for any degree or diploma.
-  \item I have followed the guidelines provided by the Institute in writing the report.
-  \item I have conformed to the norms and guidelines given in the Ethical Code of Conduct of the
+  \item We have followed the guidelines provided by the Institute in writing the report.
+  \item We have conformed to the norms and guidelines given in the Ethical Code of Conduct of the
         Institute.
-  \item Whenever I have used materials (data, theoretical analysis, and text) from other sources,
-        I have given due credit to them by citing them in the text of the report and giving their
+  \item Whenever we have used materials (data, theoretical analysis, and text) from other sources,
+        we have given due credit to them by citing them in the text of the report and giving their
         details in the references.
-  \item Whenever I have quoted written materials from other sources, I have put them under
+  \item Whenever we have quoted written materials from other sources, we have put them under
         quotation marks and given due credit to the sources by citing them and giving required
         details in the references.
 \end{enumerate}
 
-\vspace{1.6cm}
+\vspace{1.3cm}
 \noindent
-Yuvraj Singh\\
-@ROLLNO@
+\begin{tabular}{@{}ll@{}}
+Yuvraj Singh & @ROLLME@ \\[0.35em]
+Shaktimayee Mohanty & @ROLLSM@ \\[0.35em]
+Pedapatruni Shanmuk Vardhan & @ROLLPSV@ \\
+\end{tabular}
 
 % ============================== ACKNOWLEDGMENTS ==============================
 \newpage
@@ -116,18 +123,21 @@ Yuvraj Singh\\
 
 \vspace{0.9cm}
 \noindent
-I would like to express my sincere gratitude to my respected supervisor, @SUPERVISOR@, for the
-invaluable guidance, support and encouragement given throughout this project. Their insights and
-expertise were instrumental in shaping this work and helped me overcome numerous challenges. I am
+We would like to express our sincere gratitude to our respected supervisor, @SUPERVISOR@, for the
+invaluable guidance, support and encouragement given throughout this project. Her insights and
+expertise were instrumental in shaping this work and helped us overcome numerous challenges. We are
 also thankful to the faculty and staff of the Department of Computer Science and Engineering,
 International Institute of Information Technology, Bhubaneswar, for providing the resources and a
-conducive learning environment. Finally, I would like to thank my family and friends for their
+conducive learning environment. Finally, we would like to thank our families and friends for their
 unwavering support and understanding during the course of this project.
 
-\vspace{1.6cm}
+\vspace{1.3cm}
 \noindent
-Yuvraj Singh\\
-@ROLLNO@
+\begin{tabular}{@{}ll@{}}
+Yuvraj Singh & @ROLLME@ \\[0.35em]
+Shaktimayee Mohanty & @ROLLSM@ \\[0.35em]
+Pedapatruni Shanmuk Vardhan & @ROLLPSV@ \\
+\end{tabular}
 
 % ============================== ABSTRACT ==============================
 \newpage
@@ -402,11 +412,24 @@ analysis of the Indian serosurvey.
 
 \section{Research Gap}
 
-The literature reviewed above divides into three disjoint groups. Epidemiological studies
-describe where glanders occurs. Machine learning studies of \textit{B. mallei} classify laboratory
-spectra. Veterinary risk models exist but are built for influenza. No study joins an occurrence
-corpus, a livestock census, development indicators and reanalysis climatology into a single panel
-for glanders, and none evaluates a calibrated predictive model on that panel.
+The literature reviewed above divides into three disjoint groups. Epidemiological studies describe
+where glanders occurs. Machine learning studies of \textit{B. mallei} classify laboratory spectra.
+Veterinary risk models exist but are built for influenza. No study joins an occurrence corpus, a
+livestock census, development indicators and reanalysis climatology into a single panel for
+glanders, and none evaluates a calibrated predictive model on that panel.
 
-That gap defines the contribution of this project.
+A second gap appears once the question moves from analysis to use. A probability on a dashboard
+does not reach the person who owns the animals, and a risk score without a stated basis is not
+something a field officer will act on. The literature that describes glanders occurrence and the
+literature that builds spectroscopic classifiers both stop short of the delivery problem: how a
+forecast becomes a cited explanation, and how an explanation becomes a message that an owner
+receives and trusts. No work connects a glanders risk model to official control guidance and to a
+notification path with rules that account for alert fatigue.
+
+The contribution of this project therefore has two parts. The first is empirical: a calibrated
+population-level risk model for glanders, built on data sources not previously applied to the
+disease and evaluated under a forward temporal split and a country-holdout split. The second is
+architectural: a decomposition of the delivery problem into three components with fixed contracts,
+so that the prediction, its explanation and its alert can be built, tested and replaced
+independently, and so that the same structure carries over to another disease.
 """

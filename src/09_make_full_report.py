@@ -182,8 +182,10 @@ _env = (f"Python {platform.python_version()}, scikit-learn {sklearn.__version__}
         f"SciPy {scipy.__version__}")
 
 VALUES = {
-    "ROLLNO": "XXXXXXXXX",
-    "SUPERVISOR": "Dr. [Supervisor Name]",
+    "ROLLME": "B123153",
+    "ROLLSM": "B123118",
+    "ROLLPSV": "B123089",
+    "SUPERVISOR": "Dr. Sangita Dhara",
     "MONTHYEAR": "November 2026",
     "HARDWARE": "an Apple M4 processor with 10 cores and 16 GB of unified memory",
 
@@ -281,8 +283,8 @@ PREAMBLE = r"""\documentclass[11pt,openany]{report}
   linkcolor=black,
   citecolor=black,
   urlcolor=blue!45!black,
-  pdftitle={GlandersWatch: A Chained Multi-Level Machine Learning Framework for Population-Level Glanders Risk Prediction},
-  pdfauthor={Yuvraj Singh},
+  pdftitle={GlandersWatch: A Modular Platform for Glanders Risk Prediction, Retrieval-Augmented Explanation and Owner Alerting},
+  pdfauthor={Yuvraj Singh, Shaktimayee Mohanty, Pedapatruni Shanmuk Vardhan},
   pdfsubject={B.Tech Project Report, International Institute of Information Technology, Bhubaneswar}
 }
 

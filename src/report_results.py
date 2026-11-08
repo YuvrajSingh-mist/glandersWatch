@@ -357,11 +357,15 @@ BODY_CONCL = r"""
 
 \section{Conclusion}
 
-This project set out to determine whether population-level glanders risk could be predicted from
-publicly available data. Four sources that had not previously been applied to the disease were
-assembled into a country-year panel covering 162 equine-holding countries, and six model families
-were trained and evaluated under three validation schemes, together with a three-stage chained
-pipeline.
+This project set out to build a usable warning system for glanders, not only a model. That meant
+two things: establishing whether population-level risk could be predicted from publicly available
+data, and designing how such a prediction reaches a person. Four sources that had not previously
+been applied to the disease were assembled into a country-year panel covering 162 equine-holding
+countries, and six model families were trained and evaluated under three validation schemes,
+together with a three-stage chained pipeline. Around that model, the delivery problem was
+decomposed into three components with fixed contracts: the risk engine that produces a calibrated
+probability, the retrieval-augmented layer that explains it against official guidance, and the
+alert service that turns it into a small number of messages.
 
 The central finding is that prediction is possible, and that the achievable performance is
 moderate. On a strictly forward-looking temporal holdout the strongest model reaches a
@@ -385,9 +389,18 @@ improve discrimination, because the intermediate quantity is already available a
 feature. This is reported rather than omitted, since it is a reproducible result about chained
 architectures for this problem class.
 
+The fifth finding is architectural. Decomposing the system into three components with versioned
+contracts, none of which hardcodes the disease, made each part testable on its own: the risk engine
+could be evaluated before any explanation existed, and the alert rules could be specified and
+checked against a policy before any message was sent. The cost is that the parts must be
+maintained together, and the benefit is that replacing the model, the language model or the
+notification channel is a local change. For a project whose useful life outlasts any single
+model, that trade is the right one.
+
 \section{Future Work}
 
-Four directions follow directly from the limitations identified in this report.
+Six directions follow from the limitations identified in this report. Four concern the model and
+two concern the components around it.
 
 \textbf{Modelling reporting effort explicitly.} The most important extension is to treat
 surveillance capacity as a modelled quantity rather than an incidental covariate. This could be
@@ -409,7 +422,19 @@ resolution would match the scale at which control measures are applied.
 reporting practice changes. The calibration framework used here is a single point estimate; a
 production system would need drift monitoring and a defined retraining trigger.
 
-Two smaller extensions are worth noting. Incorporating WOAH WAHIS official outbreak records as a
+\textbf{Deploying and evaluating the explanation layer.} The RAG layer is specified to the level of
+its retrieval parameters, guardrails and evaluation protocol, but its targets are unmeasured. The
+next step is to run it against the guidance corpus and report recall@5, faithfulness and citation
+precision on the hand-built question set, including the false refusal rate, since a layer that
+refuses too often is as unusable as one that never refuses.
+
+\textbf{Measuring alert fatigue in the field.} The three alert rules are designed to keep message
+volume low, but the quantity that decides whether the service survives its second year is messages
+per subscriber per year, and that can only be measured with real subscribers. A small pilot with a
+district veterinary office would give both that number and the delivery reliability per channel,
+which the current specification states as a protocol rather than a result.
+
+Two smaller extensions are also worth noting. Incorporating WOAH WAHIS official outbreak records as a
 second label source would allow the literature-derived label to be validated where the two
 overlap. And a cost-sensitive threshold, in which the relative cost of a missed outbreak and a
 false alert is stated explicitly, would replace the F1-optimal threshold used here with one
