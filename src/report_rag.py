@@ -18,7 +18,8 @@ is that a language model asked about glanders will answer from its training data
 outdated, may conflate glanders with melioidosis, and may invent a treatment protocol. For a
 zoonosis with a statutory control programme, an invented instruction is worse than no instruction.
 
-Retrieval-augmented generation resolves this by changing what the model is allowed to use. The
+Retrieval-augmented generation \cite{lewis2020} resolves this by changing what the model is
+allowed to use. The
 model is not asked what it knows about glanders. It is given a small set of passages retrieved
 from official guidance, given the prediction's own numbers, and asked to answer using only those.
 Every claim must be traceable to a passage, and the passage must be shown to the reader.
@@ -52,7 +53,7 @@ them. Each document carries an authority tier, which is used as a tie-breaker du
 \toprule
 \textbf{Source} & \textbf{Tier} & \textbf{Use} \\
 \midrule
-DAHD National Action Plan for Glanders, 2025 & 1 & Case definitions, surveillance obligations, movement control, quarantine, notification duties. \\
+DAHD National Action Plan for Glanders, 2025 \cite{dahd2025} & 1 & Case definitions, surveillance obligations, movement control, quarantine, notification duties. \\
 WOAH and WHO disease information sheets & 1 & Disease biology, transmission, zoonotic risk, official status. \\
 ICAR and national laboratory guidance & 2 & Diagnostic sampling, laboratory referral. \\
 Open-access research papers & 3 & Epidemiology, risk factors, regional situation. \\
@@ -103,12 +104,13 @@ the same database as the predictions removes a synchronisation problem: a re-ing
 prediction are covered by the same transaction boundary, and there is no second store to keep
 consistent.
 
-The default model is a compact sentence-transformer producing 384-dimensional vectors, which is
+The default model is a compact sentence-transformer \cite{reimers2019} producing
+384-dimensional vectors, which is
 sufficient for a corpus of this size and cheap enough to embed on a laptop. A multilingual variant
 is used when the corpus or the questions are in Hindi, because an English-only embedding degrades
 badly on Devanagari text.
 
-The index is HNSW with cosine distance. An approximate index is acceptable here because the
+The index is HNSW with cosine distance \cite{malkov2020}. An approximate index is acceptable here because the
 reranker corrects recall at the top of the list, and the corpus is small enough that even exact
 search would be fast; the index is there to keep the query cost flat as the corpus grows.
 
@@ -119,14 +121,15 @@ the per-request path below.
 
 \input{fig_rag.tex}
 
-Retrieval is hybrid, because dense and lexical search fail in different ways on this corpus. A
+Retrieval is hybrid, because dense and lexical search \cite{robertson2009} fail in different ways
+on this corpus. A
 dense query for "what should I do if I suspect glanders" retrieves passages about suspicion, which
 is useful. A dense query for the exact phrase "movement control" may miss a passage that uses
 "restriction of equid movement", where a lexical match would succeed. Conversely a lexical query
 for a rare acronym retrieves noise that a dense query would ignore.
 
-Both result lists are retrieved, then fused by reciprocal rank fusion, which combines rankings
-without requiring the two scores to be on a comparable scale.
+Both result lists are retrieved, then fused by reciprocal rank fusion \cite{cormack2009}, which
+combines rankings without requiring the two scores to be on a comparable scale.
 
 \[
 \mathrm{RRF}(d) = \sum_{i \in \{\text{dense},\text{lexical}\}} \frac{1}{k + \mathrm{rank}_i(d)},

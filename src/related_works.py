@@ -154,6 +154,39 @@ REFERENCES: dict[str, str] = {
         "\\emph{Journal of the American Medical Informatics Association}. "
         "2020;27(4):621--633. doi:10.1093/jamia/ocz228"
     ),
+    # ---------------- 8. retrieval, embeddings and language models ----------------
+    "lewis2020": (
+        "Lewis P, Perez E, Piktus A, et al. Retrieval-augmented generation for "
+        "knowledge-intensive NLP tasks. In: \\emph{Advances in Neural Information "
+        "Processing Systems 33 (NeurIPS)}. 2020:9459--9474. arXiv:2005.11401"
+    ),
+    "reimers2019": (
+        "Reimers N, Gurevych I. Sentence-BERT: sentence embeddings using Siamese "
+        "BERT-networks. In: \\emph{Proceedings of the 2019 Conference on Empirical "
+        "Methods in Natural Language Processing (EMNLP-IJCNLP)}. 2019:3982--3992. "
+        "doi:10.18653/v1/D19-1410"
+    ),
+    "malkov2020": (
+        "Malkov YA, Yashunin DA. Efficient and robust approximate nearest neighbor "
+        "search using hierarchical navigable small world graphs. \\emph{IEEE "
+        "Transactions on Pattern Analysis and Machine Intelligence}. "
+        "2020;42(4):824--836. doi:10.1109/TPAMI.2018.2889473"
+    ),
+    "robertson2009": (
+        "Robertson S, Zaragoza H. The probabilistic relevance framework: BM25 and "
+        "beyond. \\emph{Foundations and Trends in Information Retrieval}. "
+        "2009;3(4):333--389. doi:10.1561/1500000019"
+    ),
+    "cormack2009": (
+        "Cormack GV, Clarke CLA, Buettcher S. Reciprocal rank fusion outperforms "
+        "Condorcet and individual rank learning methods. In: \\emph{Proceedings of "
+        "the 32nd International ACM SIGIR Conference}. 2009:758--759. "
+        "doi:10.1145/1571941.1572114"
+    ),
+    "pedregosa2011": (
+        "Pedregosa F, Varoquaux G, Gramfort A, et al. Scikit-learn: machine learning "
+        "in Python. \\emph{Journal of Machine Learning Research}. 2011;12:2825--2830."
+    ),
 }
 
 # Data sources and grey literature.

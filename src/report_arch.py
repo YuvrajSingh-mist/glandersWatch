@@ -235,7 +235,7 @@ adding an adapter and a template, not touching the rules engine, which never kno
 will carry the message.
 
 \textbf{Embedding the engine as a library.} The trained pipeline is a scikit-learn compatible
-object with \texttt{predict\_proba}, exported with a manifest that records its feature order,
+object \cite{pedregosa2011} with \texttt{predict\_proba}, exported with a manifest that records its feature order,
 its calibration and its metrics. Any Python process can load it without running the API, which is
 what makes offline batch scoring and notebook analysis possible.
 

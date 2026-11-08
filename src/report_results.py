@@ -75,7 +75,7 @@ ordered. Block structure indicates the collinear groups that motivated redundanc
 
 The most consequential finding in this section concerns the choice of selection criterion.
 Marginal association and conditional importance disagree almost completely. The rank correlation
-between mutual information and SHAP attribution is @MIRHO@, and only @TOPOVERLAP@ of the ten
+between mutual information and SHAP attribution \cite{lundberg2017} is @MIRHO@, and only @TOPOVERLAP@ of the ten
 highest-ranked features are shared between the two orderings. \texttt{longitude} ranks first on
 marginal correlation and approximately twentieth on conditional importance, because once
 population and history are conditioned upon it carries little additional information. It
@@ -434,7 +434,7 @@ per subscriber per year, and that can only be measured with real subscribers. A 
 district veterinary office would give both that number and the delivery reliability per channel,
 which the current specification states as a protocol rather than a result.
 
-Two smaller extensions are also worth noting. Incorporating WOAH WAHIS official outbreak records as a
+Two smaller extensions are also worth noting. Incorporating WOAH WAHIS official outbreak records \cite{wahis} as a
 second label source would allow the literature-derived label to be validated where the two
 overlap. And a cost-sensitive threshold, in which the relative cost of a missed outbreak and a
 false alert is stated explicitly, would replace the F1-optimal threshold used here with one

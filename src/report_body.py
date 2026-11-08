@@ -8,8 +8,10 @@ BODY_METHOD = r"""
 
 \section{Data Sources}
 
-Four publicly accessible sources are used. None had previously been applied to glanders risk
-modelling, and each contributes a distinct kind of evidence.
+Four publicly accessible sources are used: a literature index, a livestock census, a development
+indicator set and a reanalysis climate archive \cite{europepmc,faostat,wdi,power}. None had
+previously been applied to glanders risk modelling, and each contributes a distinct kind of
+evidence.
 
 \begin{table}[htbp]
 \centering
@@ -161,7 +163,8 @@ includes a deliberately simple reference.
 Logistic regression provides an additive baseline with balanced class weights. A single decision
 tree is included because shallow trees are interpretable by a non-specialist, and because the
 performance gap between one tree and an ensemble is itself informative. Random forest and extra
-trees are bagged ensembles, differing in the degree of randomisation applied to split selection.
+trees are bagged ensembles \cite{breiman2001}, differing in the degree of randomisation applied to
+split selection.
 XGBoost and LightGBM are boosted ensembles, differing in tree growth strategy \cite{chen2016,ke2017}.
 
 Neural networks were excluded on evidential grounds. With @POSITIVES@ positive observations and
