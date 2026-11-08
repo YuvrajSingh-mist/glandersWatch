@@ -32,16 +32,16 @@ Explanation and Owner Alerting\par}
 \vspace{0.25em}
 {\large in\par}
 \vspace{0.2em}
-{\large\bfseries Computer Engineering\par}
+{\large\bfseries Computer Science Engineering\par}
 
 \vspace{0.85cm}
 {\large by\par}
 \vspace{0.3em}
-{\large\bfseries Yuvraj Singh \quad @ROLLME@\par}
+{\large\bfseries Pedapatruni Shanmuk Vardhan \quad @ROLLPSV@\par}
 \vspace{0.15em}
 {\large\bfseries Shaktimayee Mohanty \quad @ROLLSM@\par}
 \vspace{0.15em}
-{\large\bfseries Pedapatruni Shanmuk Vardhan \quad @ROLLPSV@\par}
+{\large\bfseries Yuvraj Singh \quad @ROLLME@\par}
 
 \vspace{0.8cm}
 {\large Under the supervision of\par}
@@ -73,8 +73,8 @@ Explanation and Owner Alerting\par}
 \noindent
 {\sloppy
 This is to certify that the report entitled ``GlandersWatch: A Modular Platform for Glanders Risk
-Prediction, Retrieval-Augmented Explanation and Owner Alerting'' submitted by Yuvraj Singh
-(@ROLLME@), Shaktimayee Mohanty (@ROLLSM@) and Pedapatruni Shanmuk Vardhan (@ROLLPSV@) to
+Prediction, Retrieval-Augmented Explanation and Owner Alerting'' submitted by Pedapatruni Shanmuk Vardhan
+(@ROLLPSV@), Shaktimayee Mohanty (@ROLLSM@) and Yuvraj Singh (@ROLLME@) to
 International Institute of Information Technology, Bhubaneswar is a record of bonafide project work
 under my supervision, and the report is submitted for the evaluation of the BTech
 Degree Final-Semester Project.\par}
@@ -111,9 +111,9 @@ We certify that
 \vspace{1.3cm}
 \noindent
 \begin{tabular}{@{}ll@{}}
-Yuvraj Singh & @ROLLME@ \\[0.35em]
+Pedapatruni Shanmuk Vardhan & @ROLLPSV@ \\[0.35em]
 Shaktimayee Mohanty & @ROLLSM@ \\[0.35em]
-Pedapatruni Shanmuk Vardhan & @ROLLPSV@ \\
+Yuvraj Singh & @ROLLME@ \\
 \end{tabular}
 
 % ============================== ACKNOWLEDGMENTS ==============================
@@ -134,9 +134,9 @@ unwavering support and understanding during the course of this project.
 \vspace{1.3cm}
 \noindent
 \begin{tabular}{@{}ll@{}}
-Yuvraj Singh & @ROLLME@ \\[0.35em]
+Pedapatruni Shanmuk Vardhan & @ROLLPSV@ \\[0.35em]
 Shaktimayee Mohanty & @ROLLSM@ \\[0.35em]
-Pedapatruni Shanmuk Vardhan & @ROLLPSV@ \\
+Yuvraj Singh & @ROLLME@ \\
 \end{tabular}
 
 % ============================== ABSTRACT ==============================
