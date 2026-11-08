@@ -260,10 +260,11 @@ VALUES = {
     "EVALFIG": DG.EVALUATION,
 }
 
-PREAMBLE = r"""\documentclass[11pt,openany]{report}
+PREAMBLE = r"""\documentclass[10pt,openany]{report}
 \usepackage[a4paper,margin=1in]{geometry}
-\usepackage{mathptmx}
+\usepackage{lmodern}
 \usepackage[T1]{fontenc}
+\usepackage{textcomp}
 \usepackage{amsmath,amssymb}
 \usepackage{graphicx}
 \usepackage{booktabs}

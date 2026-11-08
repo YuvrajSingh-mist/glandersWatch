@@ -39,7 +39,7 @@ Explanation and Owner Alerting\par}
 \vspace{0.95cm}
 {\normalsize by\par}
 \vspace{0.40em}
-{\large
+{\fontsize{10.9}{13.2}\selectfont
 \begin{tabular}{@{}r@{\hspace{1.1em}}l@{}}
 \bfseries Pedapatruni Shanmuk Vardhan & B123089 \\[1pt]
 \bfseries Shaktimayee Mohanty & B123118 \\[1pt]
@@ -49,7 +49,7 @@ Explanation and Owner Alerting\par}
 \vspace{1.0cm}
 {\normalsize Under the supervision of\par}
 \vspace{0.32em}
-{\large\bfseries Dr. Sangita Dhara\par}
+{\fontsize{10.9}{13.2}\selectfont\bfseries Dr. Sangita Dhara\par}
 
 \vspace{1.0cm}
 \includegraphics[width=3.0cm]{iiit_logo.png}\par
@@ -58,7 +58,7 @@ Explanation and Owner Alerting\par}
 
 {\normalsize Department of Computer Science and Engineering\par}
 \vspace{0.32em}
-{\normalsize\bfseries International Institute of Information Technology, Bhubaneswar\par}
+{\fontsize{10.9}{13.2}\selectfont\bfseries International Institute of Information Technology, Bhubaneswar\par}
 \vspace{0.32em}
 {\normalsize @MONTHYEAR@\par}
 
@@ -76,8 +76,7 @@ Explanation and Owner Alerting\par}
 \noindent
 {\sloppy
 This is to certify that the report entitled ``GlandersWatch: A Modular Platform for Glanders Risk
-Prediction, Retrieval-Augmented Explanation and Owner Alerting'' submitted by Pedapatruni Shanmuk Vardhan
-(@ROLLPSV@), Shaktimayee Mohanty (@ROLLSM@) and Yuvraj Singh (@ROLLME@) to
+Prediction, Retrieval-Augmented Explanation and Owner Alerting'' submitted by \mbox{Pedapatruni Shanmuk Vardhan (@ROLLPSV@)}, \mbox{Shaktimayee Mohanty (@ROLLSM@)} and \mbox{Yuvraj Singh (@ROLLME@)} to
 International Institute of Information Technology, Bhubaneswar is a record of bonafide project work
 under my supervision, and the report is submitted for the evaluation of the BTech
 Degree Final-Semester Project.\par}
@@ -111,12 +110,12 @@ We certify that
         details in the references.
 \end{enumerate}
 
-\vspace{1.3cm}
+\vspace{2.5cm}
 \noindent
-\begin{tabular}{@{}ll@{}}
-Pedapatruni Shanmuk Vardhan & @ROLLPSV@ \\[0.35em]
-Shaktimayee Mohanty & @ROLLSM@ \\[0.35em]
-Yuvraj Singh & @ROLLME@ \\
+\noindent
+\begin{tabular}{@{}p{5.75cm}p{4.35cm}p{4.35cm}@{}}
+\textbf{Pedapatruni Shanmuk Vardhan} & \textbf{Shaktimayee Mohanty} & \textbf{Yuvraj Singh} \\[0.12em]
+B123089 & B123118 & B123153 \\
 \end{tabular}
 
 % ============================== ACKNOWLEDGMENTS ==============================
@@ -134,12 +133,12 @@ International Institute of Information Technology, Bhubaneswar, for providing th
 conducive learning environment. Finally, we would like to thank our families and friends for their
 unwavering support and understanding during the course of this project.
 
-\vspace{1.3cm}
+\vspace{2.5cm}
 \noindent
-\begin{tabular}{@{}ll@{}}
-Pedapatruni Shanmuk Vardhan & @ROLLPSV@ \\[0.35em]
-Shaktimayee Mohanty & @ROLLSM@ \\[0.35em]
-Yuvraj Singh & @ROLLME@ \\
+\noindent
+\begin{tabular}{@{}p{5.75cm}p{4.35cm}p{4.35cm}@{}}
+\textbf{Pedapatruni Shanmuk Vardhan} & \textbf{Shaktimayee Mohanty} & \textbf{Yuvraj Singh} \\[0.12em]
+B123089 & B123118 & B123153 \\
 \end{tabular}
 
 % ============================== ABSTRACT ==============================
