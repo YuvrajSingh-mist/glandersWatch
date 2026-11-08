@@ -11,55 +11,58 @@ No f-strings, so LaTeX braces need no escaping.
 
 FRONT_MATTER = r"""
 % ============================== TITLE PAGE ==============================
-% Layout measured from the department template: title flush with the top margin,
-% the emblem centred below the author block at 3.19 cm, department block at foot.
+% Bold/regular pattern measured from the department template: the title is large but
+% REGULAR weight; the four structural headings are bold; author names are bold with the
+% roll numbers set regular in a second column. Names right-aligned, roll numbers
+% left-aligned, as a tabular{rl}.
 \begin{titlepage}
 \thispagestyle{empty}
 \begin{center}
 
-{\LARGE\bfseries GlandersWatch: A Modular Platform for\\[5pt]
-Glanders Risk Prediction, Retrieval-Augmented\\[5pt]
+{\huge GlandersWatch: A Modular Platform for\\[7pt]
+Glanders Risk Prediction, Retrieval-Augmented\\[7pt]
 Explanation and Owner Alerting\par}
 
-\vspace{0.85cm}
+\vspace{1.15cm}
 
-{\large Project Report Submitted\par}
-\vspace{0.45em}
+{\Large\bfseries Project Report Submitted\par}
+\vspace{0.30em}
 {\normalsize in partial fulfillment of the requirements for the award of the\par}
 
-\vspace{0.75cm}
-{\large\bfseries Bachelor of Technology\par}
-\vspace{0.25em}
-{\large in\par}
-\vspace{0.2em}
-{\large\bfseries Computer Science Engineering\par}
+\vspace{1.05cm}
+{\Large\bfseries Bachelor of Technology\par}
+\vspace{0.28em}
+{\normalsize in\par}
+\vspace{0.22em}
+{\Large\bfseries Computer Science Engineering\par}
 
-\vspace{0.85cm}
-{\large by\par}
-\vspace{0.3em}
-{\large\bfseries Pedapatruni Shanmuk Vardhan \quad @ROLLPSV@\par}
-\vspace{0.15em}
-{\large\bfseries Shaktimayee Mohanty \quad @ROLLSM@\par}
-\vspace{0.15em}
-{\large\bfseries Yuvraj Singh \quad @ROLLME@\par}
+\vspace{1.0cm}
+{\normalsize by\par}
+\vspace{0.42em}
+{\Large
+\begin{tabular}{@{}rl@{}}
+\bfseries Pedapatruni Shanmuk Vardhan & B123089 \\[1pt]
+\bfseries Shaktimayee Mohanty & B123118 \\[1pt]
+\bfseries Yuvraj Singh & B123153 \\
+\end{tabular}\par}
 
-\vspace{0.8cm}
-{\large Under the supervision of\par}
-\vspace{0.3em}
-{\large\bfseries @SUPERVISOR@\par}
+\vspace{1.0cm}
+{\normalsize Under the supervision of\par}
+\vspace{0.34em}
+{\Large\bfseries Dr. Sangita Dhara\par}
 
-\vspace{0.85cm}
-\includegraphics[width=3.19cm]{iiit_logo.png}\par
+\vspace{1.0cm}
+\includegraphics[width=3.0cm]{iiit_logo.png}\par
 
 \vfill
 
 {\normalsize Department of Computer Science and Engineering\par}
-\vspace{0.3em}
+\vspace{0.32em}
 {\normalsize International Institute of Information Technology, Bhubaneswar\par}
-\vspace{0.3em}
+\vspace{0.32em}
 {\normalsize @MONTHYEAR@\par}
 
-\vspace*{0.55cm}
+\vspace*{0.6cm}
 
 \end{center}
 \end{titlepage}
