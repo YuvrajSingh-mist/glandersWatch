@@ -7,7 +7,10 @@ columns in the order the pipeline receives them, and the binary next-year label.
 
 The rows and columns come from the same loader and the same feature-group
 constants that the training script uses, so this file cannot drift from what the
-models actually saw.
+models actually saw. Floating point values are written to 6 decimal places: this
+file is an export for inspection, not an input to training (the training script
+reads the panel and derives the matrix itself), so rounding here cannot change
+any reported number, and it keeps each row readable.
 """
 from __future__ import annotations
 
@@ -42,6 +45,13 @@ def main() -> None:
         raise SystemExit(f"features missing from panel: {missing}")
 
     out = df[IDENTIFIERS + FEATURES + [TARGET]].copy()
+
+    # Round the numeric features so each row stays readable in an editor. Integer
+    # stock counts are left exact. This file is an export, not a training input.
+    num_cols = [c for c in C.FULL if c in out.columns
+                and out[c].dtype.kind == "f"]
+    out[num_cols] = out[num_cols].round(6)
+
     out.to_csv(OUT, index=False)
 
     print(f"wrote {OUT.relative_to(ROOT)}")
