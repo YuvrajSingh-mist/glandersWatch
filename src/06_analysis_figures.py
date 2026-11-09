@@ -173,3 +173,52 @@ if __name__ == "__main__":
     fig_correlation()
     fig_importance_views()
     fig_diagnostics()
+
+
+# --------------------------------------------------------------------------- #
+def fig_background() -> None:
+    """Two motivating figures placed after the introduction's background section.
+
+    A: where the susceptible equid population is.
+    B: how much glanders activity has been documented each year.
+    """
+    panel = pd.read_csv(PROC / "country_year_panel.csv")
+    ev = pd.read_csv(PROC / "literature_events.csv")
+
+    # --- A: top countries by equid population, split by species ---------------
+    yr = 2019 if (panel.year == 2019).any() else int(panel.year.max())
+    snap = panel[panel.year == yr].copy()
+    snap["total"] = snap[["horses", "asses", "mules"]].sum(axis=1)
+    top = snap.nlargest(14, "total").iloc[::-1]
+
+    fig, axes = plt.subplots(1, 2, figsize=(11.6, 3.9))
+    ax = axes[0]
+    left = np.zeros(len(top))
+    for col, colour, label in (("horses", BLUE, "horses"),
+                               ("asses", ORANGE, "asses / donkeys"),
+                               ("mules", TEAL, "mules")):
+        ax.barh(top.iso3, top[col] / 1e6, left=left / 1e6, color=colour, label=label, height=0.74)
+        left = left + top[col].to_numpy()
+    ax.set_xlabel(f"equids, millions (FAOSTAT stocks, {yr})")
+    ax.set_title(f"A. Susceptible population, fourteen largest countries")
+    ax.legend(fontsize=7.5, frameon=False, loc="lower right")
+
+    # --- B: documented occurrence events per year ----------------------------
+    ax = axes[1]
+    yrs = np.arange(2005, 2024)
+    counts = [int((ev.year == y).sum()) for y in yrs]
+    ax.bar(yrs, counts, color=GREY, width=0.72)
+    win = pd.Series(counts).rolling(3, center=True, min_periods=1).mean()
+    ax.plot(yrs, win, color=BLUE, lw=2, label="three-year mean")
+    ax.set_xlabel("year")
+    ax.set_ylabel("documented occurrence events")
+    ax.set_title("B. Glanders activity recorded in the literature")
+    ax.legend(fontsize=7.5, frameon=False, loc="upper left")
+    ax.annotate("open-access publishing grows,\nso this is not incidence",
+                xy=(2013, 20), fontsize=7, color=INK, ha="left", va="top")
+
+    save(fig, "fig14_background.png")
+
+
+if __name__ == "__main__":
+    fig_background()

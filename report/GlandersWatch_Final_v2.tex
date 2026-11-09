@@ -211,21 +211,26 @@ and each degrades without failing the others.
 \noindent
 The risk engine combines four public datasets not previously applied to glanders into a country-year
 panel: a text-mined occurrence corpus from Europe PMC, FAOSTAT livestock stocks, World Bank
-development indicators and NASA POWER reanalysis climatology. The panel contains 3,078 country-year
-observations across 162 equine-holding countries from 2005 to 2023, with 172 positive labels and 44
-engineered features. Six model families are trained and compared under three validation schemes.
+development indicators and NASA POWER reanalysis climatology. 6,700 country-year rows reduce to
+3,059 modelling observations across 161 equine-holding countries from 2005 to 2023, with
+172 positive labels. Candidate features are screened by attribution rather than association:
+the top 12 of 42 numeric candidates, ranked by mean absolute SHAP on the training years
+alone, are kept with two categorical columns, and six model families are trained under three
+validation schemes.
 
 \vspace{0.5em}
 \noindent
-On a forward temporal holdout the strongest model reaches a precision-recall AUC of 0.554 against a
-base rate of 0.056, roughly a ten-fold lift, with an expected calibration error of 0.016. Performance
-falls to 0.304 under leave-country-out validation, which is the estimate to quote for an unseen
-country. The model performs least well in low-income regions, where label sparsity limits what
-can be learned. The dominant limitation is that the label reflects documented activity rather than true
-incidence, so the model largely learns where disease is reported. Reporting effort is the principal
-confounder and the main target for future work. The explanation and alert components are specified
-to the level of their interfaces, rule semantics and evaluation protocol, and are not reported as
-measured results because they are not deployed.
+On a forward temporal holdout the strongest model reaches a precision-recall AUC of 0.551
+against a base rate of 5.62\%. Under leave-country-out validation the ranking inverts and
+Logistic Regression leads at 0.411, with calibration error 0.025, so it is the champion and the estimate to
+quote for an unseen country. Asking the coarser question instead, whether a country is a
+glanders-reporting country at all, raises discrimination to about 0.95, which reflects how stable
+reporting status is rather than any gain in predictive skill. The dominant limitation is that the
+label reflects documented activity rather than true incidence, so the model largely learns where
+disease is reported. Reporting effort is the principal confounder and the main target for future
+work. The explanation and alert components are specified to the level of their interfaces, rule
+semantics and evaluation protocol, and are not reported as measured results because they are not
+deployed.
 
 \vspace{0.7em}
 \noindent
@@ -259,14 +264,30 @@ fatality rate and follows occupational contact. The disease is notifiable to the
 Organisation for Animal Health and is classified as a potential bioterrorism agent.
 
 The economic weight sits in low and middle income countries, where equids remain essential to
-transport, construction and agriculture. India recorded 5.44 lakh equids in the 2019 Livestock
-Census, many held by households that depend on them for daily income, so losing a working animal is a
-direct loss of livelihood. Early warning is useful even where mass treatment is not feasible.
+transport, construction and agriculture. An equid is a member of the family \emph{Equidae}: horses,
+donkeys (recorded here as asses) and mules. India held 5.50 lakh of them in the 2019 Livestock
+Census, made up of 3.42 lakh horses, 1.24 lakh asses and 0.84 lakh mules. That figure is the size of
+the susceptible population, not a count of sick animals: it says how many animals are exposed, not how
+many the disease has damaged. Most are held by households that depend on them for daily income, so the
+death of one working animal is a direct loss of livelihood.
 
-Surveillance shows the disease is neither rare nor geographically contained. A national programme
-screening 158,798 sera from 391 districts in 2019 to 2023 found 728 seropositive animals in 138
-districts, roughly sixty per cent of them in Uttar Pradesh; earlier surveillance covering 2006 to 2018
-reported 1,145 positives among 128,404 sera.
+The damage that is documented is smaller and better measured. A national programme screening
+158,798 sera from 391 districts between 2019 and 2023 found 728 seropositive animals in 138 districts,
+roughly sixty per cent of them in Uttar Pradesh; earlier surveillance covering 2006 to 2018 reported
+1,145 positives among 128,404 sera. That is under one per cent of the equid population, concentrated
+in a few states, and because glanders is notifiable and frequently fatal once clinical, each positive
+is acted on rather than monitored.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{fig14_background.png}
+\caption{The two quantities behind the problem. Panel A gives the equid population of the fourteen
+largest countries, split by species, which sets the size of the exposed population. Panel B gives the
+occurrence events recovered from the literature each year, which sets the size of the label. The rise
+in panel B follows open-access publishing volume as much as disease, which is why the label is treated
+as documented activity throughout.}
+\label{fig:background}
+\end{figure}
 
 \section{Problem Definition}
 
@@ -299,10 +320,10 @@ into something a person can act on.
 
 \section{Objectives}
 
-There is one research objective and three engineering objectives.
+The project has four objectives.
 
 \begin{enumerate}
-  \item \textbf{Research.} Assemble a country-year panel from public sources not previously applied
+  \item \textbf{The prediction study.} Assemble a country-year panel from public sources not previously applied
         to the disease, compare six model families under three validation schemes, and report the
         achievable skill including negative results.
   \item \textbf{Prediction as a service.} Package the trained model as a versioned artefact behind a
@@ -429,9 +450,9 @@ glanders + gradient boosting & 4 \\
 The decisive cells pair glanders with NASA POWER, which returns zero records, and with gradient
 boosting, which returns four, none a glanders risk model.
 
-\section{Research and Deployment Gap}
+\section{What the Existing Work Leaves Open}
 
-\textbf{Research gap.} The literature divides into three disjoint groups. Epidemiological studies
+\textbf{The evidence gap.} The literature divides into three disjoint groups. Epidemiological studies
 describe where glanders occurs; machine learning studies of \textit{B. mallei} classify laboratory
 spectra; veterinary risk models exist but are built for influenza. No study joins an occurrence
 corpus, a livestock census, development indicators and reanalysis climatology into a single panel
@@ -569,7 +590,7 @@ Combining the four sources produces a grid of 6,700 country-year rows across
 268 countries for 2000 to 2024, in 60 columns: 44 engineered candidate features, three
 identifiers, five label fields and eight intermediate quantities.
 
-Preprocessing reduces that grid to 3,078 rows, and selection keeps 14 of the 44 candidates, which
+Preprocessing reduces that grid to 3,059 rows, and selection keeps 14 of the 44 candidates, which
 is the matrix every model was trained and evaluated on. The row loss comes from the equine-holding
 filter, which keeps 162 of the 268 countries on a maximum equid stock of at least one
 thousand, and from the 2005 to 2023 year window; the observable-label restriction then removes nothing
@@ -577,14 +598,14 @@ further. Imputation and scaling happen inside the training pipeline, so the test
 influence them.
 
 The matrix is committed as \texttt{model\_matrix.csv} under \texttt{data/}\allowbreak\texttt{processed/}:
-3,078 rows by 14 feature columns plus the target, written by
+3,059 rows by 14 feature columns plus the target, written by
 \texttt{src/11\_export\_model\_matrix.py} from the same loader and selection the training script uses.
 
 Events are de-duplicated on country, year and source record identifier, so one paper reporting
 several cases cannot contribute multiple counts. Missing values are median-imputed inside the training
 pipeline, with a missing-indicator feature per affected column. Missingness is low: 0.00\% for
-FAOSTAT, 1.68\% for the World Bank, 2.19\% for climate, and 0.99\% overall, no column above
-5.8\%.
+FAOSTAT, 1.67\% for the World Bank, 2.19\% for climate, and 0.99\% overall, no column above
+5.9\%.
 
 \section{Label Definition}
 
@@ -616,7 +637,7 @@ attribution instead (Section~\ref{sec:shapselect}).
 
 One column is removed structurally: \texttt{equids} is exactly the sum of horses, asses and mules,
 which a tree can rebuild from its parts. No projection or principal component analysis is applied;
-with 14 retained features and 3,078 rows the binding constraint is signal rather than
+with 14 retained features and 3,059 rows the binding constraint is signal rather than
 dimensionality.
 
 \section{Statistical Association Measures}
@@ -716,25 +737,25 @@ total attribution across all 42 candidates.}
 \toprule
 \textbf{Rank} & \textbf{Feature} & \textbf{Unit as measured} & \textbf{Mean $|\phi|$} \\
 \midrule
-1 & \texttt{pop\_total} & persons & 0.956 \\
-2 & \texttt{years\_since\_last} & years (99 = none) & 0.698 \\
-3 & \texttt{temp\_mean\_anom} & $^\circ$C from baseline & 0.524 \\
-4 & \texttt{internet\_pct} & \% of population & 0.449 \\
-5 & \texttt{precip\_cv} & ratio (sd/mean) & 0.383 \\
-6 & \texttt{humidity\_anom} & \% RH from baseline & 0.380 \\
-7 & \texttt{goats} & head & 0.341 \\
-8 & \texttt{cattle} & head & 0.339 \\
-9 & \texttt{equid\_growth\_1y} & fraction per year & 0.339 \\
-10 & \texttt{precip\_sum\_anom} & mm from baseline & 0.328 \\
-11 & \texttt{log\_livestock} & ln(1 + LSU) & 0.311 \\
-12 & \texttt{temp\_max} & $^\circ$C & 0.278 \\
+1 & \texttt{pop\_total} & persons & 0.868 \\
+2 & \texttt{years\_since\_last} & years (99 = none) & 0.640 \\
+3 & \texttt{temp\_mean\_anom} & $^\circ$C from baseline & 0.549 \\
+4 & \texttt{internet\_pct} & \% of population & 0.468 \\
+5 & \texttt{log\_livestock} & ln(1 + LSU) & 0.438 \\
+6 & \texttt{humidity\_anom} & \% RH from baseline & 0.390 \\
+7 & \texttt{equid\_growth\_1y} & fraction per year & 0.375 \\
+8 & \texttt{precip\_cv} & ratio (sd/mean) & 0.373 \\
+9 & \texttt{cattle} & head & 0.351 \\
+10 & \texttt{goats} & head & 0.328 \\
+11 & \texttt{pop\_density} & persons per km$^2$ & 0.309 \\
+12 & \texttt{gdp\_pc} & current US\$ per person & 0.300 \\
 13 & \texttt{region} & World Bank region & -- \\
 14 & \texttt{income} & World Bank income band & -- \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The set is deliberately small. 14 columns against 3,078 rows leaves roughly a hundred rows per
+The set is deliberately small. 14 columns against 3,059 rows leaves roughly a hundred rows per
 column, which is what the positive count can support: with 172 events, a model given forty
 inputs has more directions to fit than it has events to learn from, and Chapter~\ref{ch:results}
 reports what that costs in transfer.
@@ -757,7 +778,7 @@ for an unseen country; it answers whether the model transfers and it governs sel
 harsher test and the closer approximation of deployment. Repeated stratified cross-validation, five
 folds three times, is a stability check.
 
-Precision-recall AUC is the primary metric: at 5.59\% prevalence ROC-AUC is dominated by the
+Precision-recall AUC is the primary metric: at 5.62\% prevalence ROC-AUC is dominated by the
 true-negative mass and overstates performance \cite{saito2015,davis2006}, so it is reported only for
 comparability. Brier score and expected calibration error are reported because an uncalibrated
 probability cannot support a threshold-based alert \cite{niculescu2005,huang2020}. Precision, recall,
@@ -880,9 +901,9 @@ bundle, scores a fixed fixture and asserts the output to four decimals, which ca
 silent failure here, where a dependency upgrade changes numerical behaviour and every downstream number
 moves unnoticed.
 
-The full computation runs in about 4.5 minutes on an Apple M4 processor with 10 cores and 16 GB of unified memory without a graphics accelerator.
+The full computation runs in about 4.4 minutes on an Apple M4 processor with 10 cores and 16 GB of unified memory without a graphics accelerator.
 Per-family fitting time at the country-year level ranges from 1.6 seconds for the decision tree
-to 67.1 seconds for LightGBM. One module-level seed governs fitting, cross-validation, bootstrap
+to 66.9 seconds for LightGBM. One module-level seed governs fitting, cross-validation, bootstrap
 resampling and SHAP sampling, with software versions Python 3.12.13, scikit-learn 1.9.1, XGBoost 3.4.1, LightGBM 4.7.0, SHAP 0.54.1, NumPy 2.5.4, pandas 3.1.1, SciPy 1.18.1, and the bundle smoke test runs
 single-threaded because tree ensembles are not bitwise reproducible across thread counts.
 
@@ -929,7 +950,7 @@ Each document carries an authority tier, used as a tie-breaker during retrieval.
 DAHD National Action Plan for Glanders, 2025 \cite{dahd2025} & 1 & Case definitions, surveillance obligations, movement control, quarantine, notification duties. \\
 WOAH and WHO disease information sheets & 1 & Disease biology, transmission, zoonotic risk, official status. \\
 ICAR and national laboratory guidance & 2 & Diagnostic sampling, laboratory referral. \\
-Open-access research papers & 3 & Epidemiology, risk factors, regional situation. \\
+Open-access publications & 3 & Epidemiology, risk factors, regional situation. \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1172,6 +1193,18 @@ provider accepts a message, the response times out, and the retry would deliver 
 
 \section{Fan-Out, Channels and Delivery}
 
+Figure~\ref{fig:alertarch} shows the delivery pipeline as specified in the project proposal, from the
+rule decision through fan-out, rendering, the channel adapters and the delivery log.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{proposal_alert_architecture.png}
+\caption{The alert pipeline as specified in the project proposal. After the three rules decide that a
+message is warranted, one delivery job per subscription is queued, the template is rendered, a channel
+adapter sends it, and the delivery status flows back to the administrative view.}
+\label{fig:alertarch}
+\end{figure}
+
 Once an alert record exists, one delivery job per subscription is queued through Redis. A channel
 adapter receives a rendered message and a recipient and returns a delivery status, with adapters for
 SMS, WhatsApp and Telegram, the last used for demonstration because it needs no commercial
@@ -1220,8 +1253,8 @@ retry window, per channel, since channels fail differently.
 
 \subsection{Dataset Characteristics}
 
-The modelling matrix holds 3,078 country-year observations, of which 172 are positive: a
-prevalence of 5.59\% and an imbalance of 16.9 to one. 56 of 162
+The modelling matrix holds 3,059 country-year observations, of which 172 are positive: a
+prevalence of 5.62\% and an imbalance of 16.8 to one. 56 of 161
 countries record at least one positive, 30 of them in two or more years, and the top five
 hold 35.5\% of all positives.
 
@@ -1257,12 +1290,12 @@ Section~8.1.3.}
 \textbf{Model} & \textbf{PR-AUC (time)} & \textbf{95\% CI} & \textbf{ROC-AUC (time)} &
 \textbf{PR-AUC (country)} \\
 \midrule
-Logistic regression & 0.446 & [0.34, 0.57] & 0.863 & 0.336 \\
-Decision tree & 0.424 & [0.32, 0.53] & 0.860 & 0.240 \\
-Random forest & 0.518 & [0.40, 0.63] & 0.865 & 0.318 \\
-Extra trees & 0.516 & [0.41, 0.62] & 0.860 & 0.284 \\
-XGBoost & 0.432 & [0.32, 0.55] & 0.842 & 0.292 \\
-LightGBM & 0.452 & [0.34, 0.57] & 0.840 & 0.311 \\
+Logistic regression & 0.471 & [0.36, 0.59] & 0.851 & 0.411 \\
+Decision tree & 0.439 & [0.33, 0.56] & 0.857 & 0.241 \\
+Random forest & 0.540 & [0.43, 0.65] & 0.866 & 0.318 \\
+Extra trees & 0.551 & [0.44, 0.66] & 0.868 & 0.304 \\
+XGBoost & 0.465 & [0.35, 0.59] & 0.853 & 0.290 \\
+LightGBM & 0.501 & [0.38, 0.61] & 0.844 & 0.315 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1276,10 +1309,10 @@ and leave-country-out validation is the cost of generalising to an unseen countr
 \end{figure}
 
 Two results need separating. On the forward temporal holdout the best discrimination comes from
-Random forest at 0.518 against a base rate of 5.59\%, roughly a 9-fold lift. Under
-leave-country-out validation the ranking inverts: Random forest falls to 0.318, while logistic
-regression holds 0.336 and becomes the strongest model on the criterion that governs selection.
-Its temporal score is 0.446, about a 8-fold lift.
+Extra trees at 0.551 against a base rate of 5.62\%, roughly a 10-fold lift. Under
+leave-country-out validation the ranking inverts: Extra trees falls to 0.304, while logistic
+regression holds 0.411 and becomes the strongest model on the criterion that governs selection.
+Its temporal score is 0.471, about a 8-fold lift.
 
 Because deployment means an unseen country rather than an unseen year, the champion is
 Logistic Regression, and every number quoted below refers to it. The inversion is the more informative result.
@@ -1291,7 +1324,7 @@ signal is not concentrated in one or two splits.
 \subsection{Calibration}
 
 Predictions are well calibrated, with an expected calibration error of 0.025 and a Brier score of
-0.0543: a stated risk of twenty-four per cent corresponds to an observed frequency near twenty-four
+0.0537: a stated risk of twenty-four per cent corresponds to an observed frequency near twenty-four
 per cent, which is what makes a threshold-based alert defensible.
 
 \begin{figure}[htbp]
@@ -1316,11 +1349,11 @@ help most; the cause is label sparsity, since few events are recorded in those s
 \toprule
 \textbf{Region} & \textbf{Observations} & \textbf{Events} & \textbf{ROC-AUC} & \textbf{PR-AUC} \\
 \midrule
-East Asia \& Pacific & 456 & 48 & 0.860 & 0.410 \\
-Europe \& Central Asia & 912 & 31 & 0.840 & 0.167 \\
-Latin America \& Caribbean & 551 & 12 & 0.905 & 0.418 \\
-MENA, Afghanistan and Pakistan & 380 & 23 & 0.815 & 0.210 \\
-Sub-Saharan Africa & 665 & 27 & 0.627 & 0.088 \\
+East Asia \& Pacific & 456 & 48 & 0.862 & 0.396 \\
+Europe \& Central Asia & 912 & 31 & 0.844 & 0.174 \\
+Latin America \& Caribbean & 551 & 12 & 0.929 & 0.441 \\
+MENA, Afghanistan and Pakistan & 380 & 23 & 0.837 & 0.362 \\
+Sub-Saharan Africa & 646 & 27 & 0.741 & 0.140 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1330,9 +1363,9 @@ Sub-Saharan Africa & 665 & 27 & 0.627 & 0.088 \\
 The alert layer turns the calibrated probability into messages, so its economics are reported
 separately from model skill.
 
-Alerting the six per cent of country-years at highest predicted risk captures 43 per cent of
+Alerting the six per cent of country-years at highest predicted risk captures 42 per cent of
 observed events, half of them are reached at an alert budget of 10 per cent, and eighty per
-cent at 29 per cent (Figure~\ref{fig:alerts}). Uniform alerting would need full coverage for
+cent at 34 per cent (Figure~\ref{fig:alerts}). Uniform alerting would need full coverage for
 the same recall, so the model is about 5.2 times more efficient than arbitrary selection at the
 fifty per cent point.
 
@@ -1347,10 +1380,49 @@ against random alerting. Panel B gives the alert volume required to reach a targ
 For the retrieval-augmented layer no measured results are reported: it is specified in
 Chapter~\ref{ch:rag} but has not been run against the corpus, so its five metrics have no values.
 
+\section{The Country-Level View}
+
+The results above answer a year-by-year question. A surveillance planner often asks a coarser one:
+which countries are glanders countries at all? That reframing is worth reporting because it changes
+the answer, and because it shows where the model's information comes from.
+
+Collapsing the panel to one row per country, with features averaged over 2005 to 2023 and the label
+defined as whether the country reports glanders in any year, leaves 161 rows and 56 positives, a
+prevalence of 34.8 per cent rather than 5.62. Validation is leave-one-out over countries, since with
+one row per country there is no grouping left to hold out.
+
+\begin{table}[htbp]
+\centering
+\caption{Country-level classification on the same twelve features, validated leave-one-country-out.
+The task is easier than the country-year problem, and the scores say so.}
+\label{tab:countrylevel}
+\small
+\begin{tabular}{@{}lcc@{}}
+\toprule
+\textbf{Model} & \textbf{ROC-AUC} & \textbf{PR-AUC} \\
+\midrule
+Logistic regression & 0.951 & 0.914 \\
+Random forest & 0.968 & 0.963 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Discrimination rises to about 0.95, and the temptation is to read that as a much better model. It is
+not a better model; it is an easier question. Asking whether a country reports glanders ever is
+largely asking whether it has a veterinary reference laboratory, publishes in indexed journals and
+has a large equid population, and those three properties are almost perfectly separable at country
+granularity. The year-by-year target was hard precisely because reporting status is stable while
+incidence is not.
+
+This is why the country code is not used as a feature anywhere in this report. As an identifier it
+cannot transfer to a country the model has not seen, which is the deployment case, and in-sample it
+would simply memorise the reporting capacity that the discussion identifies as the confounder. The
+country-level table reports the effect of that confounder rather than exploiting it.
+
 \section{Discussion}
 
-The risk model has predictive skill: Logistic Regression reaches a precision-recall AUC of 0.446 against a base
-rate of 5.59\% on the forward split, and holds 0.336 across unseen countries, with
+The risk model has predictive skill: Logistic Regression reaches a precision-recall AUC of 0.471 against a base
+rate of 5.62\% on the forward split, and holds 0.411 across unseen countries, with
 calibration error 0.025. The gap between those two figures is smaller than the full-feature model
 showed, which is the practical gain from selecting features on conditional evidence. The signal it
 learns is surveillance rather than biology: the leading features are population, connectivity and
@@ -1371,9 +1443,9 @@ equine-holding countries, and six model families were trained under three valida
 engine, an explanation layer and an alert service.
 
 Prediction is possible, and the performance is moderate: Logistic Regression reaches a precision-recall AUC of
-0.446 against a base rate of 5.59\% on a forward split, about a 8-fold lift with a
-calibration error of 0.025, and holds 0.336 across unseen countries. Alerting six per cent of
-country-years captures 43 per cent of events. The skill is fragile across geography, and the
+0.471 against a base rate of 5.62\% on a forward split, about a 8-fold lift with a
+calibration error of 0.025, and holds 0.411 across unseen countries. Alerting six per cent of
+country-years captures 42 per cent of events. The skill is fragile across geography, and the
 decline concentrates where early warning would help most.
 
 What the model learns is less encouraging. Three analyses converge: the highest-ranked features are

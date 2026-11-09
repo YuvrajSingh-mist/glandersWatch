@@ -16,8 +16,8 @@ others failing.
 
 That asymmetry is the reason the system is built as three components rather than one application.
 A district officer looking at a map needs the prediction immediately and the explanation on
-demand. An owner with a feature phone needs a short message and nothing else. A researcher
-auditing a decision needs the cited passages months later. Building a single service that serves
+demand. An owner with a feature phone needs a short message and nothing else. An auditor
+reviewing a decision needs the cited passages months later. Building a single service that serves
 all three would tie the alert delivery rate to the latency of an LLM call and would make the risk
 model impossible to test on its own.
 

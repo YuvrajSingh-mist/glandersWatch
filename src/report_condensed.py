@@ -21,14 +21,30 @@ fatality rate and follows occupational contact. The disease is notifiable to the
 Organisation for Animal Health and is classified as a potential bioterrorism agent.
 
 The economic weight sits in low and middle income countries, where equids remain essential to
-transport, construction and agriculture. India recorded 5.44 lakh equids in the 2019 Livestock
-Census, many held by households that depend on them for daily income, so losing a working animal is a
-direct loss of livelihood. Early warning is useful even where mass treatment is not feasible.
+transport, construction and agriculture. An equid is a member of the family \emph{Equidae}: horses,
+donkeys (recorded here as asses) and mules. India held 5.50 lakh of them in the 2019 Livestock
+Census, made up of 3.42 lakh horses, 1.24 lakh asses and 0.84 lakh mules. That figure is the size of
+the susceptible population, not a count of sick animals: it says how many animals are exposed, not how
+many the disease has damaged. Most are held by households that depend on them for daily income, so the
+death of one working animal is a direct loss of livelihood.
 
-Surveillance shows the disease is neither rare nor geographically contained. A national programme
-screening 158,798 sera from 391 districts in 2019 to 2023 found 728 seropositive animals in 138
-districts, roughly sixty per cent of them in Uttar Pradesh; earlier surveillance covering 2006 to 2018
-reported 1,145 positives among 128,404 sera.
+The damage that is documented is smaller and better measured. A national programme screening
+158,798 sera from 391 districts between 2019 and 2023 found 728 seropositive animals in 138 districts,
+roughly sixty per cent of them in Uttar Pradesh; earlier surveillance covering 2006 to 2018 reported
+1,145 positives among 128,404 sera. That is under one per cent of the equid population, concentrated
+in a few states, and because glanders is notifiable and frequently fatal once clinical, each positive
+is acted on rather than monitored.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{fig14_background.png}
+\caption{The two quantities behind the problem. Panel A gives the equid population of the fourteen
+largest countries, split by species, which sets the size of the exposed population. Panel B gives the
+occurrence events recovered from the literature each year, which sets the size of the label. The rise
+in panel B follows open-access publishing volume as much as disease, which is why the label is treated
+as documented activity throughout.}
+\label{fig:background}
+\end{figure}
 
 \section{Problem Definition}
 
@@ -61,10 +77,10 @@ into something a person can act on.
 
 \section{Objectives}
 
-There is one research objective and three engineering objectives.
+The project has four objectives.
 
 \begin{enumerate}
-  \item \textbf{Research.} Assemble a country-year panel from public sources not previously applied
+  \item \textbf{The prediction study.} Assemble a country-year panel from public sources not previously applied
         to the disease, compare six model families under three validation schemes, and report the
         achievable skill including negative results.
   \item \textbf{Prediction as a service.} Package the trained model as a versioned artefact behind a
@@ -181,9 +197,9 @@ in this study.}
 The decisive cells pair glanders with NASA POWER, which returns zero records, and with gradient
 boosting, which returns four, none a glanders risk model.
 
-\section{Research and Deployment Gap}
+\section{What the Existing Work Leaves Open}
 
-\textbf{Research gap.} The literature divides into three disjoint groups. Epidemiological studies
+\textbf{The evidence gap.} The literature divides into three disjoint groups. Epidemiological studies
 describe where glanders occurs; machine learning studies of \textit{B. mallei} classify laboratory
 spectra; veterinary risk models exist but are built for influenza. No study joins an occurrence
 corpus, a livestock census, development indicators and reanalysis climatology into a single panel
@@ -684,7 +700,7 @@ Each document carries an authority tier, used as a tie-breaker during retrieval.
 DAHD National Action Plan for Glanders, 2025 \cite{dahd2025} & 1 & Case definitions, surveillance obligations, movement control, quarantine, notification duties. \\
 WOAH and WHO disease information sheets & 1 & Disease biology, transmission, zoonotic risk, official status. \\
 ICAR and national laboratory guidance & 2 & Diagnostic sampling, laboratory referral. \\
-Open-access research papers & 3 & Epidemiology, risk factors, regional situation. \\
+Open-access publications & 3 & Epidemiology, risk factors, regional situation. \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -931,6 +947,18 @@ provider accepts a message, the response times out, and the retry would deliver 
 
 \section{Fan-Out, Channels and Delivery}
 
+Figure~\ref{fig:alertarch} shows the delivery pipeline as specified in the project proposal, from the
+rule decision through fan-out, rendering, the channel adapters and the delivery log.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{proposal_alert_architecture.png}
+\caption{The alert pipeline as specified in the project proposal. After the three rules decide that a
+message is warranted, one delivery job per subscription is queued, the template is rendered, a channel
+adapter sends it, and the delivery status flows back to the administrative view.}
+\label{fig:alertarch}
+\end{figure}
+
 Once an alert record exists, one delivery job per subscription is queued through Redis. A channel
 adapter receives a rendered message and a recipient and returns a delivery status, with adapters for
 SMS, WhatsApp and Telegram, the last used for demonstration because it needs no commercial
@@ -1100,6 +1128,44 @@ against random alerting. Panel B gives the alert volume required to reach a targ
 
 For the retrieval-augmented layer no measured results are reported: it is specified in
 Chapter~\ref{ch:rag} but has not been run against the corpus, so its five metrics have no values.
+
+\section{The Country-Level View}
+
+The results above answer a year-by-year question. A surveillance planner often asks a coarser one:
+which countries are glanders countries at all? That reframing is worth reporting because it changes
+the answer, and because it shows where the model's information comes from.
+
+Collapsing the panel to one row per country, with features averaged over 2005 to 2023 and the label
+defined as whether the country reports glanders in any year, leaves 161 rows and 56 positives, a
+prevalence of 34.8 per cent rather than 5.62. Validation is leave-one-out over countries, since with
+one row per country there is no grouping left to hold out.
+
+\begin{table}[htbp]
+\centering
+\caption{Country-level classification on the same twelve features, validated leave-one-country-out.
+The task is easier than the country-year problem, and the scores say so.}
+\label{tab:countrylevel}
+\small
+\begin{tabular}{@{}lcc@{}}
+\toprule
+\textbf{Model} & \textbf{ROC-AUC} & \textbf{PR-AUC} \\
+\midrule
+@COUNTRYROWS@
+\bottomrule
+\end{tabular}
+\end{table}
+
+Discrimination rises to about 0.95, and the temptation is to read that as a much better model. It is
+not a better model; it is an easier question. Asking whether a country reports glanders ever is
+largely asking whether it has a veterinary reference laboratory, publishes in indexed journals and
+has a large equid population, and those three properties are almost perfectly separable at country
+granularity. The year-by-year target was hard precisely because reporting status is stable while
+incidence is not.
+
+This is why the country code is not used as a feature anywhere in this report. As an identifier it
+cannot transfer to a country the model has not seen, which is the deployment case, and in-sample it
+would simply memorise the reporting capacity that the discussion identifies as the confounder. The
+country-level table reports the effect of that confounder rather than exploiting it.
 
 \section{Discussion}
 

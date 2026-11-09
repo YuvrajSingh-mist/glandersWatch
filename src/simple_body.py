@@ -38,7 +38,7 @@ events across 2000 to 2024.}
 \toprule
 \textbf{Source} & \textbf{What it gives us} & \textbf{Size} \\
 \midrule
-Europe PMC (research papers) & Where and when glanders was reported & 6,674 papers $\rightarrow$ 263 events \\
+Europe PMC (publications) & Where and when glanders was reported & 6,674 papers $\rightarrow$ 263 events \\
 FAOSTAT & How many horses, donkeys, mules, cattle, goats and sheep each country has & 68,449 records, 1961--2023 \\
 World Bank & Money, farming, population, internet access & 10 indicators, 217 countries \\
 NASA POWER & Temperature, rainfall, humidity, wind & 6 measures, 211 locations \\
@@ -57,7 +57,7 @@ calendar year, so they join without ambiguity. The full panel has PANEL_ROWS cou
 rows covering PANEL_COUNTRIES countries from 2000 to 2024. For modelling we keep only
 equine-holding countries, meaning those with a maximum stock of at least 1{,}000 equids, the
 years 2005 to 2023, and rows where next year's answer is observable. That leaves
-\textbf{3,078 rows, 44 input columns and 172 positive labels}.
+\textbf{3,059 rows, 44 candidate columns and 172 positive labels}.
 
 \paragraph{Preprocessing.} Five steps, in this order.
 
@@ -107,7 +107,7 @@ We start with the label, then move to how each input relates to it and how much 
 duplicate each other.
 
 \paragraph{The answer key.} For every country and year the answer is yes or no: was
-glanders reported the following year? Only 172 of the 3,078 rows are yes, which is 5.6\%.
+glanders reported the following year? Only 172 of the 3,059 rows are yes, which is 5.6\%.
 
 \begin{table}[htbp]
 \centering
@@ -117,12 +117,12 @@ glanders reported the following year? Only 172 of the 3,078 rows are yes, which 
 \toprule
 \textbf{Measure} & \textbf{Value} \\
 \midrule
-Total rows & 3,078 \\
+Total rows & 3,059 \\
 ``Yes'' rows (event next year) & 172 \\
 ``No'' rows & 2,906 \\
 Percentage ``yes'' & 5.6\% \\
 Ratio of no to yes & about 17 to 1 \\
-Countries with at least one ``yes'' & 56 of 162 \\
+Countries with at least one ``yes'' & 56 of 161 \\
 Countries with ``yes'' in two or more years & 30 \\
 Share of all ``yes'' in the top 5 countries & 35.5\% \\
 \bottomrule
@@ -169,7 +169,7 @@ columns carry overlapping information.
 
 \paragraph{Where the two importance measures disagree.} This is the result that shaped the
 whole feature set. We compared how much each column correlates with the answer on its own
-with how much the trained model actually relies on it, using SHAP. The two rankings agreed
+with how much the trained model relies on it, using SHAP. The two rankings agreed
 almost not at all, with a rank correlation of MI_RHO and only 5 of the 10 top features
 shared. Longitude is the clearest case: it ranks first on simple correlation and around
 twentieth in what the model uses. The explanation is that longitude does not cause
@@ -199,7 +199,7 @@ TOP_FEATURES
 $|\rho|$ below 0.02, which means no measurable relationship to the answer at all. We
 dropped one column that was exactly the sum of three others, since it adds nothing a tree
 cannot build itself. We dropped one member of each near-duplicate pair listed above. No
-principal component analysis was used: with 44 columns and 3,078 rows the limit is signal
+principal component analysis was used: with the retained columns and 3,059 rows the limit is signal
 rather than dimensionality, and the section on results confirms that fewer columns
 generalise better across countries, so compressing further would have cost
 interpretability for nothing. Scaling is applied only to the logistic baseline, because

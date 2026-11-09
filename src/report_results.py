@@ -235,7 +235,7 @@ transfer, because they allow the model to fit country-specific peculiarities. Se
 covariates alone reach only @AS3LOCO@, marginally above the @PREVALENCE@ floor, which indicates
 that annual country-level climatology largely encodes latitude and therefore country identity.
 
-A separate probe adds research-output proxies as two additional columns. It moves the
+A separate probe adds publication-count proxies as two additional columns. It moves the
 leave-country-out score by @AS7DELTA@, which is weak evidence that the model is not purely
 tracking publication volume, but it is not proof.
 
@@ -326,6 +326,44 @@ are few recorded events from which to learn in those strata.
 \caption{Regional performance under leave-country-out validation.}
 \label{fig:subgroups}
 \end{figure}
+
+\section{The Country-Level View}
+
+The results above answer a year-by-year question. A surveillance planner often asks a coarser one:
+which countries are glanders countries at all? That reframing is worth reporting because it changes
+the answer, and because it shows where the model's information comes from.
+
+Collapsing the panel to one row per country, with features averaged over 2005 to 2023 and the label
+defined as whether the country reports glanders in any year, leaves @CL_N@ rows and @CL_POS@
+positives, a prevalence of @CL_PREV@ rather than @PREVALENCE@. Validation is leave-one-out over
+countries, since with one row per country there is no grouping left to hold out.
+
+\begin{table}[htbp]
+\centering
+\caption{Country-level classification on the same retained features, validated
+leave-one-country-out. The task is easier than the country-year problem, and the scores say so.}
+\label{tab:countrylevel}
+\small
+\begin{tabular}{@{}lcc@{}}
+\toprule
+\textbf{Model} & \textbf{ROC-AUC} & \textbf{PR-AUC} \\
+\midrule
+@COUNTRYROWS@
+\bottomrule
+\end{tabular}
+\end{table}
+
+Discrimination rises to about 0.95, and the temptation is to read that as a much better model. It is
+not a better model; it is an easier question. Asking whether a country reports glanders ever is
+largely asking whether it has a veterinary reference laboratory, publishes in indexed journals and has
+a large equid population, and those three properties are almost perfectly separable at country
+granularity. The year-by-year target was hard precisely because reporting status is stable while
+incidence is not.
+
+This is why the country code is not used as a feature anywhere in this report. As an identifier it
+cannot transfer to a country the model has not seen, which is the deployment case, and in-sample it
+would memorise the reporting capacity the discussion identifies as the confounder. This table reports
+the effect of that confounder rather than exploiting it.
 
 \section{Discussion}
 

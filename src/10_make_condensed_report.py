@@ -40,21 +40,8 @@ BODY = (
 # The condensed report drops the ablation and chained-pipeline results, so the shared
 # Abstract must not advertise them. Applied here only, so the full report keeps its own
 # abstract. Each entry is (old, new) and must match exactly once.
-ABSTRACT_EDITS = [
-    (
-        "Six model families are trained under three validation schemes, and a\n"
-        "three-stage chained pipeline is evaluated in which animal population is forecast before occurrence\n"
-        "is predicted.",
-        "Six model families are trained and compared under three validation schemes.",
-    ),
-    (
-        "Chaining produces no measurable gain in discrimination. An ablation shows climate\n"
-        "covariates transfer poorly across countries, and the model performs least well in low-income\n"
-        "regions.",
-        "The model performs least well in low-income regions, where label sparsity limits what\n"
-        "can be learned.",
-    ),
-]
+ABSTRACT_EDITS: list[tuple[str, str]] = []  # the abstract no longer names the
+# ablation or the chained pipeline, so the condensed report needs no override.
 
 
 def condensed_front_matter() -> str:

@@ -169,24 +169,26 @@ and each degrades without failing the others.
 \noindent
 The risk engine combines four public datasets not previously applied to glanders into a country-year
 panel: a text-mined occurrence corpus from Europe PMC, FAOSTAT livestock stocks, World Bank
-development indicators and NASA POWER reanalysis climatology. The panel contains 3,078 country-year
-observations across 162 equine-holding countries from 2005 to 2023, with 172 positive labels and 44
-engineered features. Six model families are trained under three validation schemes, and a
-three-stage chained pipeline is evaluated in which animal population is forecast before occurrence
-is predicted.
+development indicators and NASA POWER reanalysis climatology. @PANELROWS@ country-year rows reduce to
+@ROWS@ modelling observations across @COUNTRIES@ equine-holding countries from 2005 to 2023, with
+@POSITIVES@ positive labels. Candidate features are screened by attribution rather than association:
+the top @SELK@ of @SELCAND@ numeric candidates, ranked by mean absolute SHAP on the training years
+alone, are kept with two categorical columns, and six model families are trained under three
+validation schemes.
 
 \vspace{0.5em}
 \noindent
-On a forward temporal holdout the strongest model reaches a precision-recall AUC of 0.554 against a
-base rate of 0.056, roughly a ten-fold lift, with an expected calibration error of 0.016. Performance
-falls to 0.304 under leave-country-out validation, which is the estimate to quote for an unseen
-country. Chaining produces no measurable gain in discrimination. An ablation shows climate
-covariates transfer poorly across countries, and the model performs least well in low-income
-regions. The dominant limitation is that the label reflects documented activity rather than true
-incidence, so the model largely learns where disease is reported. Reporting effort is the principal
-confounder and the main target for future work. The explanation and alert components are specified
-to the level of their interfaces, rule semantics and evaluation protocol, and are not reported as
-measured results because they are not deployed.
+On a forward temporal holdout the strongest model reaches a precision-recall AUC of @BESTTEMPPR@
+against a base rate of @PREVALENCE@. Under leave-country-out validation the ranking inverts and
+@CHAMP@ leads at @CHAMPLOCO@, with calibration error @ECE@, so it is the champion and the estimate to
+quote for an unseen country. Asking the coarser question instead, whether a country is a
+glanders-reporting country at all, raises discrimination to about 0.95, which reflects how stable
+reporting status is rather than any gain in predictive skill. The dominant limitation is that the
+label reflects documented activity rather than true incidence, so the model largely learns where
+disease is reported. Reporting effort is the principal confounder and the main target for future
+work. The explanation and alert components are specified to the level of their interfaces, rule
+semantics and evaluation protocol, and are not reported as measured results because they are not
+deployed.
 
 \vspace{0.7em}
 \noindent
@@ -216,6 +218,21 @@ recorded 5.44 lakh equids in the 2019 Livestock Census, a large proportion held 
 that depend on the animals for daily income. For such households the loss of a working animal is
 a direct loss of livelihood, which makes early warning useful even where mass treatment is not
 feasible.
+
+An equid is a member of the family \emph{Equidae}: horses, donkeys (recorded here as asses) and
+mules. The census figure above is the size of the susceptible population, not a count of sick
+animals, and the two are separated below.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{fig14_background.png}
+\caption{The two quantities behind the problem. Panel A gives the equid population of the fourteen
+largest countries, split by species, which sets the size of the exposed population. Panel B gives the
+occurrence events recovered from the literature each year, which sets the size of the label. The rise
+in panel B follows open-access publishing volume as much as disease, which is why the label is treated
+as documented activity throughout.}
+\label{fig:background}
+\end{figure}
 
 Surveillance data indicate that the disease is neither rare nor geographically contained. A
 national programme screening 158,798 equid serum samples from 391 districts between 2019 and
@@ -260,12 +277,11 @@ turning it into something a person can act on.
 
 \section{Objectives}
 
-The project has one research objective and three engineering objectives. The research objective is
-the prediction problem; the engineering objectives are the three components that turn the
-prediction into something a person can use.
+The project has four objectives. One is the prediction problem itself; the other three are the
+components that turn a prediction into something a person can use.
 
 \begin{enumerate}
-  \item \textbf{Research.} To assemble a country-year panel for glanders from public sources not
+  \item \textbf{The prediction study.} To assemble a country-year panel for glanders from public sources not
         previously applied to this disease, train and compare six model families under three
         validation schemes, and report the achievable skill honestly, including negative results.
   \item \textbf{Component 1, prediction as a service.} To package the trained model as a versioned,
@@ -437,9 +453,9 @@ and the pairing with gradient boosting, which returns four, none of which is a g
 model. The nearest prior work is descriptive cluster detection in Brazil and a risk-factor
 analysis of the Indian serosurvey.
 
-\section{Research and Deployment Gap}
+\section{What the Existing Work Leaves Open}
 
-\textbf{Research gap.} The literature reviewed above divides into three disjoint groups.
+\textbf{The evidence gap.} The literature reviewed above divides into three disjoint groups.
 Epidemiological studies describe where glanders occurs. Machine learning studies of
 \textit{B. mallei} classify laboratory spectra. Veterinary risk models exist but are built for
 influenza. No study joins an occurrence corpus, a livestock census, development indicators and

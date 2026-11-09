@@ -98,7 +98,7 @@ FEATURE_UNITS = {
     "precip_sum_anom": "mm from baseline",
     "humidity_anom": "% RH from baseline",
     # socio-geography (World Bank)
-    "gdp_pc": "current US$ per person",
+    "gdp_pc": r"current US\$ per person",
     "rural_pct": "% of population",
     "agri_land_pct": "% of land area",
     "agri_va_pct_gdp": "% of GDP",

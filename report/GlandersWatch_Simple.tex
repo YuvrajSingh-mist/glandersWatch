@@ -33,7 +33,7 @@
 horses and donkeys. We asked one question: can we predict, using only public data,
 which countries will report glanders next year?
 
-We combined four data sources that had never been used for this disease: published
+We combined four data sources that had never been used for this disease: indexed
 research papers, farm animal counts, World Bank statistics, and NASA climate records.
 We then trained six machine learning models and tested them on future years and on
 countries the models had never seen.
@@ -126,7 +126,7 @@ events across 2000 to 2024.}
 \toprule
 \textbf{Source} & \textbf{What it gives us} & \textbf{Size} \\
 \midrule
-Europe PMC (research papers) & Where and when glanders was reported & 6,674 papers $\rightarrow$ 263 events \\
+Europe PMC (publications) & Where and when glanders was reported & 6,674 papers $\rightarrow$ 263 events \\
 FAOSTAT & How many horses, donkeys, mules, cattle, goats and sheep each country has & 68,449 records, 1961--2023 \\
 World Bank & Money, farming, population, internet access & 10 indicators, 217 countries \\
 NASA POWER & Temperature, rainfall, humidity, wind & 6 measures, 211 locations \\
@@ -145,7 +145,7 @@ calendar year, so they join without ambiguity. The full panel has 6,700 country-
 rows covering 268 countries from 2000 to 2024. For modelling we keep only
 equine-holding countries, meaning those with a maximum stock of at least 1{,}000 equids, the
 years 2005 to 2023, and rows where next year's answer is observable. That leaves
-\textbf{3,078 rows, 44 input columns and 172 positive labels}.
+\textbf{3,059 rows, 44 candidate columns and 172 positive labels}.
 
 \paragraph{Preprocessing.} Five steps, in this order.
 
@@ -164,7 +164,7 @@ years 2005 to 2023, and rows where next year's answer is observable. That leaves
 \item \textbf{Missing values.} Filled with the column median, and every column keeps a
       missing-indicator flag so the model can tell an imputed value from a real one. The
       fill is fitted inside the training pipeline, never on the full table. Missing data
-      was rare: 0.99\% overall and 5.8\% in the worst column.
+      was rare: 0.99\% overall and 5.9\% in the worst column.
 \item \textbf{Absence handling.} A country-year is coded 0 only after that country passes
       the equine-stock filter, so a blank is never read as proof that disease was absent.
       This is the step that keeps the label honest.
@@ -195,7 +195,7 @@ We start with the label, then move to how each input relates to it and how much 
 duplicate each other.
 
 \paragraph{The answer key.} For every country and year the answer is yes or no: was
-glanders reported the following year? Only 172 of the 3,078 rows are yes, which is 5.6\%.
+glanders reported the following year? Only 172 of the 3,059 rows are yes, which is 5.6\%.
 
 \begin{table}[htbp]
 \centering
@@ -205,12 +205,12 @@ glanders reported the following year? Only 172 of the 3,078 rows are yes, which 
 \toprule
 \textbf{Measure} & \textbf{Value} \\
 \midrule
-Total rows & 3,078 \\
+Total rows & 3,059 \\
 ``Yes'' rows (event next year) & 172 \\
 ``No'' rows & 2,906 \\
 Percentage ``yes'' & 5.6\% \\
 Ratio of no to yes & about 17 to 1 \\
-Countries with at least one ``yes'' & 56 of 162 \\
+Countries with at least one ``yes'' & 56 of 161 \\
 Countries with ``yes'' in two or more years & 30 \\
 Share of all ``yes'' in the top 5 countries & 35.5\% \\
 \bottomrule
@@ -242,12 +242,12 @@ since the last outbreak means lower risk. This is the one broadly epidemiologica
 the panel, and it says what we would hope: recent activity predicts future activity. On the
 same scale, \texttt{internet\_pct} scores only $+0.09$ and \texttt{temp\_mean\_anom} about
 zero. For the two text categories, region gives Cram\'er's $V$ of 0.243, which counts
-as a small association, and income band gives 0.047, which is negligible. Neither is
+as a small association, and income band gives 0.044, which is negligible. Neither is
 strong enough to act as a stand-in for the label.
 
 \paragraph{Correlation and redundancy.} Several columns measure nearly the same thing.
 Variance inflation factor is the standard measure of that, where a value above 10 is
-usually treated as a problem. It reaches 228 for \texttt{temp\_mean}, because annual mean,
+usually treated as a problem. It reaches 227 for \texttt{temp\_mean}, because annual mean,
 minimum and maximum temperature are near-duplicates of each other at country resolution.
 Three groups sit at $|\rho| \geq 0.90$: \texttt{occ\_lag1} with \texttt{occ\_count\_lag1},
 \texttt{cattle} with \texttt{log\_livestock}, and \texttt{temp\_mean} with \texttt{temp\_min}.
@@ -257,8 +257,8 @@ columns carry overlapping information.
 
 \paragraph{Where the two importance measures disagree.} This is the result that shaped the
 whole feature set. We compared how much each column correlates with the answer on its own
-with how much the trained model actually relies on it, using SHAP. The two rankings agreed
-almost not at all, with a rank correlation of +0.31 and only 5 of the 10 top features
+with how much the trained model relies on it, using SHAP. The two rankings agreed
+almost not at all, with a rank correlation of -0.04 and only 5 of the 10 top features
 shared. Longitude is the clearest case: it ranks first on simple correlation and around
 twentieth in what the model uses. The explanation is that longitude does not cause
 glanders. It identifies which part of the world a country is in, and some parts publish
@@ -278,14 +278,14 @@ alongside. The gap between the two sets of numbers is the disagreement described
 \textbf{Rank} & \textbf{Feature} & \textbf{Importance} & \textbf{Correlation} & \textbf{Mutual info} & \textbf{Redundancy} \\
  & & \textbf{(mean $|$SHAP$|$)} & \textbf{(Spearman $\rho$)} & \textbf{(MI)} & \textbf{(VIF)} \\
 \midrule
-1 & pop\_total & 1.476 & +0.28 & 0.0639 & 4 \\
-2 & internet\_pct & 0.896 & +0.09 & 0.0015 & 5 \\
-3 & goats & 0.661 & +0.19 & 0.0422 & 27 \\
-4 & log\_livestock & 0.626 & +0.25 & 0.0571 & 3 \\
-5 & precip\_cv & 0.609 & -0.01 & 0.0006 & 2 \\
-6 & temp\_mean\_anom & 0.598 & -0.00 & 0.0012 & 2 \\
-7 & years\_since\_last & 0.576 & -0.35 & 0.0486 & 2 \\
-8 & cattle & 0.548 & +0.25 & 0.0512 & 7 \\
+1 & pop\_total & 1.457 & +0.28 & 0.0639 & 10 \\
+2 & internet\_pct & 0.892 & +0.09 & 0.0000 & 5 \\
+3 & log\_livestock & 0.702 & +0.26 & 0.0571 & 3 \\
+4 & goats & 0.688 & +0.19 & 0.0421 & 11 \\
+5 & temp\_mean\_anom & 0.635 & -0.01 & 0.0006 & 2 \\
+6 & precip\_cv & 0.579 & -0.01 & 0.0008 & 2 \\
+7 & humidity\_anom & 0.494 & +0.03 & 0.0065 & 2 \\
+8 & pop\_density & 0.473 & +0.05 & 0.0262 & 2 \\
 \bottomrule
 \end{tabular}}
 \end{table}
@@ -294,7 +294,7 @@ alongside. The gap between the two sets of numbers is the disagreement described
 $|\rho|$ below 0.02, which means no measurable relationship to the answer at all. We
 dropped one column that was exactly the sum of three others, since it adds nothing a tree
 cannot build itself. We dropped one member of each near-duplicate pair listed above. No
-principal component analysis was used: with 44 columns and 3,078 rows the limit is signal
+principal component analysis was used: with the retained columns and 3,059 rows the limit is signal
 rather than dimensionality, and the section on results confirms that fewer columns
 generalise better across countries, so compressing further would have cost
 interpretability for nothing. Scaling is applied only to the logistic baseline, because
@@ -349,10 +349,10 @@ gives each model's family, what it does, and the settings the tuning search pick
 \toprule
 \textbf{Model} & \textbf{Family} & \textbf{What it does, and the settings chosen} \\
 \midrule
-Logistic Regression & linear & Adds the inputs with fixed weights and squashes the total into a 0--1 score. The honest baseline: if the complex models cannot beat it, the complexity is not worth it.\par\vspace{3pt}{\scriptsize Tuned settings: \emph{$C=1.0$, $\ell_2$ penalty, balanced class weights}} \\
-Decision Tree & tree & A flowchart of yes/no questions, for example ``horses $>$ 10,000? then last outbreak $<$ 2 years ago?''. Easy to read, but one tree is weak, which is part of why we included it.\par\vspace{3pt}{\scriptsize Tuned settings: \emph{depth 4, minimum leaf size 40, split criterion entropy}} \\
+Logistic Regression & linear & Adds the inputs with fixed weights and squashes the total into a 0--1 score. The honest baseline: if the complex models cannot beat it, the complexity is not worth it.\par\vspace{3pt}{\scriptsize Tuned settings: \emph{$C=0.01$, $\ell_2$ penalty, balanced class weights}} \\
+Decision Tree & tree & A flowchart of yes/no questions, for example ``horses $>$ 10,000? then last outbreak $<$ 2 years ago?''. Easy to read, but one tree is weak, which is part of why we included it.\par\vspace{3pt}{\scriptsize Tuned settings: \emph{depth 4, minimum leaf size 20, split criterion gini}} \\
 Random Forest & bagged trees & 500 trees, each trained on a random part of the data, then they vote. Fixes the single tree's habit of memorising.\par\vspace{3pt}{\scriptsize Tuned settings: \emph{depth 6, minimum leaf size 10, features per split 0.3}} \\
-Extra Trees & bagged trees & Same idea, with splits chosen more randomly. Extra randomness helps when examples are scarce, as they are here.\par\vspace{3pt}{\scriptsize Tuned settings: \emph{depth 6, minimum leaf size 10, features per split 0.3}} \\
+Extra Trees & bagged trees & Same idea, with splits chosen more randomly. Extra randomness helps when examples are scarce, as they are here.\par\vspace{3pt}{\scriptsize Tuned settings: \emph{depth 6, minimum leaf size 3, features per split square root of the column count}} \\
 XGBoost & boosted trees & Trees built one after another, each fixing the previous mistakes. The strongest standard method for tables like ours.\par\vspace{3pt}{\scriptsize Tuned settings: \emph{depth 3, regularisation $\lambda=1.0$, minimum child weight 5}} \\
 LightGBM & boosted trees & Same family as XGBoost with a faster algorithm. A speed comparison, often slightly better on wide data.\par\vspace{3pt}{\scriptsize Tuned settings: \emph{leaves 31, minimum child samples 40, regularisation $\lambda=3.0$}} \\
 \bottomrule
@@ -500,7 +500,7 @@ only the answer taken from the following year.
      World Bank (10 indicators)\quad$\cdot$\quad NASA POWER (6 climate measures)};
 
   \node[st,below=0.20cm of src] (clean) {\textbf{2. Clean}: reconcile country names to ISO-3, drop duplicates};
-  \node[st,below=0.12cm of clean] (panel) {\textbf{3. Assemble panel}: 3{,}078 rows $\times$ 44 columns};
+  \node[st,below=0.12cm of clean] (panel) {\textbf{3. Assemble panel}: 3{,}059 rows $\times$ 60 columns};
   \node[st,below=0.12cm of panel] (feat) {\textbf{4. Feature engineering}: lags, growth rates, climate anomalies};
   \node[st,below=0.12cm of feat] (shift) {\textbf{5. Shift targets}: answer comes from year $t{+}1$};
   \node[dec,below=0.18cm of shift] (split) {\textbf{6. Chronological split}};
@@ -636,12 +636,12 @@ alert threshold on the time split.}
  & \textbf{(time split)} & \textbf{on PR-AUC} & \textbf{(time split)} &
 \textbf{(country split)} & \textbf{(time split)} & \textbf{(time split)} \\
 \midrule
-Logistic regression & 0.446 & [0.34, 0.57] & 0.863 & 0.336 & 0.30 & 0.65 \\
-Decision tree & 0.424 & [0.32, 0.53] & 0.860 & 0.240 & 0.44 & 0.49 \\
-Random forest & 0.518 & [0.40, 0.63] & 0.865 & 0.318 & 0.52 & 0.49 \\
-Extra trees & 0.516 & [0.41, 0.62] & 0.860 & 0.284 & 0.46 & 0.51 \\
-XGBoost & 0.432 & [0.32, 0.55] & 0.842 & 0.292 & 0.52 & 0.43 \\
-LightGBM & 0.452 & [0.34, 0.57] & 0.840 & 0.311 & 0.58 & 0.38 \\
+Logistic regression & 0.471 & [0.36, 0.59] & 0.851 & 0.411 & 0.55 & 0.41 \\
+Decision tree & 0.439 & [0.33, 0.56] & 0.857 & 0.241 & 0.39 & 0.54 \\
+Random forest & 0.540 & [0.43, 0.65] & 0.866 & 0.318 & 0.48 & 0.50 \\
+Extra trees & 0.551 & [0.44, 0.66] & 0.868 & 0.304 & 0.58 & 0.47 \\
+XGBoost & 0.465 & [0.35, 0.59] & 0.853 & 0.290 & 0.64 & 0.43 \\
+LightGBM & 0.501 & [0.38, 0.61] & 0.844 & 0.315 & 0.68 & 0.31 \\
 \bottomrule
 \end{tabular}}
 \end{table}
@@ -651,8 +651,8 @@ to 2017 and tests on 2018 to 2023. Country split trains without some countries a
 those, which is harder and closer to real use. Neither is a precision score.
 
 PR-AUC sits at 0.056 for a model with no skill. On the time split the best model reaches
-0.518; on the country split, which is closer to real use, the logistic regression leads at
-0.336. The uncertainty column is wide: with 74 positives in the test years a score can
+0.551; on the country split, which is closer to real use, the logistic regression leads at
+0.411. The uncertainty column is wide: with 74 positives in the test years a score can
 move a long way within that range, so neighbouring models should not be separated with
 confidence.
 

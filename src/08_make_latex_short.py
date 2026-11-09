@@ -323,7 +323,7 @@ TEX = rf"""\documentclass[10pt]{{article}}
 horses and donkeys. We asked one question: can we predict, using only public data,
 which countries will report glanders next year?
 
-We combined four data sources that had never been used for this disease: published
+We combined four data sources that had never been used for this disease: indexed
 research papers, farm animal counts, World Bank statistics, and NASA climate records.
 We then trained six machine learning models and tested them on future years and on
 countries the models had never seen.

@@ -41,6 +41,7 @@ R = json.loads((REP / "results.json").read_text())
 A = json.loads((REP / "dataset_analysis.json").read_text())
 N = json.loads((REP / "novelty_audit.json").read_text())
 IMP = pandas.read_csv(REP / "feature_importance.csv")
+_CL = json.loads((REP / "country_level.json").read_text()) if (REP / "country_level.json").exists() else {}
 
 L1, L2 = R["level1"]["metrics"], R["level2"]["metrics"]
 LAB, MISS = A["labels"], A["missingness"]
@@ -287,6 +288,9 @@ VALUES = {
     "BESTTEMPM": PRETTY[_temporal_best],
     "BESTTEMPPR": f"{BESTTEMPPR:.3f}",
     "BESTTEMPLOCO": f"{BESTTEMPLOCO:.3f}",
+    "CL_N": str(_CL.get("n_countries", "--")),
+    "CL_POS": str(_CL.get("positives", "--")),
+    "CL_PREV": f"{_CL.get('prevalence', 0)*100:.1f}\\%",
     "SELK": str(SELK),
     "SELN": str(SELN),
     "SELCAND": str(SELCAND),
@@ -329,6 +333,11 @@ VALUES = {
     "SUBGROUPROWS": subgroup_rows(),
     "TOPFROWS": topfeat_rows(),
 
+    "COUNTRYROWS": (lambda: "\n".join(
+        f"{k} & {v['roc_auc']:.3f} & {v['pr_auc']:.3f} \\\\"
+        for k, v in (json.loads((REP / "country_level.json").read_text()).get("models", {})
+                     if (REP / "country_level.json").exists() else {}).items()
+    ))(),
     "ALERT6REC": f"{_AE.get('r6', 0)*100:.0f}",
     "ALERT50BUD": f"{_AE.get('b50', 0)*100:.0f}",
     "ALERT80BUD": f"{_AE.get('b80', 0)*100:.0f}",

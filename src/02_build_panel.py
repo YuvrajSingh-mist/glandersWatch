@@ -74,17 +74,47 @@ _OVERRIDES = {
 }
 
 
+# FAOSTAT and Europe PMC both carry regional aggregates alongside countries. A fuzzy
+# match must never turn one into a country: "Africa" is a substring of "Central
+# African Republic", which silently gave the whole continent CAF's row.
+_NON_COUNTRY = {
+    "world", "africa", "asia", "europe", "americas", "oceania", "antarctica",
+    "north america", "south america", "central america", "caribbean",
+    "eastern africa", "western africa", "middle africa", "northern africa",
+    "southern africa", "sub-saharan africa", "central asia", "eastern asia",
+    "southern asia", "south-eastern asia", "western asia", "eastern europe",
+    "western europe", "northern europe", "southern europe",
+    "asia and the pacific", "least developed countries", "landlocked countries",
+    "developing countries", "developed countries", "small island states",
+    "european union", "world total", "total", "areas, total",
+}
+
+
+def _is_word_in(needle: str, hay: str) -> bool:
+    """True when needle appears in hay on word boundaries."""
+    import re
+    return re.search(rf"\b{re.escape(needle)}\b", hay, flags=re.IGNORECASE) is not None
+
+
 def to_iso3(name: str) -> str | None:
-    if name in _OVERRIDES:
-        return _OVERRIDES[name]
-    try:
-        return pycountry.countries.lookup(name).alpha_3
-    except LookupError:
-        for c in pycountry.countries:
-            if c.name.lower().startswith(name.lower()) or name.lower() in c.name.lower():
-                if len(name) > 4:
-                    return c.alpha_3
+    if not isinstance(name, str) or not name.strip():
         return None
+    key = name.strip()
+    if key in _OVERRIDES:
+        return _OVERRIDES[key]
+    if key.lower() in _NON_COUNTRY:
+        return None
+    try:
+        return pycountry.countries.lookup(key).alpha_3
+    except LookupError:
+        pass
+    # Only accept a fuzzy hit on a word boundary, so an aggregate cannot smuggle
+    # itself in as a country.
+    if len(key) > 4:
+        for c in pycountry.countries:
+            if _is_word_in(key, c.name):
+                return c.alpha_3
+    return None
 
 
 # --------------------------------------------------------------------------- #

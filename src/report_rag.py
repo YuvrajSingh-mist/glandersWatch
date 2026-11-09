@@ -56,7 +56,7 @@ them. Each document carries an authority tier, which is used as a tie-breaker du
 DAHD National Action Plan for Glanders, 2025 \cite{dahd2025} & 1 & Case definitions, surveillance obligations, movement control, quarantine, notification duties. \\
 WOAH and WHO disease information sheets & 1 & Disease biology, transmission, zoonotic risk, official status. \\
 ICAR and national laboratory guidance & 2 & Diagnostic sampling, laboratory referral. \\
-Open-access research papers & 3 & Epidemiology, risk factors, regional situation. \\
+Open-access publications & 3 & Epidemiology, risk factors, regional situation. \\
 \bottomrule
 \end{tabular}
 \end{table}
