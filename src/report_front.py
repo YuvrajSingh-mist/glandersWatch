@@ -313,7 +313,7 @@ a substitute for laboratory confirmation or clinical examination.
 Three limitations are stated at the outset because they shape every result that follows. First,
 the label is derived from published reports, so a negative observation may indicate absence of
 disease or absence of reporting. Second, occurrence is reconstructed by an automated extractor
-that has not been validated against a hand-annotated reference set. Third, with 172 positive
+that has not been validated against a hand-annotated reference set. Third, with @POSITIVES@ positive
 observations the statistical uncertainty on every headline metric is substantial, and this is
 quantified rather than hidden.
 

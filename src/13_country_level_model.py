@@ -3,7 +3,7 @@
 Run:  .venv/bin/python src/13_country_level_model.py
 
 The country-year model in 03_train_evaluate.py asks whether a country reports glanders
-in one particular year. That is a hard, sparse question: 172 positives over 3,078 rows.
+in one particular year. That is a hard, sparse question: 169 positives over 2,880 rows.
 This script asks the coarser question a surveillance planner actually acts on: is this
 country a glanders country at all, over the whole observation window?
 

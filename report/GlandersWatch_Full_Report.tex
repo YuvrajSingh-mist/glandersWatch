@@ -212,17 +212,17 @@ and each degrades without failing the others.
 The risk engine combines four public datasets not previously applied to glanders into a country-year
 panel: a text-mined occurrence corpus from Europe PMC, FAOSTAT livestock stocks, World Bank
 development indicators and NASA POWER reanalysis climatology. 6,700 country-year rows reduce to
-3,059 modelling observations across 161 equine-holding countries from 2005 to 2023, with
-172 positive labels. Candidate features are screened by attribution rather than association:
-the top 12 of 42 numeric candidates, ranked by mean absolute SHAP on the training years
+2,880 modelling observations across 160 equine-holding countries from 2005 to 2023, with
+169 positive labels. Candidate features are screened by attribution rather than association:
+the top 8 of 42 numeric candidates, ranked by mean absolute SHAP on the training years
 alone, are kept with two categorical columns, and six model families are trained under three
 validation schemes.
 
 \vspace{0.5em}
 \noindent
-On a forward temporal holdout the strongest model reaches a precision-recall AUC of 0.551
-against a base rate of 5.62\%. Under leave-country-out validation the ranking inverts and
-Logistic Regression leads at 0.411, with calibration error 0.025, so it is the champion and the estimate to
+On a forward temporal holdout the strongest model reaches a precision-recall AUC of 0.495
+against a base rate of 5.87\%. Under leave-country-out validation the ranking inverts and
+Logistic Regression leads at 0.381, with calibration error 0.025, so it is the champion and the estimate to
 quote for an unseen country. Asking the coarser question instead, whether a country is a
 glanders-reporting country at all, raises discrimination to about 0.95, which reflects how stable
 reporting status is rather than any gain in predictive skill. The dominant limitation is that the
@@ -365,7 +365,7 @@ a substitute for laboratory confirmation or clinical examination.
 Three limitations are stated at the outset because they shape every result that follows. First,
 the label is derived from published reports, so a negative observation may indicate absence of
 disease or absence of reporting. Second, occurrence is reconstructed by an automated extractor
-that has not been validated against a hand-annotated reference set. Third, with 172 positive
+that has not been validated against a hand-annotated reference set. Third, with 169 positive
 observations the statistical uncertainty on every headline metric is substantial, and this is
 quantified rather than hidden.
 
@@ -859,13 +859,13 @@ Combining the four sources produces a grid of 6,700 country-year rows across
 268 countries for 2000 to 2024, in 60 columns: 44 engineered candidate features, three
 identifiers, five label fields and eight intermediate quantities from which the features are derived.
 
-Preprocessing reduces that grid to 3,059 rows, and feature selection then keeps 14 of the 44
+Preprocessing reduces that grid to 2,880 rows, and feature selection then keeps 8 of the 44
 candidates, which is the matrix every model in this report was trained and evaluated on. The row loss
 comes from two restrictions: the equine-holding filter, which keeps 162 of the 268
 countries on a maximum equid stock of at least one thousand animals, and the 2005 to 2023 year window.
 The third restriction, an observable next-year label, then removes no further rows.
 
-The exported file is therefore 3,059 rows by 14 feature columns, plus the target column.
+The exported file is therefore 2,880 rows by 8 feature columns, plus the target column.
 
 \section{Preprocessing}
 
@@ -880,9 +880,9 @@ counts and inflate the occurrence signal.
 Missing numeric values are imputed with the column median, and every column that required
 imputation keeps a binary missing-indicator feature so that absence is represented rather than
 silently filled. Imputation is fitted inside the training pipeline, so the test period cannot
-influence imputed values. Missingness is low: 0.00\% in the FAOSTAT block, 1.67\% in the
-World Bank block, 2.19\% in the climate block, and 0.99\% overall, with no column
-exceeding 5.9\%.
+influence imputed values. Missingness is low: 0.00\% in the FAOSTAT block, 1.01\% in the
+World Bank block, 0.00\% in the climate block, and 0.25\% overall, with no column
+exceeding 3.8\%.
 
 \subsection{Treatment of Absence}
 
@@ -981,7 +981,7 @@ attribution instead, in Section~\ref{sec:shapselect}.
 
 One column is removed structurally: \texttt{equids} is exactly the sum of horses, asses and mules,
 which a tree can rebuild from its parts. No projection or principal component analysis is applied;
-with 14 retained features and 3,059 rows the binding constraint proved to be signal rather than
+with 8 retained features and 2,880 rows the binding constraint proved to be signal rather than
 dimensionality, which the ablation in Section~\ref{sec:ablation} supports.
 
 \section{Feature Selection by SHAP}
@@ -1027,13 +1027,13 @@ the correlated inputs this panel has many of.
 The ranking is computed on the training years only, 2005 to 2017. Fitting on the full panel
 would let the held-out years influence which features were chosen, making the temporal-holdout score
 optimistic. The 42 numeric candidates are ranked by mean absolute SHAP on that window and the
-first 12 are kept, together with the two categorical columns, which are retained because region and
+first 8 are kept, together with the two categorical columns, which are retained because region and
 income band are the reporting-capacity proxies the discussion turns on.
 
 \begin{table}[htbp]
 \centering
-\caption{The 14 features the reported models use, in rank order by mean absolute SHAP on the
-training years, with the unit each variable is measured in. The set carries 65\% of the total
+\caption{The 8 features the reported models use, in rank order by mean absolute SHAP on the
+training years, with the unit each variable is measured in. The set carries 49\% of the total
 attribution across all 42 candidates.}
 \label{tab:selected}
 \small
@@ -1041,20 +1041,14 @@ attribution across all 42 candidates.}
 \toprule
 \textbf{Rank} & \textbf{Feature} & \textbf{Unit as measured} & \textbf{Mean $|\phi|$} \\
 \midrule
-1 & \texttt{pop\_total} & persons & 0.868 \\
-2 & \texttt{years\_since\_last} & years (99 = none) & 0.640 \\
-3 & \texttt{temp\_mean\_anom} & $^\circ$C from baseline & 0.549 \\
-4 & \texttt{internet\_pct} & \% of population & 0.468 \\
-5 & \texttt{log\_livestock} & ln(1 + LSU) & 0.438 \\
-6 & \texttt{humidity\_anom} & \% RH from baseline & 0.390 \\
-7 & \texttt{equid\_growth\_1y} & fraction per year & 0.375 \\
-8 & \texttt{precip\_cv} & ratio (sd/mean) & 0.373 \\
-9 & \texttt{cattle} & head & 0.351 \\
-10 & \texttt{goats} & head & 0.328 \\
-11 & \texttt{pop\_density} & persons per km$^2$ & 0.309 \\
-12 & \texttt{gdp\_pc} & current US\$ per person & 0.300 \\
-13 & \texttt{region} & World Bank region & -- \\
-14 & \texttt{income} & World Bank income band & -- \\
+1 & \texttt{pop\_total} & persons & 1.035 \\
+2 & \texttt{years\_since\_last} & years (99 = none) & 0.648 \\
+3 & \texttt{temp\_mean\_anom} & $^\circ$C from baseline & 0.505 \\
+4 & \texttt{internet\_pct} & \% of population & 0.449 \\
+5 & \texttt{humidity\_anom} & \% RH from baseline & 0.382 \\
+6 & \texttt{precip\_cv} & ratio (sd/mean) & 0.371 \\
+7 & \texttt{log\_livestock} & ln(1 + LSU) & 0.364 \\
+8 & \texttt{goats} & head & 0.362 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1074,10 +1068,10 @@ includes a deliberately simple reference.
 \textbf{Model} & \textbf{Family} & \textbf{Selected configuration} \\
 \midrule
 \textbf{Logistic regression} & linear & Additive model with balanced class weights; the reference baseline.\par\vspace{2pt}{\footnotesize Tuned settings: $C=0.01$, $\ell_2$ penalty, balanced class weights} \\
-\textbf{Decision tree} & tree & Single shallow tree; interpretable, and a low-variance check on ensemble gains.\par\vspace{2pt}{\footnotesize Tuned settings: depth 4, minimum leaf size 20, criterion gini} \\
+\textbf{Decision tree} & tree & Single shallow tree; interpretable, and a low-variance check on ensemble gains.\par\vspace{2pt}{\footnotesize Tuned settings: depth 4, minimum leaf size 40, criterion entropy} \\
 \textbf{Random forest} & bagged trees & Bagged trees over random subsets; variance control at small positive counts.\par\vspace{2pt}{\footnotesize Tuned settings: depth 6, minimum leaf size 10, features per split 0.3} \\
-\textbf{Extra trees} & bagged trees & Bagged trees with randomised split thresholds; further decorrelation when positives are scarce.\par\vspace{2pt}{\footnotesize Tuned settings: depth 6, minimum leaf size 3, features per split square root of the column count} \\
-\textbf{XGBoost} & boosted trees & Boosted trees with explicit regularisation.\par\vspace{2pt}{\footnotesize Tuned settings: depth 3, regularisation $\lambda=1.0$, minimum child weight 5} \\
+\textbf{Extra trees} & bagged trees & Bagged trees with randomised split thresholds; further decorrelation when positives are scarce.\par\vspace{2pt}{\footnotesize Tuned settings: depth 6, minimum leaf size 10, features per split 0.3} \\
+\textbf{XGBoost} & boosted trees & Boosted trees with explicit regularisation.\par\vspace{2pt}{\footnotesize Tuned settings: depth 5, regularisation $\lambda=1.0$, minimum child weight 5} \\
 \textbf{LightGBM} & boosted trees & Leaf-wise boosted trees; efficient comparison on wide tabular data.\par\vspace{2pt}{\footnotesize Tuned settings: leaves 31, minimum child samples 40, regularisation $\lambda=3.0$} \\
 \bottomrule
 \end{tabular}
@@ -1090,7 +1084,7 @@ trees are bagged ensembles \cite{breiman2001}, differing in the degree of random
 split selection.
 XGBoost and LightGBM are boosted ensembles, differing in tree growth strategy \cite{chen2016,ke2017}.
 
-Neural networks were excluded on evidential grounds: with 172 positives and 14
+Neural networks were excluded on evidential grounds: with 169 positives and 8
 features a network has more parameters than examples and would memorise the training period.
 
 \section{Chained Pipeline}
@@ -1126,7 +1120,7 @@ Three validation schemes are reported, each answering a different question.
         stability check on the ranking metrics.
 \end{itemize}
 
-Precision-recall AUC is the primary metric. At 5.62\% prevalence, ROC-AUC is dominated by the
+Precision-recall AUC is the primary metric. At 5.87\% prevalence, ROC-AUC is dominated by the
 true-negative mass and overstates performance, a well-characterised property of imbalanced problems
 \cite{saito2015,davis2006}, so it is reported only for comparability. Brier score and expected
 calibration error are reported because an uncalibrated probability cannot support a threshold-based
@@ -1227,7 +1221,7 @@ sees data, so the test years cannot influence fitting, tuning, calibration or th
      World Bank (10 indicators)\quad$\cdot$\quad NASA POWER (6 climate measures)};
 
   \node[st,below=0.20cm of src] (clean) {\textbf{2. Clean}: reconcile country names to ISO-3, drop duplicates};
-  \node[st,below=0.12cm of clean] (panel) {\textbf{3. Assemble panel}: 3{,}059 rows $\times$ 60 columns};
+  \node[st,below=0.12cm of clean] (panel) {\textbf{3. Assemble panel}: 2{,}880 rows $\times$ 60 columns};
   \node[st,below=0.12cm of panel] (feat) {\textbf{4. Feature engineering}: lags, growth rates, climate anomalies};
   \node[st,below=0.12cm of feat] (shift) {\textbf{5. Shift targets}: answer comes from year $t{+}1$};
   \node[dec,below=0.18cm of shift] (split) {\textbf{6. Chronological split}};
@@ -1500,9 +1494,9 @@ numerical behaviour and every downstream number moves without anyone noticing.
 
 \section{Reproducibility}
 
-The full computation runs in approximately 4.4 minutes on a laptop processor without a
+The full computation runs in approximately 4.2 minutes on a laptop processor without a
 graphics accelerator, using an Apple M4 processor with 10 cores and 16 GB of unified memory. Per-family fitting time at the country-year level ranges
-from 1.6 seconds for the decision tree to 66.9 seconds for LightGBM.
+from 1.3 seconds for the decision tree to 64.2 seconds for LightGBM.
 
 A single module-level seed governs model fitting, cross-validation splitting, bootstrap resampling
 and SHAP sampling. Software versions are Python 3.12.13, scikit-learn 1.9.1, XGBoost 3.4.1, LightGBM 4.7.0, SHAP 0.54.1, NumPy 2.5.4, pandas 3.1.1, SciPy 1.18.1. Raw payloads are cached under
@@ -2024,8 +2018,8 @@ within the retry window, reported per channel, since channels fail differently.
 
 \section{Dataset Characteristics}
 
-The modelling matrix contains 3,059 country-year observations, of which 172 are
-positive, a prevalence of 5.62\% and an imbalance ratio of 16.8 to one.
+The modelling matrix contains 2,880 country-year observations, of which 169 are
+positive, a prevalence of 5.87\% and an imbalance ratio of 16.0 to one.
 Table~\ref{tab:labels} summarises the distribution.
 
 \begin{table}[htbp]
@@ -2037,11 +2031,11 @@ Table~\ref{tab:labels} summarises the distribution.
 \toprule
 \textbf{Property} & \textbf{Value} \\
 \midrule
-Observations & 3,059 \\
-Positives and negatives & 172 and 2,887 \\
-Prevalence & 5.62\% \\
-Imbalance ratio & 16.8 : 1 \\
-Countries with at least one positive & 56 of 161 \\
+Observations & 2,880 \\
+Positives and negatives & 169 and 2,711 \\
+Prevalence & 5.87\% \\
+Imbalance ratio & 16.0 : 1 \\
+Countries with at least one positive & 55 of 160 \\
 Countries positive in two or more years & 30 \\
 Share of positives in the top five countries & 35.5\% \\
 \bottomrule
@@ -2050,7 +2044,7 @@ Share of positives in the top five countries & 35.5\% \\
 
 Three properties of this distribution matter. The imbalance rules out accuracy as a metric and
 motivates precision-recall analysis. The temporal persistence of the label, with 30 of
-56 positive countries recording positives in more than one year, justifies the use of
+55 positive countries recording positives in more than one year, justifies the use of
 historical features. The geographic concentration of positives, with the top five countries
 holding 35.5\% of them, provides the first indication that the label tracks reporting
 capacity, since those countries operate reference laboratories.
@@ -2074,10 +2068,10 @@ Spearman correlation, mutual information and Cram\'er's $V$ were computed for ev
 feature before any model was fitted. The strongest monotone association is
 \texttt{years\_since\_last} at $\rho = -0.35$, negative because a longer interval since the
 last recorded event implies lower risk. This is the most defensible epidemiological signal in the
-panel. Among the categorical strata, region yields a Cram\'er's $V$ of 0.243, a small
-association, and income band yields 0.044, which is negligible.
+panel. Among the categorical strata, region yields a Cram\'er's $V$ of 0.247, a small
+association, and income band yields 0.053, which is negligible.
 
-Redundancy is substantial. Variance inflation reaches 227 for \texttt{temp\_mean}, because
+Redundancy is substantial. Variance inflation reaches 229 for \texttt{temp\_mean}, because
 annual mean, minimum and maximum temperature are near-duplicates at country resolution.
 Figure~\ref{fig:corr} shows the correlation structure of the highest-ranked features.
 
@@ -2091,7 +2085,7 @@ ordered. Block structure indicates the collinear groups that motivated redundanc
 
 The most consequential finding in this section concerns the choice of selection criterion.
 Marginal association and conditional importance disagree almost completely. The rank correlation
-between mutual information and SHAP attribution \cite{lundberg2017} is -0.04, and only 8 of the ten
+between mutual information and SHAP attribution \cite{lundberg2017} is +0.19, and only 8 of the ten
 highest-ranked features are shared between the two orderings. \texttt{longitude} ranks first on
 marginal correlation and approximately twentieth on conditional importance, because once
 population and history are conditioned upon it carries little additional information. It
@@ -2123,14 +2117,14 @@ alongside for comparison.}
 \textbf{Rank} & \textbf{Feature} & \textbf{Mean $|$SHAP$|$} & \textbf{Spearman $\rho$} &
 \textbf{Mutual info} & \textbf{VIF} \\
 \midrule
-1 & pop\_total & 1.457 & +0.28 & 0.0639 & 10 \\
-2 & internet\_pct & 0.892 & +0.09 & 0.0000 & 5 \\
-3 & log\_livestock & 0.702 & +0.26 & 0.0571 & 3 \\
-4 & goats & 0.688 & +0.19 & 0.0421 & 11 \\
-5 & temp\_mean\_anom & 0.635 & -0.01 & 0.0006 & 2 \\
-6 & precip\_cv & 0.579 & -0.01 & 0.0008 & 2 \\
-7 & humidity\_anom & 0.494 & +0.03 & 0.0065 & 2 \\
-8 & pop\_density & 0.473 & +0.05 & 0.0262 & 2 \\
+1 & pop\_total & 1.757 & +0.29 & 0.0663 & 10 \\
+2 & internet\_pct & 1.064 & +0.09 & 0.0001 & 5 \\
+3 & log\_livestock & 0.929 & +0.26 & 0.0584 & 4 \\
+4 & goats & 0.763 & +0.19 & 0.0429 & 11 \\
+5 & precip\_cv & 0.743 & -0.01 & 0.0027 & 2 \\
+6 & temp\_mean\_anom & 0.735 & -0.01 & 0.0006 & 2 \\
+7 & humidity\_anom & 0.656 & +0.03 & 0.0060 & 2 \\
+8 & years\_since\_last & 0.473 & -0.35 & 0.0488 & 2 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -2165,24 +2159,24 @@ on the temporal holdout.}
  & \textbf{(time)} & \textbf{on PR-AUC} & \textbf{(time)} & \textbf{(country)} &
 \textbf{(rep.\ CV)} & & & \\
 \midrule
-Logistic regression & 0.471 & [0.36, 0.59] & 0.851 & 0.411 & 0.418 & 0.0537 & 0.55 / 0.41 \\
-Decision tree & 0.439 & [0.33, 0.56] & 0.857 & 0.241 & 0.345 & 0.0586 & 0.39 / 0.54 \\
-Random forest & 0.540 & [0.43, 0.65] & 0.866 & 0.318 & 0.456 & 0.0515 & 0.48 / 0.50 \\
-Extra trees & 0.551 & [0.44, 0.66] & 0.868 & 0.304 & 0.462 & 0.0522 & 0.58 / 0.47 \\
-XGBoost & 0.465 & [0.35, 0.59] & 0.853 & 0.290 & 0.430 & 0.0543 & 0.64 / 0.43 \\
-LightGBM & 0.501 & [0.38, 0.61] & 0.844 & 0.315 & 0.422 & 0.0534 & 0.68 / 0.31 \\
+Logistic regression & 0.461 & [0.34, 0.58] & 0.844 & 0.381 & 0.410 & 0.0555 & 0.40 / 0.51 \\
+Decision tree & 0.376 & [0.28, 0.48] & 0.871 & 0.243 & 0.364 & 0.0587 & 0.33 / 0.59 \\
+Random forest & 0.495 & [0.38, 0.62] & 0.874 & 0.322 & 0.426 & 0.0529 & 0.51 / 0.46 \\
+Extra trees & 0.494 & [0.38, 0.60] & 0.866 & 0.353 & 0.413 & 0.0565 & 0.45 / 0.54 \\
+XGBoost & 0.429 & [0.32, 0.54] & 0.846 & 0.268 & 0.401 & 0.0569 & 0.47 / 0.36 \\
+LightGBM & 0.471 & [0.36, 0.58] & 0.846 & 0.280 & 0.397 & 0.0554 & 0.51 / 0.32 \\
 \bottomrule
 \end{tabular}}
 \end{table}
 
 Two results need separating. On the forward temporal holdout the best discrimination comes from
-Extra trees at 0.551, against a base rate of 5.62\%, roughly a 10-fold lift.
-Under leave-country-out validation the ranking inverts: Extra trees falls to 0.304, while
-logistic regression holds 0.411 at a temporal score of 0.471 and so becomes the champion on
+Random forest at 0.495, against a base rate of 5.87\%, roughly a 8-fold lift.
+Under leave-country-out validation the ranking inverts: Random forest falls to 0.322, while
+logistic regression holds 0.381 at a temporal score of 0.461 and so becomes the champion on
 the criterion that governs selection. The single decision tree is weakest on both schemes.
 
 The more important pattern is the systematic decline under leave-country-out validation. For
-Random Forest the score falls from 0.540 to 0.318, and the decline exceeds the width of the
+Random Forest the score falls from 0.495 to 0.322, and the decline exceeds the width of the
 bootstrap interval for every family. This is the expected signature of learning country-specific
 structure, and it is the estimate that should be quoted for deployment.
 
@@ -2209,7 +2203,7 @@ separates the families.
 \section{Calibration}
 
 Predictions from the selected model are well calibrated, with an expected calibration error of
-0.025 and a Brier score of 0.0537. A stated risk of twenty-four per cent corresponds to an
+0.025 and a Brier score of 0.0555. A stated risk of twenty-four per cent corresponds to an
 observed event frequency of approximately twenty-four per cent. This property is what makes a
 threshold-based alert defensible, since a message quoting a probability must be numerically
 trustworthy.
@@ -2224,7 +2218,7 @@ distribution of predicted risk.}
 
 \section{Temporal Resolution}
 
-Aggregating observations to country and five-year period raises prevalence to 14.8\% and
+Aggregating observations to country and five-year period raises prevalence to 15.8\% and
 improves every metric, as shown in Figure~\ref{fig:resolution}. The mechanism is that coarser
 windows match the reporting cadence of the label, and a positive anywhere within the window counts
 once.
@@ -2251,26 +2245,26 @@ Table~\ref{tab:ablation} and Figure~\ref{fig:ablation}.
 \toprule
 \textbf{Feature set} & \textbf{Columns} & \textbf{PR-AUC (time)} & \textbf{PR-AUC (country)} \\
 \midrule
-History only & 7 & 0.407 & 0.238 \\
-Population only & 14 & 0.442 & 0.258 \\
-Climate only & 10 & 0.394 & 0.065 \\
-Socio-geography only & 11 & 0.467 & 0.171 \\
-History and population & 21 & 0.455 & 0.317 \\
-All groups & 42 & 0.510 & 0.254 \\
-All groups plus surveillance proxy & 44 & 0.513 & 0.260 \\
+History only & 7 & 0.419 & 0.170 \\
+Population only & 14 & 0.462 & 0.228 \\
+Climate only & 10 & 0.368 & 0.071 \\
+Socio-geography only & 11 & 0.466 & 0.165 \\
+History and population & 21 & 0.464 & 0.263 \\
+All groups & 42 & 0.504 & 0.230 \\
+All groups plus surveillance proxy & 44 & 0.512 & 0.240 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 Two results are more informative than the headline score. First, the reduced history and
-population set of 21 columns reaches 0.317 under leave-country-out validation, against
-0.254 for the full 42 column set. Added covariates improve in-distribution fit and reduce
+population set of 21 columns reaches 0.263 under leave-country-out validation, against
+0.230 for the full 42 column set. Added covariates improve in-distribution fit and reduce
 transfer, because they allow the model to fit country-specific peculiarities. Second, climate
-covariates alone reach only 0.065, marginally above the 5.62\% floor, which indicates
+covariates alone reach only 0.071, marginally above the 5.87\% floor, which indicates
 that annual country-level climatology largely encodes latitude and therefore country identity.
 
 A separate probe adds publication-count proxies as two additional columns. It moves the
-leave-country-out score by +0.006, which is weak evidence that the model is not purely
+leave-country-out score by +0.010, which is weak evidence that the model is not purely
 tracking publication volume, but it is not proof.
 
 \begin{figure}[htbp]
@@ -2294,20 +2288,20 @@ occurrence model.
 \toprule
 \textbf{Variant} & \textbf{PR-AUC (time)} & \textbf{ROC-AUC (time)} & \textbf{PR-AUC (country)} \\
 \midrule
-Plain (no chained feature) & 0.523 & 0.848 & 0.407 \\
-Chained (population forecast added) & 0.523 & 0.848 & 0.407 \\
+Plain (no chained feature) & 0.523 & 0.852 & 0.405 \\
+Chained (population forecast added) & 0.523 & 0.853 & 0.405 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The population forecast performs well as a forecast, with a mean absolute error of 0.432 on the
-log scale and a Spearman correlation of 0.975. The intensity stage is weaker but usable, with a
-mean absolute error of 0.150 and a rank correlation of 0.465 among positive observations. The
-hurdle product ranks expected annual event burden with a Spearman correlation of 0.321, and its
+The population forecast performs well as a forecast, with a mean absolute error of 0.401 on the
+log scale and a Spearman correlation of 0.973. The intensity stage is weaker but usable, with a
+mean absolute error of 0.150 and a rank correlation of 0.475 among positive observations. The
+hurdle product ranks expected annual event burden with a Spearman correlation of 0.325, and its
 highest decile captures 68 of 106 observed events.
 
 Appending the stage-one forecast to the occurrence model changes temporal PR-AUC by
--0.001, which is inside the noise band. The explanation is structural rather than a failure
+-0.000, which is inside the noise band. The explanation is structural rather than a failure
 of tuning. Population magnitude is already a direct feature of the occurrence model, so
 forecasting it and appending the forecast supplies a less accurate copy of information the model
 already holds. Chaining is expected to assist where the intermediate quantity cannot be observed
@@ -2321,9 +2315,9 @@ architectures for this problem class.
 
 The operating characteristics of the champion model as a warning system are shown in
 Figure~\ref{fig:alerts}. Alerting the six per cent of country-years at highest predicted risk
-captures 42 per cent of observed events, half of them are reached at an alert budget of
-10 per cent, and eighty per cent at 34 per cent. Uniform alerting would require
-full coverage for the same recall, so the model is about 5.2 times more efficient than
+captures 43 per cent of observed events, half of them are reached at an alert budget of
+9 per cent, and eighty per cent at 37 per cent. Uniform alerting would require
+full coverage for the same recall, so the model is about 5.5 times more efficient than
 arbitrary selection at the fifty per cent operating point.
 
 \begin{figure}[htbp]
@@ -2350,11 +2344,11 @@ are few recorded events from which to learn in those strata.
 \toprule
 \textbf{Region} & \textbf{Observations} & \textbf{Events} & \textbf{ROC-AUC} & \textbf{PR-AUC} \\
 \midrule
-East Asia \& Pacific & 456 & 48 & 0.862 & 0.396 \\
-Europe \& Central Asia & 912 & 31 & 0.844 & 0.174 \\
-Latin America \& Caribbean & 551 & 12 & 0.929 & 0.441 \\
-MENA, Afghanistan and Pakistan & 380 & 23 & 0.837 & 0.362 \\
-Sub-Saharan Africa & 646 & 27 & 0.741 & 0.140 \\
+East Asia \& Pacific & 432 & 48 & 0.875 & 0.459 \\
+Europe \& Central Asia & 864 & 31 & 0.824 & 0.161 \\
+Latin America \& Caribbean & 522 & 12 & 0.921 & 0.351 \\
+MENA, Afghanistan and Pakistan & 360 & 23 & 0.825 & 0.422 \\
+Sub-Saharan Africa & 612 & 25 & 0.738 & 0.112 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -2374,7 +2368,7 @@ the answer, and because it shows where the model's information comes from.
 
 Collapsing the panel to one row per country, with features averaged over 2005 to 2023 and the label
 defined as whether the country reports glanders in any year, leaves 161 rows and 56
-positives, a prevalence of 34.8\% rather than 5.62\%. Validation is leave-one-out over
+positives, a prevalence of 34.8\% rather than 5.87\%. Validation is leave-one-out over
 countries, since with one row per country there is no grouping left to hold out.
 
 \begin{table}[htbp]
@@ -2409,8 +2403,8 @@ the effect of that confounder rather than exploiting it.
 
 The results support four conclusions.
 
-The model has predictive skill. Logistic Regression reaches a precision-recall AUC of 0.471 against a base
-rate of 5.62\%, survives a strictly forward-looking temporal split, holds 0.411 across
+The model has predictive skill. Logistic Regression reaches a precision-recall AUC of 0.461 against a base
+rate of 5.87\%, survives a strictly forward-looking temporal split, holds 0.381 across
 unseen countries, and is calibrated to within 0.025.
 
 The skill does not transfer intact. Leave-country-out performance is roughly forty per cent lower
@@ -2445,7 +2439,7 @@ probability, the retrieval-augmented layer that explains it against official gui
 alert service that turns it into a small number of messages.
 
 Prediction is possible, and the achievable performance is moderate. On a strictly forward-looking temporal holdout the strongest model reaches a
-precision-recall AUC of 0.471 against a base rate of 5.62\%, an approximately 8-fold
+precision-recall AUC of 0.461 against a base rate of 5.87\%, an approximately 8-fold
 lift, with an expected calibration error of 0.025. Used as a warning system, it captures half of
 all observed events while alerting six per cent of country-years.
 

@@ -60,7 +60,7 @@ TRAINING = r"""
      World Bank (10 indicators)\quad$\cdot$\quad NASA POWER (6 climate measures)};
 
   \node[st,below=0.20cm of src] (clean) {\textbf{2. Clean}: reconcile country names to ISO-3, drop duplicates};
-  \node[st,below=0.12cm of clean] (panel) {\textbf{3. Assemble panel}: 3{,}059 rows $\times$ 60 columns};
+  \node[st,below=0.12cm of clean] (panel) {\textbf{3. Assemble panel}: 2{,}880 rows $\times$ 60 columns};
   \node[st,below=0.12cm of panel] (feat) {\textbf{4. Feature engineering}: lags, growth rates, climate anomalies};
   \node[st,below=0.12cm of feat] (shift) {\textbf{5. Shift targets}: answer comes from year $t{+}1$};
   \node[dec,below=0.18cm of shift] (split) {\textbf{6. Chronological split}};

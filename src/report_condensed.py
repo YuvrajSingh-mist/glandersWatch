@@ -104,7 +104,7 @@ animal and does not replace laboratory confirmation.
 
 Three limitations shape every result. The label comes from published reports, so a negative may mean
 no disease or no reporting. Occurrence is reconstructed by an extractor not validated against a
-hand-annotated set. And with 172 positives the uncertainty on every headline metric is substantial,
+hand-annotated set. And with @POSITIVES@ positives the uncertainty on every headline metric is substantial,
 which is quantified rather than hidden.
 """
 
@@ -435,24 +435,39 @@ collinearity result in Chapter~\ref{ch:results}.
 \section{Feature Selection by SHAP}
 \label{sec:shapselect}
 
-\subsection{What SHAP is}
+\subsection{What SHAP is and why the average is over orderings}
 
-SHAP attributes a prediction to its inputs using Shapley values, a construction from cooperative game
-theory. The inputs are players, the prediction is the payout, and a feature's contribution is its
-average marginal effect over every order in which the features could be introduced. For feature $j$,
-with $F$ the full set and $f$ the model,
+SHAP assigns each input a share of one prediction, borrowed from Shapley values in cooperative game
+theory. The inputs are players, the prediction is the payout, and a player's fair share is what the
+payout changes by, on average, across every order in which the players could have joined.
+
+The average over orderings is the whole point. A single ordering would credit a feature with
+everything it adds once the features before it are already present, which depends arbitrarily on that
+ordering. A feature that duplicates another would look worthless if its twin entered first and
+essential if it entered second. Averaging over all $|F|!$ orderings removes that arbitrariness, and
+the weight in the formula below is simply the fraction of orderings in which the set $S$ precedes
+feature $j$.
+
+For feature $j$, with $F$ the full set and $f$ the model,
 \[
 \phi_j = \sum_{S \subseteq F \setminus \{j\}}
-\frac{|S|!\,\big(|F|-|S|-1\big)!}{|F|!}
-\Big[ f\big(S \cup \{j\}\big) - f(S) \Big],
+\underbrace{\frac{|S|!\,\big(|F|-|S|-1\big)!}{|F|!}}_{\text{share of orderings with }S\text{ first}}
+\Big[ \underbrace{f\big(S \cup \{j\}\big) - f(S)}_{\text{added by }j\text{ given }S} \Big],
 \]
-where $f(S)$ is the model output using only the features in $S$, with the rest marginalised. The
-values satisfy local accuracy ($\sum_j \phi_j$ equals the prediction minus the base rate),
-missingness (an absent feature gets zero) and consistency (if a feature's marginal effect rises in
-every subset, its value does not fall). The implementation is \texttt{shap.TreeExplainer}, which
-computes exact TreeSHAP values for the tree ensembles, so the attribution is not sampled. Global
-importance is the mean absolute value, $\bar{\phi}_j = \frac{1}{n}\sum_i |\phi_{ij}|$, over the $n$
-rows explained.
+where $f(S)$ is the model output using only the features in $S$, the rest marginalised. Each term is
+the marginal contribution of $j$ given one coalition, and the sum weights those contributions by how
+often that coalition occurs.
+
+Three properties make the result usable rather than merely plausible. Local accuracy: the values sum
+to the prediction minus the base rate, so they decompose that prediction exactly and nothing is left
+unexplained. Missingness: a feature absent from the model receives zero, so the accounting does not
+invent contributions. Consistency: if a feature's marginal effect rises in every subset, its value
+cannot fall, which is the property that makes the ranking trustworthy for selection.
+
+The implementation is \texttt{shap.TreeExplainer}, which evaluates the sum exactly for tree ensembles
+in polynomial rather than exponential time, so the attribution is not sampled. Global importance is
+the mean absolute value over the $n$ explained rows,
+$\bar{\phi}_j = \frac{1}{n}\sum_i |\phi_{ij}|$, which is what ranks features for selection.
 
 \subsection{Why attribution rather than association}
 
@@ -477,9 +492,10 @@ permutation importance is unstable with correlated inputs, of which this panel h
 The ranking is computed on the training years only, 2005 to @SELTRAINEND@. Fitting on the full panel
 would let the held-out years influence which features were chosen, and the temporal-holdout score
 reported in Chapter~\ref{ch:results} would then be optimistic. The @SELCAND@ numeric candidates are
-ranked by mean absolute SHAP on that training window and the first @SELK@ are kept, plus the
-@SELN@-column set's two categorical columns, which are retained because region and income band are
-the reporting-capacity proxies the discussion turns on.
+ranked by mean absolute SHAP on that training window and the first @SELK@ are kept.
+
+@SELK@ is the whole set. No further columns are retained, and the exported dataset contains exactly
+those @SELK@ columns so the artefact on disk and the model behind the results are the same object.
 
 \begin{table}[htbp]
 \centering
@@ -497,10 +513,17 @@ total attribution across all @SELCAND@ candidates.}
 \end{tabular}
 \end{table}
 
-The set is deliberately small. @SELN@ columns against @ROWS@ rows leaves roughly a hundred rows per
-column, which is what the positive count can support: with @POSITIVES@ events, a model given forty
-inputs has more directions to fit than it has events to learn from, and Chapter~\ref{ch:results}
-reports what that costs in transfer.
+The set is deliberately small. @SELK@ columns against @ROWS@ rows leaves an order of magnitude more
+rows than columns, which is what the positive count can support: with @POSITIVES@ events, a model
+given forty inputs has more directions to fit than it has events to learn from, and
+Chapter~\ref{ch:results} reports what that costs in transfer.
+
+\subsection{What the ranking looks like}
+
+Panel B of Figure~\ref{fig:importance} plots the mean absolute SHAP value against the marginal rank
+for the full candidate set, and the absence of any downward trend is the disagreement described
+above made visible. The eight retained features occupy the top of the conditional ordering; features
+that lead the marginal ordering sit far below it.
 
 \section{Models}
 
@@ -1018,7 +1041,7 @@ hold @TOP5SHARE@ of all positives.
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.52\textwidth]{fig10_label_anatomy.png}
+\includegraphics[width=0.95\textwidth]{fig10_label_anatomy.png}
 \caption{Label anatomy. Panel A gives annual positive counts against prevalence on the secondary
 axis. Panel B gives the distribution of positive years per country. Panel C gives prevalence by
 World Bank region.}
@@ -1055,7 +1078,7 @@ Section~8.1.3.}
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.44\textwidth]{fig02_model_comparison.png}
+\includegraphics[width=0.82\textwidth]{fig02_model_comparison.png}
 \caption{Discrimination by model and validation scheme. The gap between repeated cross-validation
 and leave-country-out validation is the cost of generalising to an unseen country.}
 \label{fig:comparison}
@@ -1074,6 +1097,23 @@ model transfers best, and the flexible ensembles pay for their extra capacity in
 the project cares about. The single decision tree is weakest on both schemes, which confirms that the
 signal is not concentrated in one or two splits.
 
+\subsection{Marginal and Conditional Importance}
+
+Figure~\ref{fig:importance} sets the two views of feature importance against each other. Panel A
+plots mutual information against conditional rank, and the absence of a downward slope is the
+disagreement the selection section relies on; panel B gives the conditional ordering with the
+marginal sign annotated.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{fig12_importance_views.png}
+\caption{Marginal and conditional importance for the same candidate set. Panel A: mutual information
+against conditional rank, where a downward trend would mean the two orderings agree. Panel B:
+conditional rank with the marginal association sign annotated. The eight retained features are the
+top of the conditional ordering.}
+\label{fig:importance}
+\end{figure}
+
 \subsection{Calibration}
 
 Predictions are well calibrated, with an expected calibration error of @ECE@ and a Brier score of
@@ -1082,7 +1122,7 @@ per cent, which is what makes a threshold-based alert defensible.
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.40\textwidth]{fig04_calibration.png}
+\includegraphics[width=0.72\textwidth]{fig04_calibration.png}
 \caption{Reliability diagram for the selected model on the temporal holdout, with the distribution of
 predicted risk. Points on the diagonal are perfectly calibrated.}
 \label{fig:calib}
@@ -1120,7 +1160,7 @@ fifty per cent point.
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.40\textwidth]{fig07_alert_budget.png}
+\includegraphics[width=0.78\textwidth]{fig07_alert_budget.png}
 \caption{Alert economics. Panel A gives the fraction of events captured as the alert budget grows,
 against random alerting. Panel B gives the alert volume required to reach a target recall.}
 \label{fig:alerts}

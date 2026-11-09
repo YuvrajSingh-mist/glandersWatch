@@ -48,32 +48,40 @@ def feature_list() -> list[str]:
 
 
 def main() -> None:
-    df = TE.load_level1()
-    FEATURES = feature_list()
+    """Write strictly the eight selected feature columns, and nothing else.
 
-    missing = [c for c in FEATURES if c not in df.columns]
+    No identifiers, no categorical columns, no target. The previous version kept
+    iso3/year/region/income/y_occ_next alongside the features, which made a "10
+    feature" file 13 columns wide. The label is written separately to
+    model_matrix_labels.csv so the feature table is exactly what was asked for.
+    """
+    df = TE.load_level1()
+    sel = json.loads(_spec.read_text())
+    features = sel["numeric"]
+    if len(features) != 8:
+        raise SystemExit(f"expected 8 selected features, found {len(features)}: {features}")
+    missing = [c for c in features if c not in df.columns]
     if missing:
         raise SystemExit(f"features missing from panel: {missing}")
 
-    out = df[IDENTIFIERS + FEATURES + [TARGET]].copy()
+    out = df[features].copy()
 
-    # Round the numeric features so each row stays readable in an editor. Integer
-    # stock counts are left exact. This file is an export, not a training input.
-    num_cols = [c for c in FEATURES if c in out.columns
-                and out[c].dtype.kind == "f"]
+    # Round so each row stays readable in an editor. This file is an export, not a
+    # training input.
+    num_cols = [c for c in features if out[c].dtype.kind == "f"]
     out[num_cols] = out[num_cols].round(6)
-
     out.to_csv(OUT, index=False)
 
+    # The label, kept beside the features so a reader can still tell a positive row.
+    labels = df[["y_occ_next"]].copy()
+    labels.to_csv(OUT.with_name("model_matrix_labels.csv"), index=False)
+
     print(f"wrote {OUT.relative_to(ROOT)}")
-    print(f"  rows      : {len(out):,}")
-    n_num = sum(1 for f in FEATURES if f in C.FULL)
-    print(f"  features  : {len(FEATURES)} ({n_num} numeric + {len(FEATURES) - n_num} categorical)")
-    print(f"  positives : {int(out[TARGET].sum())}")
-    print(f"  prevalence: {out[TARGET].mean() * 100:.2f}%")
-    print(f"  countries : {out.iso3.nunique()}")
-    print(f"  years     : {out.year.min()} to {out.year.max()}")
-    print(f"  size      : {OUT.stat().st_size / 1024:.0f} KB")
+    print(f"  rows     : {len(out):,}")
+    print(f"  columns  : {len(out.columns)} (exactly the selected features)")
+    print(f"  features : {', '.join(features)}")
+    print(f"  positives: {int(df['y_occ_next'].sum())} "
+          f"(label in {OUT.with_name('model_matrix_labels.csv').name})")
 
 
 if __name__ == "__main__":

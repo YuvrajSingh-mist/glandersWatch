@@ -57,7 +57,7 @@ calendar year, so they join without ambiguity. The full panel has PANEL_ROWS cou
 rows covering PANEL_COUNTRIES countries from 2000 to 2024. For modelling we keep only
 equine-holding countries, meaning those with a maximum stock of at least 1{,}000 equids, the
 years 2005 to 2023, and rows where next year's answer is observable. That leaves
-\textbf{3,059 rows, 44 candidate columns and 172 positive labels}.
+\textbf{2,880 rows, 44 candidate columns and 169 positive labels}.
 
 \paragraph{Preprocessing.} Five steps, in this order.
 
@@ -107,7 +107,7 @@ We start with the label, then move to how each input relates to it and how much 
 duplicate each other.
 
 \paragraph{The answer key.} For every country and year the answer is yes or no: was
-glanders reported the following year? Only 172 of the 3,059 rows are yes, which is 5.6\%.
+glanders reported the following year? Only 169 of the 2,880 rows are yes, which is 5.9\%.
 
 \begin{table}[htbp]
 \centering
@@ -117,12 +117,12 @@ glanders reported the following year? Only 172 of the 3,059 rows are yes, which 
 \toprule
 \textbf{Measure} & \textbf{Value} \\
 \midrule
-Total rows & 3,059 \\
+Total rows & 2,880 \\
 ``Yes'' rows (event next year) & 172 \\
 ``No'' rows & 2,906 \\
 Percentage ``yes'' & 5.6\% \\
 Ratio of no to yes & about 17 to 1 \\
-Countries with at least one ``yes'' & 56 of 161 \\
+Countries with at least one ``yes'' & 56 of 160 \\
 Countries with ``yes'' in two or more years & 30 \\
 Share of all ``yes'' in the top 5 countries & 35.5\% \\
 \bottomrule
@@ -199,7 +199,7 @@ TOP_FEATURES
 $|\rho|$ below 0.02, which means no measurable relationship to the answer at all. We
 dropped one column that was exactly the sum of three others, since it adds nothing a tree
 cannot build itself. We dropped one member of each near-duplicate pair listed above. No
-principal component analysis was used: with the retained columns and 3,059 rows the limit is signal
+principal component analysis was used: with eight retained columns and 2,880 rows the limit is signal
 rather than dimensionality, and the section on results confirms that fewer columns
 generalise better across countries, so compressing further would have cost
 interpretability for nothing. Scaling is applied only to the logistic baseline, because
@@ -264,7 +264,7 @@ which reduces variance. Boosted models train trees \emph{in sequence}, each fitt
 error left by the last, which reduces bias. That difference explains why the two families
 end up with similar scores.
 
-We left neural networks out because the data cannot support them. With 172 positives and
+We left neural networks out because the data cannot support them. With 169 positives and
 44 inputs, a network has far more settings to learn than it has examples to learn from,
 so it would memorise the training rows and fail on new ones. That is an argument from the
 data rather than a judgement about the method.
@@ -278,7 +278,7 @@ Forest scored higher on the easier time-based test, but the country test is the 
 speaks to deployment.
 
 We did not stack the models into a meta-learner. The gap between families is smaller than
-the uncertainty on any single score, so a meta-learner trained on 172 positives would add
+the uncertainty on any single score, so a meta-learner trained on 169 positives would add
 variance without a gain we could defend. We spent that effort on calibration instead, since
 that is what a threshold-based alert depends on.
 

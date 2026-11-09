@@ -33,14 +33,21 @@ OUT: dict = {}
 
 
 def load() -> pd.DataFrame:
-    p = pd.read_csv(PROC / "country_year_panel.csv")
-    ev = pd.read_csv(PROC / "literature_events.csv")
-    cnt = ev.groupby(["iso3", "year"]).size().rename("total_pub_count").reset_index()
-    p = p.merge(cnt, on=["iso3", "year"], how="left")
-    p["total_pub_count"] = p.total_pub_count.fillna(0)
-    p["equine_pub_count"] = p.groupby("iso3")["total_pub_count"].transform("cumsum")
-    p = p[(p.equine_country == 1) & p.year.between(2005, 2023)]
-    return p.dropna(subset=["y_occ_next"]).reset_index(drop=True)
+    """Use the training loader, so the analysis describes the modelled rows.
+
+    Keeping a private copy of the filters here is how the analysis and the models
+    drifted apart: rows dropped for lack of a climate-anomaly baseline were counted
+    in the label statistics but never reached a model.
+    """
+    from importlib import util as _u
+
+    if not hasattr(load, "_te"):
+        spec = _u.spec_from_file_location(
+            "train_evaluate", pathlib.Path(__file__).resolve().parent / "03_train_evaluate.py")
+        mod = _u.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        load._te = mod  # type: ignore[attr-defined]
+    return load._te.load_level1()  # type: ignore[attr-defined]
 
 
 # --------------------------------------------------------------------------- #

@@ -27,7 +27,7 @@ import ml_core as C  # noqa: E402
 
 REP = ROOT / "reports"
 TRAIN_END = 2017
-TOP_K = 12
+TOP_K = 8
 
 
 def rank_by_shap(
@@ -74,13 +74,21 @@ def rank_by_shap(
 
 
 def select(rows: list[dict], k: int = TOP_K) -> dict:
+    """Return exactly k features, and nothing else.
+
+    Categorical columns are left out on purpose: the report states a set of eight
+    features, the exported dataset has those eight columns, and the model is
+    trained on the same eight. Carrying region and income in the model while
+    omitting them from the dataset would mean the artefact and the experiment
+    disagree.
+    """
     numeric_ranked = [r["feature"] for r in rows if r["feature"] in C.FULL]
     chosen = numeric_ranked[:k]
     return {
         "top_k": k,
         "train_end": TRAIN_END,
         "numeric": chosen,
-        "categorical": list(C.CATEGORICAL),
+        "categorical": [],          # exactly k features, no extras
         "ranking": rows,
         "n_candidates": len(numeric_ranked),
     }

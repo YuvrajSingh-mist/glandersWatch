@@ -38,103 +38,103 @@ chained ML pipeline over livestock-census and reanalysis covariates.
 | 3 | World Bank WDI (10 indicators) + country centroids | socio-agricultural context, reporting capacity | country x year | 2000-2024 |
 | 4 | NASA POWER agro-climatology (T2M, T2M max/min, precipitation, humidity, wind) | environmental covariates | country x year | 2005-2024, 211 centroids |
 
-**Panel:** 3,059 country-year rows, 172 positive labels,
-161 equine-holding countries, prevalence 5.62%.
+**Panel:** 2,880 country-year rows, 169 positive labels,
+161 equine-holding countries, prevalence 5.87%.
 
 ## 2. Level 1 - country-year occurrence (temporal holdout 2018-2023)
 
 | Model | Family | PR-AUC (95% CI) | ROC-AUC | PR-AUC LOCO | PR-AUC rep-CV | Brier | Prec | Rec | F1 | Threshold |
 |---|---|---|---|---|---|---|---|---|---|---|
-| Logistic Regression | linear | 0.471 (0.36-0.59) | 0.851 | 0.411 | 0.418 | 0.0537 | 0.55 | 0.41 | 0.47 | 0.21 |
-| Decision Tree | tree | 0.439 (0.33-0.56) | 0.857 | 0.241 | 0.345 | 0.0586 | 0.39 | 0.54 | 0.45 | 0.17 |
-| Random Forest | bagged trees | 0.540 (0.43-0.65) | 0.866 | 0.318 | 0.456 | 0.0515 | 0.48 | 0.50 | 0.49 | 0.27 |
-| Extra Trees | bagged trees | 0.551 (0.44-0.66) | 0.868 | 0.304 | 0.462 | 0.0522 | 0.58 | 0.47 | 0.52 | 0.28 |
-| XGBoost | boosted trees | 0.465 (0.35-0.59) | 0.853 | 0.290 | 0.430 | 0.0543 | 0.64 | 0.43 | 0.52 | 0.29 |
-| LightGBM | boosted trees | 0.501 (0.38-0.61) | 0.844 | 0.315 | 0.422 | 0.0534 | 0.68 | 0.31 | 0.43 | 0.35 |
+| Logistic Regression | linear | 0.461 (0.34-0.58) | 0.844 | 0.381 | 0.410 | 0.0555 | 0.40 | 0.51 | 0.45 | 0.21 |
+| Decision Tree | tree | 0.376 (0.28-0.48) | 0.871 | 0.243 | 0.364 | 0.0587 | 0.33 | 0.59 | 0.42 | 0.18 |
+| Random Forest | bagged trees | 0.495 (0.38-0.62) | 0.874 | 0.322 | 0.426 | 0.0529 | 0.51 | 0.46 | 0.48 | 0.33 |
+| Extra Trees | bagged trees | 0.494 (0.38-0.60) | 0.866 | 0.353 | 0.413 | 0.0565 | 0.45 | 0.54 | 0.49 | 0.26 |
+| XGBoost | boosted trees | 0.429 (0.32-0.54) | 0.846 | 0.268 | 0.401 | 0.0569 | 0.47 | 0.36 | 0.41 | 0.29 |
+| LightGBM | boosted trees | 0.471 (0.36-0.58) | 0.846 | 0.280 | 0.397 | 0.0554 | 0.51 | 0.32 | 0.40 | 0.35 |
 
 Selected by leave-country-out PR-AUC: **Logistic Regression**.
-Prevalence 0.056 -> the best temporal PR-AUC (0.551, Extra Trees) is a
-lift of roughly 9.8x over chance.
+Prevalence 0.059 -> the best temporal PR-AUC (0.495, Random Forest) is a
+lift of roughly 8.4x over chance.
 
 ## 3. Level 2 - coarse resolution (country x 5-year period)
 
 | Model | PR-AUC | ROC-AUC | PR-AUC LOCO | ROC-AUC LOCO | Brier |
 |---|---|---|---|---|---|
-| Logistic Regression | 0.614 | 0.854 | 0.485 | 0.828 | 0.0957 |
-| Decision Tree | 0.474 | 0.817 | 0.468 | 0.818 | 0.1058 |
-| Random Forest | 0.555 | 0.838 | 0.509 | 0.859 | 0.0995 |
-| Extra Trees | 0.624 | 0.846 | 0.537 | 0.838 | 0.1097 |
-| XGBoost | 0.532 | 0.787 | 0.459 | 0.830 | 0.1027 |
-| LightGBM | 0.603 | 0.838 | 0.503 | 0.846 | 0.0968 |
+| Logistic Regression | 0.568 | 0.808 | 0.544 | 0.793 | 0.1039 |
+| Decision Tree | 0.397 | 0.773 | 0.539 | 0.825 | 0.1102 |
+| Random Forest | 0.549 | 0.843 | 0.562 | 0.859 | 0.0991 |
+| Extra Trees | 0.597 | 0.842 | 0.567 | 0.834 | 0.1045 |
+| XGBoost | 0.565 | 0.820 | 0.489 | 0.827 | 0.1000 |
+| LightGBM | 0.572 | 0.833 | 0.513 | 0.844 | 0.1017 |
 
 ## 4. Ablation settings
 
 | Ablation setting | k | PR-AUC (time) | ROC-AUC (time) | PR-AUC (LOCO) |
 |---|---|---|---|---|
-| AS-1 history only | 7 | 0.407 | 0.754 | 0.238 |
-| AS-2 population only | 14 | 0.442 | 0.850 | 0.258 |
-| AS-3 climate only | 10 | 0.394 | 0.772 | 0.065 |
-| AS-4 socio-geography | 11 | 0.467 | 0.827 | 0.171 |
-| AS-5 history+population | 21 | 0.455 | 0.840 | 0.317 |
-| AS-6 full (all groups) | 42 | 0.510 | 0.848 | 0.254 |
-| AS-7 full + surveillance proxy | 44 | 0.513 | 0.846 | 0.260 |
+| AS-1 history only | 7 | 0.419 | 0.753 | 0.170 |
+| AS-2 population only | 14 | 0.462 | 0.854 | 0.228 |
+| AS-3 climate only | 10 | 0.368 | 0.763 | 0.071 |
+| AS-4 socio-geography | 11 | 0.466 | 0.835 | 0.165 |
+| AS-5 history+population | 21 | 0.464 | 0.835 | 0.263 |
+| AS-6 full (all groups) | 42 | 0.504 | 0.834 | 0.230 |
+| AS-7 full + surveillance proxy | 44 | 0.512 | 0.841 | 0.240 |
 
 ## 5. Chained pipeline
 
 Stage 1 (population forecast, leave-country-out):
-`Ridge` MAE 0.432, median AE 0.177,
-Spearman 0.975.
+`Ridge` MAE 0.401, median AE 0.182,
+Spearman 0.973.
 
 Stage 2 (occurrence) with and without the chained population signal:
 
 | Variant | PR-AUC (temporal) | ROC-AUC | PR-AUC (LOCO) |
 |---|---|---|---|
-| plain | 0.523 | 0.848 | 0.407 |
-| chained | 0.523 | 0.848 | 0.407 |
+| plain | 0.523 | 0.852 | 0.405 |
+| chained | 0.523 | 0.853 | 0.405 |
 
 Stage 3 (intensity | occurrence): MAE 0.150,
-Spearman 0.465.
+Spearman 0.475.
 
-Hurdle chain (P x intensity) ranks next-year event burden with Spearman 0.321;
+Hurdle chain (P x intensity) ranks next-year event burden with Spearman 0.325;
 the top-10% highest-risk cells capture **68/106** observed events.
 
 ## 5b. Highest-risk cells in the temporal holdout
 
 | Country | Year | Predicted risk | Observed event |
 |---|---|---|---|
-| IND | 2023 | 0.863 | 1 |
-| IND | 2022 | 0.851 | 1 |
-| IND | 2020 | 0.830 | 1 |
-| IND | 2021 | 0.824 | 1 |
-| IND | 2019 | 0.811 | 1 |
-| IND | 2018 | 0.791 | 1 |
-| CHN | 2023 | 0.706 | 1 |
-| CHN | 2019 | 0.705 | 0 |
-| BRA | 2023 | 0.692 | 0 |
-| CHN | 2022 | 0.667 | 0 |
-| CHN | 2020 | 0.661 | 1 |
-| CHN | 2018 | 0.648 | 1 |
-| CHN | 2021 | 0.637 | 1 |
-| BRA | 2022 | 0.637 | 1 |
-| BRA | 2021 | 0.619 | 1 |
+| IND | 2023 | 0.862 | 1 |
+| IND | 2022 | 0.846 | 1 |
+| CHN | 2019 | 0.842 | 0 |
+| CHN | 2023 | 0.838 | 1 |
+| CHN | 2020 | 0.817 | 1 |
+| IND | 2021 | 0.812 | 1 |
+| CHN | 2022 | 0.810 | 0 |
+| IND | 2020 | 0.805 | 1 |
+| CHN | 2021 | 0.798 | 1 |
+| CHN | 2018 | 0.796 | 1 |
+| IND | 2019 | 0.780 | 1 |
+| IND | 2018 | 0.739 | 1 |
+| USA | 2022 | 0.429 | 0 |
+| USA | 2023 | 0.424 | 1 |
+| BRA | 2023 | 0.420 | 0 |
 
 ## 6. Subgroup performance (leave-country-out)
 
 | Grouped by | Group | n | events | ROC-AUC | PR-AUC |
 |---|---|---|---|---|---|
-| region | East Asia & Pacific | 456 | 48 | 0.862 | 0.396 |
-| region | Europe & Central Asia | 912 | 31 | 0.844 | 0.174 |
-| region | Latin America & Caribbean | 551 | 12 | 0.929 | 0.441 |
-| region | Middle East, North Africa, Afghanistan & Pakistan | 380 | 23 | 0.837 | 0.362 |
-| region | Sub-Saharan Africa | 646 | 27 | 0.741 | 0.140 |
-| income | High income | 1045 | 66 | 0.882 | 0.431 |
-| income | Low income | 342 | 10 | 0.804 | 0.196 |
-| income | Lower middle income | 741 | 42 | 0.877 | 0.567 |
-| income | Upper middle income | 912 | 54 | 0.870 | 0.326 |
+| region | East Asia & Pacific | 432 | 48 | 0.875 | 0.459 |
+| region | Europe & Central Asia | 864 | 31 | 0.824 | 0.161 |
+| region | Latin America & Caribbean | 522 | 12 | 0.921 | 0.351 |
+| region | Middle East, North Africa, Afghanistan & Pakistan | 360 | 23 | 0.825 | 0.422 |
+| region | Sub-Saharan Africa | 612 | 25 | 0.738 | 0.112 |
+| income | High income | 990 | 66 | 0.860 | 0.459 |
+| income | Low income | 324 | 8 | 0.776 | 0.172 |
+| income | Lower middle income | 702 | 41 | 0.880 | 0.576 |
+| income | Upper middle income | 864 | 54 | 0.857 | 0.317 |
 
 ## 7. Calibration
 
-Model `Logistic Regression`: ECE 0.025, Brier 0.0537.
+Model `Logistic Regression`: ECE 0.025, Brier 0.0555.
 
 ## 8. Figures
 

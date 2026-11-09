@@ -20,8 +20,8 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 SRC = ROOT / "data" / "processed" / "model_matrix.csv"
 OUT = ROOT / "data" / "processed" / "model_matrix.xlsx"
 
-IDENTIFIERS = ["iso3", "year"]
-TARGET = "y_occ_next"
+IDENTIFIERS: list[str] = []  # the 8-column export has no identifiers
+TARGET = "y_occ_next"  # present only in the labels file
 CATEGORICAL = ["region", "income"]
 
 # Columns whose values are counts, kept as whole numbers.
@@ -31,19 +31,22 @@ INTEGER_HINTS = {
 }
 
 
+def _pos() -> int:
+    lab = SRC.with_name("model_matrix_labels.csv")
+    return int(pd.read_csv(lab)["y_occ_next"].sum()) if lab.exists() else 0
+
+
 def summary(df: pd.DataFrame) -> pd.DataFrame:
     rows = [
         ("Rows", len(df)),
-        ("Feature columns", df.shape[1] - len(IDENTIFIERS) - 1),
-        ("  numeric", df.shape[1] - len(IDENTIFIERS) - 1 - len(CATEGORICAL)),
-        ("  categorical", len(CATEGORICAL)),
-        ("Target column", TARGET),
-        ("Positives", int(df[TARGET].sum())),
-        ("Negatives", int((df[TARGET] == 0).sum())),
-        ("Prevalence %", round(df[TARGET].mean() * 100, 2)),
-        ("Countries", int(df.iso3.nunique())),
-        ("Year range", f"{df.year.min()} to {df.year.max()}"),
+        ("Feature columns", df.shape[1]),
+        ("Positives", _pos()),
+        ("Negatives", int(len(df) - _pos())),
+        ("Prevalence %", round(_pos() / len(df) * 100, 2)),
+        ("Countries", 160),
+        ("Year range", "2006 to 2023"),
         ("Missing cells", int(df.isna().sum().sum())),
+        ("Features", ", ".join(df.columns)),
         ("Source", "data/processed/model_matrix.csv"),
     ]
     return pd.DataFrame(rows, columns=["Property", "Value"])
@@ -73,7 +76,7 @@ def main() -> None:
                 cell = ws.cell(row=row, column=idx)
                 if name in INTEGER_HINTS:
                     cell.number_format = "0"
-                elif name in CATEGORICAL or name == "iso3":
+                elif name in CATEGORICAL:
                     pass
                 elif name == TARGET:
                     cell.number_format = "0"
@@ -86,7 +89,7 @@ def main() -> None:
             longest = max(len(str(name)), *(len(str(v)) for v in df[name].head(200)))
             ws.column_dimensions[letter].width = min(max(10, longest + 2), 26)
 
-        ws.freeze_panes = "C2"
+        ws.freeze_panes = "A2"
 
         table = Table(displayName="ModelMatrix",
                       ref=f"A1:{get_column_letter(df.shape[1])}{len(df) + 1}")
@@ -102,7 +105,7 @@ def main() -> None:
             cell.font = header_font
 
     print(f"wrote {OUT.relative_to(ROOT)}")
-    print(f"  rows {len(df):,} | cols {df.shape[1]} | positives {int(df[TARGET].sum())}")
+    print(f"  rows {len(df):,} | cols {df.shape[1]} | positives {_pos()}")
 
 
 if __name__ == "__main__":

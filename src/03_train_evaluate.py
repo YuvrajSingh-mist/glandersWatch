@@ -56,6 +56,18 @@ def load_level1() -> pd.DataFrame:
     p = p[p.equine_country == 1].copy()
     p = p[p.year.between(2005, 2023)]
     p = p.dropna(subset=["y_occ_next"])
+
+    # A climate anomaly is measured against the country's own prior-year baseline, so
+    # the first year of the window has no value by construction, and a country with no
+    # NASA POWER record never has one. Those rows cannot carry the feature, so they are
+    # excluded rather than imputed: an imputed anomaly would look like a measured one.
+    anomaly_cols = [c for c in ("temp_mean_anom", "precip_sum_anom", "humidity_anom")
+                    if c in p.columns]
+    if anomaly_cols:
+        before = len(p)
+        p = p.dropna(subset=anomaly_cols)
+        print(f"  dropped {before - len(p)} rows with no climate-anomaly baseline "
+              f"(first year of each country, or no NASA record)")
     p["y_occ_next"] = p.y_occ_next.astype(int)
     return p.sort_values(["year", "iso3"]).reset_index(drop=True)
 
@@ -471,8 +483,13 @@ def main() -> None:
         "ranking": sel["ranking"][:25],
         "n_candidates": sel["n_candidates"],
     }
+    # Persist the selection from THIS run. Without this, every downstream consumer
+    # (the matrix export, the figures) reads a stale file and can silently disagree
+    # with the features the models were actually trained on.
+    (REP / "selected_features.json").write_text(json.dumps(sel, indent=2))
     log(f"\n>> SHAP selection: top {sel['top_k']} of {sel['n_candidates']} numeric features "
         f"plus {len(sel['categorical'])} categorical")
+    log("   features: " + ", ".join(sel["numeric"]))
     numeric = [c for c in sel["numeric"] if c in l1.columns]
     cats = sel["categorical"]
     RESULTS["level1"] = run_level(l1, "y_occ_next", numeric, cats, "L1 country-year",
