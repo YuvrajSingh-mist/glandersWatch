@@ -83,8 +83,8 @@ Degree Final-Semester Project.\par}
 
 \vspace{1.5cm}
 \noindent
-\underline{(Supervisor)}\\[0.25em]
-@SUPERVISOR@
+@SUPERVISOR@\\[0.2em]
+\underline{(Supervisor)}
 
 % ============================== DECLARATION ==============================
 \newpage
