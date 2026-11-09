@@ -1,0 +1,12 @@
+pandas
+numpy
+scipy
+scikit-learn
+xgboost
+lightgbm
+shap
+matplotlib
+pypdfium2
+openpyxl
+pycountry
+requests
