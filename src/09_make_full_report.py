@@ -172,6 +172,66 @@ def topfeat_rows() -> str:
 
 # ---------------------------------------------------------------- scalars
 _temporal_best = max(ORDER, key=lambda m: L1[m]["temporal"]["pr_auc"])
+CHAMP = R.get("best_model", "Random Forest")
+CHAMPPR = L1[CHAMP]["temporal"]["pr_auc"]
+CHAMPLOCO = L1[CHAMP]["loco"]["pr_auc"]
+BESTTEMPPR = L1[_temporal_best]["temporal"]["pr_auc"]
+BESTTEMPLOCO = L1[_temporal_best]["loco"]["pr_auc"]
+
+_SEL = R.get("selection", {})
+SELK = len(_SEL.get("numeric", []))
+SELN = SELK + len(_SEL.get("categorical", []))
+SELCAND = _SEL.get("n_candidates", len(ORDER and [1]) and 42)
+SELTRAINEND = _SEL.get("train_end", 2017)
+SELRANK = {r["feature"]: r for r in _SEL.get("ranking", [])}
+SELSHARE = 0.0
+_tot = sum(r["mean_abs_shap"] for r in _SEL.get("ranking", []) if r["feature"] in (C_FULL := set(__import__("ml_core").FULL)))
+if _tot > 0:
+    SELSHARE = sum(SELRANK[f]["mean_abs_shap"] for f in _SEL.get("numeric", [])
+                   if f in SELRANK) / _tot
+
+
+def selected_rows() -> str:
+    """Rank, feature, unit and training-period SHAP for the reported feature set."""
+    import ml_core as _MC
+    out = []
+    for i, f in enumerate(_SEL.get("numeric", []), 1):
+        # percent is a LaTeX comment character inside the tabular
+        unit = _MC.FEATURE_UNITS.get(f, "--").replace("%", r"\%")
+        shap_v = SELRANK.get(f, {}).get("mean_abs_shap", float("nan"))
+        out.append(f"{i} & \\texttt{{{esc(f)}}} & {unit} & {shap_v:.3f} \\\\")
+    for j, f in enumerate(_SEL.get("categorical", []), SELK + 1):
+        out.append(f"{j} & \\texttt{{{esc(f)}}} & "
+                   f"{_MC.FEATURE_UNITS.get(f, '--').replace('%', r'\\%')} & -- \\\\")
+    return "\n".join(out)
+
+
+def alert_economics() -> dict:
+    """Recall at a fixed budget and budget needed for a target recall, champion model."""
+    import numpy as _np
+    import pandas as _pd
+    path = REP / f"pred_L1_{CHAMP.replace(' ', '_')}.csv"
+    if not path.exists():
+        return {}
+    d = _pd.read_csv(path)
+    y = d.y_true.to_numpy().astype(int)
+    p = d.p_pred.to_numpy()
+    order = _np.argsort(-p)
+    fe = _np.cumsum(y[order]) / y.sum()
+    fa = _np.arange(1, len(y) + 1) / len(y)
+
+    def recall_at(b):
+        return float(fe[max(0, int(b * len(y)) - 1)])
+
+    def budget_at(t):
+        k = _np.flatnonzero(fe >= t - 1e-12)
+        return float(fa[k[0]]) if len(k) else 1.0
+
+    return {"cells": int(len(y)), "events": int(y.sum()),
+            "r6": recall_at(0.06), "b50": budget_at(0.50), "b80": budget_at(0.80)}
+
+
+_AE = alert_economics()
 PREV = LAB["prevalence"]
 MIRHO = A["importance_agreement"]["spearman_mi_vs_shap"]
 _vif = A["vif_top10"][0]
@@ -195,7 +255,7 @@ VALUES = {
     "PANELROWS": f"{AUD['panel_rows']:,}",
     "PANELCOUNTRIES": str(AUD["countries_in_panel"]),
     "ROWS": f"{LAB['rows']:,}",
-    "FEATURES": "44",
+    "FEATURES": str(SELN),   # features the models actually consume
     "POSITIVES": str(LAB["positives"]),
     "NEGATIVES": f"{LAB['negatives']:,}",
     "PREVALENCE": f"{PREV*100:.2f}\\%",
@@ -221,7 +281,20 @@ VALUES = {
     "TOPOVERLAP": str(A["importance_agreement"]["top10_overlap"]),
 
     "BESTPR": f"{L1[_temporal_best]['temporal']['pr_auc']:.3f}",
-    "LIFT": f"{L1[_temporal_best]['temporal']['pr_auc']/PREV:.0f}",
+    "CHAMP": CHAMP,
+    "CHAMPPR": f"{CHAMPPR:.3f}",
+    "CHAMPLOCO": f"{CHAMPLOCO:.3f}",
+    "BESTTEMPM": PRETTY[_temporal_best],
+    "BESTTEMPPR": f"{BESTTEMPPR:.3f}",
+    "BESTTEMPLOCO": f"{BESTTEMPLOCO:.3f}",
+    "SELK": str(SELK),
+    "SELN": str(SELN),
+    "SELCAND": str(SELCAND),
+    "SELTRAINEND": str(SELTRAINEND),
+    "SELSHARE": f"{SELSHARE*100:.0f}\\%",
+    "SELROWS": selected_rows(),
+    "LIFT": f"{CHAMPPR/PREV:.0f}",
+    "BESTLIFT": f"{BESTTEMPPR/PREV:.0f}",
     "RFPR": f"{L1['Random Forest']['temporal']['pr_auc']:.3f}",
     "RFLOCOR": f"{L1['Random Forest']['loco']['pr_auc']:.3f}",
     "ECE": f"{R['calibration']['ece']:.3f}",
@@ -256,6 +329,10 @@ VALUES = {
     "SUBGROUPROWS": subgroup_rows(),
     "TOPFROWS": topfeat_rows(),
 
+    "ALERT6REC": f"{_AE.get('r6', 0)*100:.0f}",
+    "ALERT50BUD": f"{_AE.get('b50', 0)*100:.0f}",
+    "ALERT80BUD": f"{_AE.get('b80', 0)*100:.0f}",
+    "ALERTEFF": f"{0.5/max(_AE.get('b50', 1), 1e-9):.1f}",
     "TRAININGFIG": DG.TRAINING,
     "EVALFIG": DG.EVALUATION,
 }

@@ -1,0 +1,410 @@
+{
+  "top_k": 12,
+  "train_end": 2017,
+  "numeric": [
+    "pop_total",
+    "years_since_last",
+    "temp_mean_anom",
+    "internet_pct",
+    "precip_cv",
+    "humidity_anom",
+    "goats",
+    "cattle",
+    "equid_growth_1y",
+    "precip_sum_anom",
+    "log_livestock",
+    "temp_max"
+  ],
+  "categorical": [
+    "region",
+    "income"
+  ],
+  "ranking": [
+    {
+      "feature": "pop_total",
+      "mean_abs_shap": 0.9560261964797974,
+      "rank": 1
+    },
+    {
+      "feature": "years_since_last",
+      "mean_abs_shap": 0.6978805661201477,
+      "rank": 2
+    },
+    {
+      "feature": "temp_mean_anom",
+      "mean_abs_shap": 0.5243826508522034,
+      "rank": 3
+    },
+    {
+      "feature": "internet_pct",
+      "mean_abs_shap": 0.4488515257835388,
+      "rank": 4
+    },
+    {
+      "feature": "precip_cv",
+      "mean_abs_shap": 0.382729172706604,
+      "rank": 5
+    },
+    {
+      "feature": "humidity_anom",
+      "mean_abs_shap": 0.3796314597129822,
+      "rank": 6
+    },
+    {
+      "feature": "goats",
+      "mean_abs_shap": 0.3407291769981384,
+      "rank": 7
+    },
+    {
+      "feature": "cattle",
+      "mean_abs_shap": 0.3387294113636017,
+      "rank": 8
+    },
+    {
+      "feature": "equid_growth_1y",
+      "mean_abs_shap": 0.3385457992553711,
+      "rank": 9
+    },
+    {
+      "feature": "precip_sum_anom",
+      "mean_abs_shap": 0.328065425157547,
+      "rank": 10
+    },
+    {
+      "feature": "log_livestock",
+      "mean_abs_shap": 0.3108946681022644,
+      "rank": 11
+    },
+    {
+      "feature": "temp_max",
+      "mean_abs_shap": 0.2782486081123352,
+      "rank": 12
+    },
+    {
+      "feature": "gdp_pc",
+      "mean_abs_shap": 0.2668764591217041,
+      "rank": 13
+    },
+    {
+      "feature": "pop_density",
+      "mean_abs_shap": 0.2667890191078186,
+      "rank": 14
+    },
+    {
+      "feature": "livestock_prod_index",
+      "mean_abs_shap": 0.26614490151405334,
+      "rank": 15
+    },
+    {
+      "feature": "equid_share",
+      "mean_abs_shap": 0.2633547782897949,
+      "rank": 16
+    },
+    {
+      "feature": "wind",
+      "mean_abs_shap": 0.2514466643333435,
+      "rank": 17
+    },
+    {
+      "feature": "horses",
+      "mean_abs_shap": 0.24497345089912415,
+      "rank": 18
+    },
+    {
+      "feature": "precip_sum",
+      "mean_abs_shap": 0.21413414180278778,
+      "rank": 19
+    },
+    {
+      "feature": "equid_density",
+      "mean_abs_shap": 0.20532432198524475,
+      "rank": 20
+    },
+    {
+      "feature": "fertilizer_pct",
+      "mean_abs_shap": 0.20337259769439697,
+      "rank": 21
+    },
+    {
+      "feature": "life_expectancy",
+      "mean_abs_shap": 0.1832890659570694,
+      "rank": 22
+    },
+    {
+      "feature": "sheep",
+      "mean_abs_shap": 0.18056721985340118,
+      "rank": 23
+    },
+    {
+      "feature": "agri_va_pct_gdp",
+      "mean_abs_shap": 0.1789345145225525,
+      "rank": 24
+    },
+    {
+      "feature": "equid_growth_3y",
+      "mean_abs_shap": 0.16733945906162262,
+      "rank": 25
+    },
+    {
+      "feature": "global_occ_share",
+      "mean_abs_shap": 0.1637839823961258,
+      "rank": 26
+    },
+    {
+      "feature": "occ_count_5y",
+      "mean_abs_shap": 0.14381228387355804,
+      "rank": 27
+    },
+    {
+      "feature": "lon",
+      "mean_abs_shap": 0.1400628685951233,
+      "rank": 28
+    },
+    {
+      "feature": "humidity",
+      "mean_abs_shap": 0.13300937414169312,
+      "rank": 29
+    },
+    {
+      "feature": "log_equids",
+      "mean_abs_shap": 0.12576508522033691,
+      "rank": 30
+    },
+    {
+      "feature": "region_occ_share",
+      "mean_abs_shap": 0.12217244505882263,
+      "rank": 31
+    },
+    {
+      "feature": "temp_mean",
+      "mean_abs_shap": 0.11901470273733139,
+      "rank": 32
+    },
+    {
+      "feature": "rural_pct",
+      "mean_abs_shap": 0.11118534207344055,
+      "rank": 33
+    },
+    {
+      "feature": "temp_min",
+      "mean_abs_shap": 0.09498053789138794,
+      "rank": 34
+    },
+    {
+      "feature": "agri_land_pct",
+      "mean_abs_shap": 0.08339309692382812,
+      "rank": 35
+    },
+    {
+      "feature": "asses",
+      "mean_abs_shap": 0.08290234208106995,
+      "rank": 36
+    },
+    {
+      "feature": "mules",
+      "mean_abs_shap": 0.08160530775785446,
+      "rank": 37
+    },
+    {
+      "feature": "abs_lat",
+      "mean_abs_shap": 0.06807082146406174,
+      "rank": 38
+    },
+    {
+      "feature": "occ_lag2",
+      "mean_abs_shap": 0.016601581126451492,
+      "rank": 39
+    },
+    {
+      "feature": "occ_lag1",
+      "mean_abs_shap": 0.013380470685660839,
+      "rank": 40
+    },
+    {
+      "feature": "missingindicator_temp_mean_anom",
+      "mean_abs_shap": 0.012723609805107117,
+      "rank": 41
+    },
+    {
+      "feature": "income_High income",
+      "mean_abs_shap": 0.00889978464692831,
+      "rank": 42
+    },
+    {
+      "feature": "region_Europe & Central Asia",
+      "mean_abs_shap": 0.008725142106413841,
+      "rank": 43
+    },
+    {
+      "feature": "region_Sub-Saharan Africa",
+      "mean_abs_shap": 0.006413457449525595,
+      "rank": 44
+    },
+    {
+      "feature": "region_Latin America & Caribbean",
+      "mean_abs_shap": 0.006230092141777277,
+      "rank": 45
+    },
+    {
+      "feature": "missingindicator_precip_sum_anom",
+      "mean_abs_shap": 0.005467240232974291,
+      "rank": 46
+    },
+    {
+      "feature": "occ_count_lag1",
+      "mean_abs_shap": 0.005210852716118097,
+      "rank": 47
+    },
+    {
+      "feature": "income_Upper middle income",
+      "mean_abs_shap": 0.001831775065511465,
+      "rank": 48
+    },
+    {
+      "feature": "region_Middle East, North Africa, Afghanistan & Pakistan",
+      "mean_abs_shap": 0.0007087136618793011,
+      "rank": 49
+    },
+    {
+      "feature": "missingindicator_fertilizer_pct",
+      "mean_abs_shap": 0.0,
+      "rank": 50
+    },
+    {
+      "feature": "region_North America",
+      "mean_abs_shap": 0.0,
+      "rank": 51
+    },
+    {
+      "feature": "region_South Asia",
+      "mean_abs_shap": 0.0,
+      "rank": 52
+    },
+    {
+      "feature": "income_Low income",
+      "mean_abs_shap": 0.0,
+      "rank": 53
+    },
+    {
+      "feature": "region_East Asia & Pacific",
+      "mean_abs_shap": 0.0,
+      "rank": 54
+    },
+    {
+      "feature": "missingindicator_lon",
+      "mean_abs_shap": 0.0,
+      "rank": 55
+    },
+    {
+      "feature": "missingindicator_abs_lat",
+      "mean_abs_shap": 0.0,
+      "rank": 56
+    },
+    {
+      "feature": "missingindicator_pop_density",
+      "mean_abs_shap": 0.0,
+      "rank": 57
+    },
+    {
+      "feature": "missingindicator_pop_total",
+      "mean_abs_shap": 0.0,
+      "rank": 58
+    },
+    {
+      "feature": "missingindicator_life_expectancy",
+      "mean_abs_shap": 0.0,
+      "rank": 59
+    },
+    {
+      "feature": "income_Lower middle income",
+      "mean_abs_shap": 0.0,
+      "rank": 60
+    },
+    {
+      "feature": "missingindicator_internet_pct",
+      "mean_abs_shap": 0.0,
+      "rank": 61
+    },
+    {
+      "feature": "missingindicator_precip_cv",
+      "mean_abs_shap": 0.0,
+      "rank": 62
+    },
+    {
+      "feature": "missingindicator_equid_density",
+      "mean_abs_shap": 0.0,
+      "rank": 63
+    },
+    {
+      "feature": "missingindicator_livestock_prod_index",
+      "mean_abs_shap": 0.0,
+      "rank": 64
+    },
+    {
+      "feature": "missingindicator_temp_mean",
+      "mean_abs_shap": 0.0,
+      "rank": 65
+    },
+    {
+      "feature": "missingindicator_temp_max",
+      "mean_abs_shap": 0.0,
+      "rank": 66
+    },
+    {
+      "feature": "missingindicator_temp_min",
+      "mean_abs_shap": 0.0,
+      "rank": 67
+    },
+    {
+      "feature": "missingindicator_precip_sum",
+      "mean_abs_shap": 0.0,
+      "rank": 68
+    },
+    {
+      "feature": "missingindicator_humidity",
+      "mean_abs_shap": 0.0,
+      "rank": 69
+    },
+    {
+      "feature": "missingindicator_region_occ_share",
+      "mean_abs_shap": 0.0,
+      "rank": 70
+    },
+    {
+      "feature": "missingindicator_wind",
+      "mean_abs_shap": 0.0,
+      "rank": 71
+    },
+    {
+      "feature": "missingindicator_humidity_anom",
+      "mean_abs_shap": 0.0,
+      "rank": 72
+    },
+    {
+      "feature": "missingindicator_gdp_pc",
+      "mean_abs_shap": 0.0,
+      "rank": 73
+    },
+    {
+      "feature": "missingindicator_rural_pct",
+      "mean_abs_shap": 0.0,
+      "rank": 74
+    },
+    {
+      "feature": "missingindicator_agri_land_pct",
+      "mean_abs_shap": 0.0,
+      "rank": 75
+    },
+    {
+      "feature": "camels",
+      "mean_abs_shap": 0.0,
+      "rank": 76
+    },
+    {
+      "feature": "missingindicator_agri_va_pct_gdp",
+      "mean_abs_shap": 0.0,
+      "rank": 77
+    }
+  ],
+  "n_candidates": 42
+}

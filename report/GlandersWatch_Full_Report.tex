@@ -840,24 +840,16 @@ prevents rows such as ``World'' or ``South Asia'' from entering the panel as if 
 countries.
 
 Combining the four sources produces a grid of 6,700 country-year rows across
-268 countries for 2000 to 2024, in 60 columns: raw stocks, covariates, derived rates
-and label fields.
+268 countries for 2000 to 2024, in 60 columns: 44 engineered candidate features, three
+identifiers, five label fields and eight intermediate quantities from which the features are derived.
 
-Preprocessing reduces that grid to 3,078 rows and 44 feature columns, excluding the target,
-which is the matrix every model here was trained and evaluated on. The row loss comes from two
-restrictions: the equine-holding filter, which keeps 162 of the 268 countries on a
-maximum equid stock of at least one thousand animals, and the 2005 to 2023 year window. The column
-loss is the 16 panel columns that are identifiers, intermediate quantities or label fields rather
-than predictors. The third restriction, an observable next-year label, then removes no further rows.
-Imputation and scaling happen inside the training pipeline, so the test period cannot influence
-them.
+Preprocessing reduces that grid to 3,078 rows, and feature selection then keeps 14 of the 44
+candidates, which is the matrix every model in this report was trained and evaluated on. The row loss
+comes from two restrictions: the equine-holding filter, which keeps 162 of the 268
+countries on a maximum equid stock of at least one thousand animals, and the 2005 to 2023 year window.
+The third restriction, an observable next-year label, then removes no further rows.
 
-The exported file is therefore 3,078 rows by 44 feature columns, plus the target column. It is
-committed as \texttt{model\_matrix.csv} under \texttt{data/processed/}, with one row per
-country-year, the 44 feature columns in the order the pipeline receives them, and the
-binary next-year label. The file is written by \texttt{src/11\_export\_model\_matrix.py} from
-the same loader and feature definitions the training script uses, so it cannot drift from what the
-models saw.
+The exported file is therefore 3,078 rows by 14 feature columns, plus the target column.
 
 \section{Preprocessing}
 
@@ -966,28 +958,90 @@ This is the measure behind the collinearity result in Chapter~\ref{ch:results}.
 
 \section{Feature Selection}
 
-Every numeric candidate was screened before fitting, but the screens were read as evidence rather
-than applied as filters. Mutual information and Spearman correlation were computed per column, one
-member of every pair correlated at or above 0.90 was flagged, and variance inflation was computed
-for the leading columns. Four columns fell below both association thresholds: three climate
-anomalies and camel stock.
+The association measures are diagnostics, not filters. They describe how each candidate relates to the
+label on its own, and they are not used to choose the feature set, because a marginal measure and a
+fitted model disagree about what matters (Chapter~\ref{ch:results}). Selection is driven by
+attribution instead, in Section~\ref{sec:shapselect}.
 
-Only one column was actually removed, on structural grounds: \texttt{equids} is exactly the sum of
-horses, asses and mules, which a tree can rebuild from its parts. All flagged columns were retained,
-so the model uses 44 features.
+One column is removed structurally: \texttt{equids} is exactly the sum of horses, asses and mules,
+which a tree can rebuild from its parts. No projection or principal component analysis is applied;
+with 14 retained features and 3,078 rows the binding constraint proved to be signal rather than
+dimensionality, which the ablation in Section~\ref{sec:ablation} supports.
 
-The reason is visible in Chapter~\ref{ch:results}. Those screens measure marginal association, which
-is a poor guide to what a fitted model uses: \texttt{temp\_mean\_anom}, flagged as no signal, is third
-by conditional attribution, ahead of every population variable except total population. A univariate
-pruning rule would have deleted one of the model's strongest predictors, which is the same
-marginal-versus-conditional disagreement the results chapter examines across the full feature set.
+\section{Feature Selection by SHAP}
+\label{sec:shapselect}
 
-No projection or principal component analysis was applied either. With 44 features and
-3,078 rows the binding constraint proved to be signal rather than dimensionality, which the
-ablation in Section~\ref{sec:ablation} supports.
+\subsection*{What SHAP is}
 
-The selection criterion is itself examined in Section~\ref{sec:selection}, where marginal and
-conditional importance are compared.
+SHAP attributes a prediction to its inputs using Shapley values, a construction from cooperative game
+theory. The inputs are players, the prediction is the payout, and a feature's contribution is its
+average marginal effect over every order in which the features could be introduced. For feature $j$,
+with $F$ the full set and $f$ the model,
+\[
+\phi_j = \sum_{S \subseteq F \setminus \{j\}}
+\frac{|S|!\,\big(|F|-|S|-1\big)!}{|F|!}
+\Big[ f\big(S \cup \{j\}\big) - f(S) \Big],
+\]
+where $f(S)$ is the model output using only the features in $S$, the rest marginalised. The values
+satisfy local accuracy ($\sum_j \phi_j$ equals the prediction minus the base rate), missingness (an
+absent feature receives zero) and consistency (if a feature's marginal effect rises in every subset,
+its value cannot fall). The implementation is \texttt{shap.TreeExplainer}, which computes exact
+TreeSHAP values for the tree ensembles, so the attribution is not sampled. Global importance is the
+mean absolute value over the $n$ explained rows, $\bar{\phi}_j = \frac{1}{n}\sum_i |\phi_{ij}|$.
+
+\subsection*{Why attribution rather than association}
+
+The measures in Section~\ref{sec:assoc} ask how a feature relates to the label on its own. Selection
+needs a different question: how much a feature adds to a model that already has the others. The two
+answers diverge here. Mutual information and Spearman correlation rank \texttt{longitude} first and
+\texttt{temp\_mean\_anom} near the bottom, while attribution reverses them, because longitude stands in
+for which continent a country occupies, and the model recovers that from region, population and
+reporting variables. Selecting on association would keep proxy columns and drop conditional signal.
+
+SHAP was the only attribution method used, for three reasons. It is additive and signed, so the same
+values supply the global ranking selection needs and the per-prediction factor list the risk engine
+returns, keeping one explanation mechanism in the platform rather than two. \texttt{TreeExplainer} is
+exact for the tree families in use, and cheap enough to recompute on every training run. And it
+carries the consistency guarantee above, which permutation importance and impurity gain do not:
+impurity gain is biased toward high-cardinality columns, and permutation importance is unstable with
+the correlated inputs this panel has many of.
+
+\subsection*{Procedure and the retained set}
+
+The ranking is computed on the training years only, 2005 to 2017. Fitting on the full panel
+would let the held-out years influence which features were chosen, making the temporal-holdout score
+optimistic. The 42 numeric candidates are ranked by mean absolute SHAP on that window and the
+first 12 are kept, together with the two categorical columns, which are retained because region and
+income band are the reporting-capacity proxies the discussion turns on.
+
+\begin{table}[htbp]
+\centering
+\caption{The 14 features the reported models use, in rank order by mean absolute SHAP on the
+training years, with the unit each variable is measured in. The set carries 65\% of the total
+attribution across all 42 candidates.}
+\label{tab:selected}
+\small
+\begin{tabular}{@{}rlp{4.6cm}r@{}}
+\toprule
+\textbf{Rank} & \textbf{Feature} & \textbf{Unit as measured} & \textbf{Mean $|\phi|$} \\
+\midrule
+1 & \texttt{pop\_total} & persons & 0.956 \\
+2 & \texttt{years\_since\_last} & years (99 = none) & 0.698 \\
+3 & \texttt{temp\_mean\_anom} & $^\circ$C from baseline & 0.524 \\
+4 & \texttt{internet\_pct} & \% of population & 0.449 \\
+5 & \texttt{precip\_cv} & ratio (sd/mean) & 0.383 \\
+6 & \texttt{humidity\_anom} & \% RH from baseline & 0.380 \\
+7 & \texttt{goats} & head & 0.341 \\
+8 & \texttt{cattle} & head & 0.339 \\
+9 & \texttt{equid\_growth\_1y} & fraction per year & 0.339 \\
+10 & \texttt{precip\_sum\_anom} & mm from baseline & 0.328 \\
+11 & \texttt{log\_livestock} & ln(1 + LSU) & 0.311 \\
+12 & \texttt{temp\_max} & $^\circ$C & 0.278 \\
+13 & \texttt{region} & World Bank region & -- \\
+14 & \texttt{income} & World Bank income band & -- \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \section{Models}
 
@@ -1004,11 +1058,11 @@ includes a deliberately simple reference.
 \textbf{Model} & \textbf{Family} & \textbf{Selected configuration} \\
 \midrule
 \textbf{Logistic regression} & linear & Additive model with balanced class weights; the reference baseline.\par\vspace{2pt}{\footnotesize Tuned settings: $C=1.0$, $\ell_2$ penalty, balanced class weights} \\
-\textbf{Decision tree} & tree & Single shallow tree; interpretable, and a low-variance check on ensemble gains.\par\vspace{2pt}{\footnotesize Tuned settings: depth 3, minimum leaf size 1, criterion entropy} \\
-\textbf{Random forest} & bagged trees & Bagged trees over random subsets; variance control at small positive counts.\par\vspace{2pt}{\footnotesize Tuned settings: depth 6, minimum leaf size 1, features per split square root of the column count} \\
+\textbf{Decision tree} & tree & Single shallow tree; interpretable, and a low-variance check on ensemble gains.\par\vspace{2pt}{\footnotesize Tuned settings: depth 4, minimum leaf size 40, criterion entropy} \\
+\textbf{Random forest} & bagged trees & Bagged trees over random subsets; variance control at small positive counts.\par\vspace{2pt}{\footnotesize Tuned settings: depth 6, minimum leaf size 10, features per split 0.3} \\
 \textbf{Extra trees} & bagged trees & Bagged trees with randomised split thresholds; further decorrelation when positives are scarce.\par\vspace{2pt}{\footnotesize Tuned settings: depth 6, minimum leaf size 10, features per split 0.3} \\
 \textbf{XGBoost} & boosted trees & Boosted trees with explicit regularisation.\par\vspace{2pt}{\footnotesize Tuned settings: depth 3, regularisation $\lambda=1.0$, minimum child weight 5} \\
-\textbf{LightGBM} & boosted trees & Leaf-wise boosted trees; efficient comparison on wide tabular data.\par\vspace{2pt}{\footnotesize Tuned settings: leaves 15, minimum child samples 40, regularisation $\lambda=1.0$} \\
+\textbf{LightGBM} & boosted trees & Leaf-wise boosted trees; efficient comparison on wide tabular data.\par\vspace{2pt}{\footnotesize Tuned settings: leaves 31, minimum child samples 40, regularisation $\lambda=3.0$} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1020,7 +1074,7 @@ trees are bagged ensembles \cite{breiman2001}, differing in the degree of random
 split selection.
 XGBoost and LightGBM are boosted ensembles, differing in tree growth strategy \cite{chen2016,ke2017}.
 
-Neural networks were excluded on evidential grounds: with 172 positives and 44
+Neural networks were excluded on evidential grounds: with 172 positives and 14
 features a network has more parameters than examples and would memorise the training period.
 
 \section{Chained Pipeline}
@@ -1432,7 +1486,7 @@ numerical behaviour and every downstream number moves without anyone noticing.
 
 The full computation runs in approximately 4.5 minutes on a laptop processor without a
 graphics accelerator, using an Apple M4 processor with 10 cores and 16 GB of unified memory. Per-family fitting time at the country-year level ranges
-from 1.9 seconds for the decision tree to 50.7 seconds for LightGBM.
+from 1.6 seconds for the decision tree to 67.1 seconds for LightGBM.
 
 A single module-level seed governs model fitting, cross-validation splitting, bootstrap resampling
 and SHAP sampling. Software versions are Python 3.12.13, scikit-learn 1.9.1, XGBoost 3.4.1, LightGBM 4.7.0, SHAP 0.54.1, NumPy 2.5.4, pandas 3.1.1, SciPy 1.18.1. Raw payloads are cached under
@@ -2021,7 +2075,7 @@ ordered. Block structure indicates the collinear groups that motivated redundanc
 
 The most consequential finding in this section concerns the choice of selection criterion.
 Marginal association and conditional importance disagree almost completely. The rank correlation
-between mutual information and SHAP attribution \cite{lundberg2017} is -0.03, and only 5 of the ten
+between mutual information and SHAP attribution \cite{lundberg2017} is +0.31, and only 8 of the ten
 highest-ranked features are shared between the two orderings. \texttt{longitude} ranks first on
 marginal correlation and approximately twentieth on conditional importance, because once
 population and history are conditioned upon it carries little additional information. It
@@ -2053,14 +2107,14 @@ alongside for comparison.}
 \textbf{Rank} & \textbf{Feature} & \textbf{Mean $|$SHAP$|$} & \textbf{Spearman $\rho$} &
 \textbf{Mutual info} & \textbf{VIF} \\
 \midrule
-1 & pop\_total & 1.144 & +0.28 & 0.0639 & 4 \\
-2 & internet\_pct & 0.542 & +0.09 & 0.0015 & 5 \\
-3 & temp\_mean\_anom & 0.469 & -0.00 & 0.0012 & 2 \\
-4 & log\_livestock & 0.458 & +0.25 & 0.0571 & 3 \\
-5 & humidity\_anom & 0.370 & +0.02 & 0.0066 & 2 \\
-6 & years\_since\_last & 0.353 & -0.35 & 0.0486 & 2 \\
-7 & wind & 0.346 & -0.08 & 0.0210 & 3 \\
-8 & sheep & 0.344 & +0.20 & 0.0512 & 13 \\
+1 & pop\_total & 1.476 & +0.28 & 0.0639 & 4 \\
+2 & internet\_pct & 0.896 & +0.09 & 0.0015 & 5 \\
+3 & goats & 0.661 & +0.19 & 0.0422 & 27 \\
+4 & log\_livestock & 0.626 & +0.25 & 0.0571 & 3 \\
+5 & precip\_cv & 0.609 & -0.01 & 0.0006 & 2 \\
+6 & temp\_mean\_anom & 0.598 & -0.00 & 0.0012 & 2 \\
+7 & years\_since\_last & 0.576 & -0.35 & 0.0486 & 2 \\
+8 & cattle & 0.548 & +0.25 & 0.0512 & 7 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -2095,23 +2149,24 @@ on the temporal holdout.}
  & \textbf{(time)} & \textbf{on PR-AUC} & \textbf{(time)} & \textbf{(country)} &
 \textbf{(rep.\ CV)} & & & \\
 \midrule
-Logistic regression & 0.454 & [0.34, 0.58] & 0.812 & 0.223 & 0.414 & 0.0547 & 0.25 / 0.57 \\
-Decision tree & 0.389 & [0.29, 0.50] & 0.861 & 0.267 & 0.360 & 0.0602 & 0.49 / 0.53 \\
-Random forest & 0.554 & [0.43, 0.66] & 0.870 & 0.304 & 0.476 & 0.0503 & 0.53 / 0.50 \\
-Extra trees & 0.530 & [0.42, 0.64] & 0.854 & 0.363 & 0.476 & 0.0535 & 0.47 / 0.51 \\
-XGBoost & 0.485 & [0.37, 0.60] & 0.844 & 0.281 & 0.423 & 0.0536 & 0.61 / 0.38 \\
-LightGBM & 0.496 & [0.38, 0.61] & 0.841 & 0.339 & 0.397 & 0.0534 & 0.65 / 0.30 \\
+Logistic regression & 0.446 & [0.34, 0.57] & 0.863 & 0.336 & 0.424 & 0.0543 & 0.30 / 0.65 \\
+Decision tree & 0.424 & [0.32, 0.53] & 0.860 & 0.240 & 0.339 & 0.0590 & 0.44 / 0.49 \\
+Random forest & 0.518 & [0.40, 0.63] & 0.865 & 0.318 & 0.449 & 0.0524 & 0.52 / 0.49 \\
+Extra trees & 0.516 & [0.41, 0.62] & 0.860 & 0.284 & 0.453 & 0.0543 & 0.46 / 0.51 \\
+XGBoost & 0.432 & [0.32, 0.55] & 0.842 & 0.292 & 0.397 & 0.0557 & 0.52 / 0.43 \\
+LightGBM & 0.452 & [0.34, 0.57] & 0.840 & 0.311 & 0.385 & 0.0548 & 0.58 / 0.38 \\
 \bottomrule
 \end{tabular}}
 \end{table}
 
-Against a base rate of 5.59\%, the strongest temporal result of 0.554 represents an
-approximately 10-fold lift. Every tree-based model exceeds the logistic baseline, and the
-single decision tree is the weakest of the six, which indicates that the relationships are
-interactive rather than additive.
+Two results need separating. On the forward temporal holdout the best discrimination comes from
+Random forest at 0.518, against a base rate of 5.59\%, roughly a 9-fold lift.
+Under leave-country-out validation the ranking inverts: Random forest falls to 0.318, while
+logistic regression holds 0.336 at a temporal score of 0.446 and so becomes the champion on
+the criterion that governs selection. The single decision tree is weakest on both schemes.
 
 The more important pattern is the systematic decline under leave-country-out validation. For
-Random Forest the score falls from 0.554 to 0.304, and the decline exceeds the width of the
+Random Forest the score falls from 0.518 to 0.318, and the decline exceeds the width of the
 bootstrap interval for every family. This is the expected signature of learning country-specific
 structure, and it is the estimate that should be quoted for deployment.
 
@@ -2138,7 +2193,7 @@ separates the families.
 \section{Calibration}
 
 Predictions from the selected model are well calibrated, with an expected calibration error of
-0.016 and a Brier score of 0.0535. A stated risk of twenty-four per cent corresponds to an
+0.025 and a Brier score of 0.0543. A stated risk of twenty-four per cent corresponds to an
 observed event frequency of approximately twenty-four per cent. This property is what makes a
 threshold-based alert defensible, since a message quoting a probability must be numerically
 trustworthy.
@@ -2223,8 +2278,8 @@ occurrence model.
 \toprule
 \textbf{Variant} & \textbf{PR-AUC (time)} & \textbf{ROC-AUC (time)} & \textbf{PR-AUC (country)} \\
 \midrule
-Plain (no chained feature) & 0.530 & 0.854 & 0.363 \\
-Chained (population forecast added) & 0.527 & 0.853 & 0.344 \\
+Plain (no chained feature) & 0.454 & 0.812 & 0.223 \\
+Chained (population forecast added) & 0.456 & 0.812 & 0.223 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -2232,11 +2287,11 @@ Chained (population forecast added) & 0.527 & 0.853 & 0.344 \\
 The population forecast performs well as a forecast, with a mean absolute error of 0.424 on the
 log scale and a Spearman correlation of 0.976. The intensity stage is weaker but usable, with a
 mean absolute error of 0.150 and a rank correlation of 0.465 among positive observations. The
-hurdle product ranks expected annual event burden with a Spearman correlation of 0.326, and its
-highest decile captures 70 of 106 observed events.
+hurdle product ranks expected annual event burden with a Spearman correlation of 0.291, and its
+highest decile captures 68 of 106 observed events.
 
 Appending the stage-one forecast to the occurrence model changes temporal PR-AUC by
--0.003, which is inside the noise band. The explanation is structural rather than a failure
++0.002, which is inside the noise band. The explanation is structural rather than a failure
 of tuning. Population magnitude is already a direct feature of the occurrence model, so
 forecasting it and appending the forecast supplies a less accurate copy of information the model
 already holds. Chaining is expected to assist where the intermediate quantity cannot be observed
@@ -2248,12 +2303,12 @@ architectures for this problem class.
 \section{Alert Economics}
 \label{sec:alerts}
 
-The operating characteristics of the model as a warning system are shown in
-Figure~\ref{fig:alerts}. Alerting the six per cent of country-years with the highest predicted
-risk captures approximately half of all observed events, and alerting twenty-eight per cent
-captures eighty per cent. Uniform alerting would require full coverage for the same recall, so the
-model is roughly eight times more efficient than arbitrary selection at the fifty per cent
-operating point.
+The operating characteristics of the champion model as a warning system are shown in
+Figure~\ref{fig:alerts}. Alerting the six per cent of country-years at highest predicted risk
+captures 43 per cent of observed events, half of them are reached at an alert budget of
+10 per cent, and eighty per cent at 29 per cent. Uniform alerting would require
+full coverage for the same recall, so the model is about 5.2 times more efficient than
+arbitrary selection at the fifty per cent operating point.
 
 \begin{figure}[htbp]
 \centering
@@ -2279,11 +2334,11 @@ are few recorded events from which to learn in those strata.
 \toprule
 \textbf{Region} & \textbf{Observations} & \textbf{Events} & \textbf{ROC-AUC} & \textbf{PR-AUC} \\
 \midrule
-East Asia \& Pacific & 456 & 48 & 0.865 & 0.396 \\
-Europe \& Central Asia & 912 & 31 & 0.826 & 0.163 \\
-Latin America \& Caribbean & 551 & 12 & 0.903 & 0.381 \\
-MENA, Afghanistan and Pakistan & 380 & 23 & 0.834 & 0.220 \\
-Sub-Saharan Africa & 665 & 27 & 0.699 & 0.073 \\
+East Asia \& Pacific & 456 & 48 & 0.860 & 0.410 \\
+Europe \& Central Asia & 912 & 31 & 0.840 & 0.167 \\
+Latin America \& Caribbean & 551 & 12 & 0.905 & 0.418 \\
+MENA, Afghanistan and Pakistan & 380 & 23 & 0.815 & 0.210 \\
+Sub-Saharan Africa & 665 & 27 & 0.627 & 0.088 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -2299,9 +2354,9 @@ Sub-Saharan Africa & 665 & 27 & 0.699 & 0.073 \\
 
 The results support four conclusions.
 
-The model has predictive skill. A precision-recall AUC of 0.554 against a base rate of
-5.59\% is not explainable by chance, it survives a strictly forward-looking temporal split,
-and the probabilities are calibrated to within two percentage points.
+The model has predictive skill. Logistic Regression reaches a precision-recall AUC of 0.446 against a base
+rate of 5.59\%, survives a strictly forward-looking temporal split, holds 0.336 across
+unseen countries, and is calibrated to within 0.025.
 
 The skill does not transfer intact. Leave-country-out performance is roughly forty per cent lower
 in relative terms, and this is the correct figure for planning. Any deployment to a new country
@@ -2335,8 +2390,8 @@ probability, the retrieval-augmented layer that explains it against official gui
 alert service that turns it into a small number of messages.
 
 Prediction is possible, and the achievable performance is moderate. On a strictly forward-looking temporal holdout the strongest model reaches a
-precision-recall AUC of 0.554 against a base rate of 5.59\%, an approximately 10-fold
-lift, with an expected calibration error of 0.016. Used as a warning system, it captures half of
+precision-recall AUC of 0.446 against a base rate of 5.59\%, an approximately 8-fold
+lift, with an expected calibration error of 0.025. Used as a warning system, it captures half of
 all observed events while alerting six per cent of country-years.
 
 The skill is fragile across geography. Leave-country-out performance is approximately forty per

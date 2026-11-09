@@ -60,6 +60,60 @@ SOCIO = [
 GEO = ["abs_lat", "lon"]
 CATEGORICAL = ["region", "income"]
 
+# Measurement unit of every feature, as the source reports it. Used by the report
+# tables and the dataset export so the unit is stated once, here.
+FEATURE_UNITS = {
+    # disease history
+    "occ_lag1": "0/1",
+    "occ_lag2": "0/1",
+    "occ_count_lag1": "events",
+    "occ_count_5y": "events",
+    "years_since_last": "years (99 = none)",
+    "global_occ_share": "share, 0-1",
+    "region_occ_share": "share, 0-1",
+    # population (FAOSTAT stocks are head counts, unit code "An")
+    "log_equids": "ln(1 + head)",
+    "log_livestock": "ln(1 + LSU)",
+    "equid_share": "ratio",
+    "equid_density": r"head per 100 km$^2$",
+    "equid_growth_1y": "fraction per year",
+    "equid_growth_3y": "fraction per 3 years",
+    "horses": "head",
+    "asses": "head",
+    "mules": "head",
+    "cattle": "head",
+    "goats": "head",
+    "sheep": "head",
+    "camels": "head",
+    "livestock_prod_index": "index (2014-16 = 100)",
+    # climate (NASA POWER, AG community)
+    "temp_mean": r"$^\circ$C",
+    "temp_max": r"$^\circ$C",
+    "temp_min": r"$^\circ$C",
+    "precip_sum": "mm per year",
+    "precip_cv": "ratio (sd/mean)",
+    "humidity": "% RH",
+    "wind": r"m s$^{-1}$",
+    "temp_mean_anom": r"$^\circ$C from baseline",
+    "precip_sum_anom": "mm from baseline",
+    "humidity_anom": "% RH from baseline",
+    # socio-geography (World Bank)
+    "gdp_pc": "current US$ per person",
+    "rural_pct": "% of population",
+    "agri_land_pct": "% of land area",
+    "agri_va_pct_gdp": "% of GDP",
+    "internet_pct": "% of population",
+    "fertilizer_pct": "kg per ha arable",
+    "life_expectancy": "years",
+    "pop_total": "persons",
+    "pop_density": r"persons per km$^2$",
+    "abs_lat": "degrees",
+    "lon": "degrees",
+    # categorical
+    "region": "World Bank region",
+    "income": "World Bank income band",
+}
+
 FULL = HISTORY + POPULATION + CLIMATE + SOCIO + GEO
 CHAIN_FEATURE = "stage1_equid_pred"
 

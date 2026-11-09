@@ -258,7 +258,7 @@ columns carry overlapping information.
 \paragraph{Where the two importance measures disagree.} This is the result that shaped the
 whole feature set. We compared how much each column correlates with the answer on its own
 with how much the trained model actually relies on it, using SHAP. The two rankings agreed
-almost not at all, with a rank correlation of -0.03 and only 5 of the 10 top features
+almost not at all, with a rank correlation of +0.31 and only 5 of the 10 top features
 shared. Longitude is the clearest case: it ranks first on simple correlation and around
 twentieth in what the model uses. The explanation is that longitude does not cause
 glanders. It identifies which part of the world a country is in, and some parts publish
@@ -278,14 +278,14 @@ alongside. The gap between the two sets of numbers is the disagreement described
 \textbf{Rank} & \textbf{Feature} & \textbf{Importance} & \textbf{Correlation} & \textbf{Mutual info} & \textbf{Redundancy} \\
  & & \textbf{(mean $|$SHAP$|$)} & \textbf{(Spearman $\rho$)} & \textbf{(MI)} & \textbf{(VIF)} \\
 \midrule
-1 & pop\_total & 1.144 & +0.28 & 0.0639 & 4 \\
-2 & internet\_pct & 0.542 & +0.09 & 0.0015 & 5 \\
-3 & temp\_mean\_anom & 0.469 & -0.00 & 0.0012 & 2 \\
-4 & log\_livestock & 0.458 & +0.25 & 0.0571 & 3 \\
-5 & humidity\_anom & 0.370 & +0.02 & 0.0066 & 2 \\
-6 & years\_since\_last & 0.353 & -0.35 & 0.0486 & 2 \\
-7 & wind & 0.346 & -0.08 & 0.0210 & 3 \\
-8 & sheep & 0.344 & +0.20 & 0.0512 & 13 \\
+1 & pop\_total & 1.476 & +0.28 & 0.0639 & 4 \\
+2 & internet\_pct & 0.896 & +0.09 & 0.0015 & 5 \\
+3 & goats & 0.661 & +0.19 & 0.0422 & 27 \\
+4 & log\_livestock & 0.626 & +0.25 & 0.0571 & 3 \\
+5 & precip\_cv & 0.609 & -0.01 & 0.0006 & 2 \\
+6 & temp\_mean\_anom & 0.598 & -0.00 & 0.0012 & 2 \\
+7 & years\_since\_last & 0.576 & -0.35 & 0.0486 & 2 \\
+8 & cattle & 0.548 & +0.25 & 0.0512 & 7 \\
 \bottomrule
 \end{tabular}}
 \end{table}
@@ -305,8 +305,8 @@ tree models are indifferent to it.
 \label{sec:features}
 % =====================================================================
 
-A feature is an input column, and all 44 of them use information available in the current
-year or earlier. They fall into four groups.
+A feature is an input column. Forty-four were engineered and fourteen are used, all of them built
+from information available in the current year or earlier. The candidates fall into four groups.
 
 \begin{itemize}
 \setlength{\itemsep}{0.15em}
@@ -350,11 +350,11 @@ gives each model's family, what it does, and the settings the tuning search pick
 \textbf{Model} & \textbf{Family} & \textbf{What it does, and the settings chosen} \\
 \midrule
 Logistic Regression & linear & Adds the inputs with fixed weights and squashes the total into a 0--1 score. The honest baseline: if the complex models cannot beat it, the complexity is not worth it.\par\vspace{3pt}{\scriptsize Tuned settings: \emph{$C=1.0$, $\ell_2$ penalty, balanced class weights}} \\
-Decision Tree & tree & A flowchart of yes/no questions, for example ``horses $>$ 10,000? then last outbreak $<$ 2 years ago?''. Easy to read, but one tree is weak, which is part of why we included it.\par\vspace{3pt}{\scriptsize Tuned settings: \emph{depth 3, minimum leaf size 1, split criterion entropy}} \\
-Random Forest & bagged trees & 500 trees, each trained on a random part of the data, then they vote. Fixes the single tree's habit of memorising.\par\vspace{3pt}{\scriptsize Tuned settings: \emph{depth 6, minimum leaf size 1, features per split square root of the column count}} \\
+Decision Tree & tree & A flowchart of yes/no questions, for example ``horses $>$ 10,000? then last outbreak $<$ 2 years ago?''. Easy to read, but one tree is weak, which is part of why we included it.\par\vspace{3pt}{\scriptsize Tuned settings: \emph{depth 4, minimum leaf size 40, split criterion entropy}} \\
+Random Forest & bagged trees & 500 trees, each trained on a random part of the data, then they vote. Fixes the single tree's habit of memorising.\par\vspace{3pt}{\scriptsize Tuned settings: \emph{depth 6, minimum leaf size 10, features per split 0.3}} \\
 Extra Trees & bagged trees & Same idea, with splits chosen more randomly. Extra randomness helps when examples are scarce, as they are here.\par\vspace{3pt}{\scriptsize Tuned settings: \emph{depth 6, minimum leaf size 10, features per split 0.3}} \\
 XGBoost & boosted trees & Trees built one after another, each fixing the previous mistakes. The strongest standard method for tables like ours.\par\vspace{3pt}{\scriptsize Tuned settings: \emph{depth 3, regularisation $\lambda=1.0$, minimum child weight 5}} \\
-LightGBM & boosted trees & Same family as XGBoost with a faster algorithm. A speed comparison, often slightly better on wide data.\par\vspace{3pt}{\scriptsize Tuned settings: \emph{leaves 15, minimum child samples 40, regularisation $\lambda=1.0$}} \\
+LightGBM & boosted trees & Same family as XGBoost with a faster algorithm. A speed comparison, often slightly better on wide data.\par\vspace{3pt}{\scriptsize Tuned settings: \emph{leaves 31, minimum child samples 40, regularisation $\lambda=3.0$}} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -564,7 +564,7 @@ compared with other papers.
 \paragraph{Calibration.} A ranking can sort countries, but a message quoting a ``30\%
 chance'' needs that number to be true. We group predictions into buckets and compare each
 bucket's average prediction with how often the event happened. The averaged gap is
-the expected calibration error, or 0.016, which is 0.016 here. The correction is fitted on
+the expected calibration error, or 0.025, which is 0.025 here. The correction is fitted on
 training data only, and it never reorders rows, only the numbers on the axis.
 
 \paragraph{SHAP.} SHAP comes from cooperative game theory. If each feature were a player
@@ -636,12 +636,12 @@ alert threshold on the time split.}
  & \textbf{(time split)} & \textbf{on PR-AUC} & \textbf{(time split)} &
 \textbf{(country split)} & \textbf{(time split)} & \textbf{(time split)} \\
 \midrule
-Logistic regression & 0.454 & [0.34, 0.58] & 0.812 & 0.223 & 0.25 & 0.57 \\
-Decision tree & 0.389 & [0.29, 0.50] & 0.861 & 0.267 & 0.49 & 0.53 \\
-Random forest & 0.554 & [0.43, 0.66] & 0.870 & 0.304 & 0.53 & 0.50 \\
-Extra trees & 0.530 & [0.42, 0.64] & 0.854 & 0.363 & 0.47 & 0.51 \\
-XGBoost & 0.485 & [0.37, 0.60] & 0.844 & 0.281 & 0.61 & 0.38 \\
-LightGBM & 0.496 & [0.38, 0.61] & 0.841 & 0.339 & 0.65 & 0.30 \\
+Logistic regression & 0.446 & [0.34, 0.57] & 0.863 & 0.336 & 0.30 & 0.65 \\
+Decision tree & 0.424 & [0.32, 0.53] & 0.860 & 0.240 & 0.44 & 0.49 \\
+Random forest & 0.518 & [0.40, 0.63] & 0.865 & 0.318 & 0.52 & 0.49 \\
+Extra trees & 0.516 & [0.41, 0.62] & 0.860 & 0.284 & 0.46 & 0.51 \\
+XGBoost & 0.432 & [0.32, 0.55] & 0.842 & 0.292 & 0.52 & 0.43 \\
+LightGBM & 0.452 & [0.34, 0.57] & 0.840 & 0.311 & 0.58 & 0.38 \\
 \bottomrule
 \end{tabular}}
 \end{table}
@@ -650,15 +650,15 @@ The two PR-AUC columns measure the same thing on different tests. Time split tra
 to 2017 and tests on 2018 to 2023. Country split trains without some countries and tests on
 those, which is harder and closer to real use. Neither is a precision score.
 
-PR-AUC sits at 0.056 for a model with no skill, and our best reaches 0.554, about 10
-times better than guessing. Precision 0.53 means that when the model warns about a country
-it is right slightly more than half the time. Recall 0.50 means it catches half the real
-events and misses the rest. The uncertainty column is wide: with 74 positives in the test
-years the score could sit anywhere in that range. We can say these models beat the
-baseline. We cannot say 0.554 is reliably better than 0.530.
+PR-AUC sits at 0.056 for a model with no skill. On the time split the best model reaches
+0.518; on the country split, which is closer to real use, the logistic regression leads at
+0.336. The uncertainty column is wide: with 74 positives in the test years a score can
+move a long way within that range, so neighbouring models should not be separated with
+confidence.
 
-Every tree-based model beats logistic regression and the single tree comes last, so the real
-relationships involve combinations of factors rather than one at a time.
+The ensembles lead on the time split, but on the country split the logistic regression is
+ahead, and the single tree comes last on both. With only fourteen inputs the relationships are
+close enough to additive that a regularised linear model transfers best.
 
 
 

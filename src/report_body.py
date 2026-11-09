@@ -57,24 +57,16 @@ prevents rows such as ``World'' or ``South Asia'' from entering the panel as if 
 countries.
 
 Combining the four sources produces a grid of @PANELROWS@ country-year rows across
-@PANELCOUNTRIES@ countries for 2000 to 2024, in 60 columns: raw stocks, covariates, derived rates
-and label fields.
+@PANELCOUNTRIES@ countries for 2000 to 2024, in 60 columns: 44 engineered candidate features, three
+identifiers, five label fields and eight intermediate quantities from which the features are derived.
 
-Preprocessing reduces that grid to @ROWS@ rows and @FEATURES@ feature columns, excluding the target,
-which is the matrix every model here was trained and evaluated on. The row loss comes from two
-restrictions: the equine-holding filter, which keeps 162 of the @PANELCOUNTRIES@ countries on a
-maximum equid stock of at least one thousand animals, and the 2005 to 2023 year window. The column
-loss is the 16 panel columns that are identifiers, intermediate quantities or label fields rather
-than predictors. The third restriction, an observable next-year label, then removes no further rows.
-Imputation and scaling happen inside the training pipeline, so the test period cannot influence
-them.
+Preprocessing reduces that grid to @ROWS@ rows, and feature selection then keeps @SELN@ of the 44
+candidates, which is the matrix every model in this report was trained and evaluated on. The row loss
+comes from two restrictions: the equine-holding filter, which keeps 162 of the @PANELCOUNTRIES@
+countries on a maximum equid stock of at least one thousand animals, and the 2005 to 2023 year window.
+The third restriction, an observable next-year label, then removes no further rows.
 
-The exported file is therefore @ROWS@ rows by 44 feature columns, plus the target column. It is
-committed as \texttt{model\_matrix.csv} under \texttt{data/processed/}, with one row per
-country-year, the @FEATURES@ feature columns in the order the pipeline receives them, and the
-binary next-year label. The file is written by \texttt{src/11\_export\_model\_matrix.py} from
-the same loader and feature definitions the training script uses, so it cannot drift from what the
-models saw.
+The exported file is therefore @ROWS@ rows by @SELN@ feature columns, plus the target column.
 
 \section{Preprocessing}
 
@@ -183,28 +175,77 @@ This is the measure behind the collinearity result in Chapter~\ref{ch:results}.
 
 \section{Feature Selection}
 
-Every numeric candidate was screened before fitting, but the screens were read as evidence rather
-than applied as filters. Mutual information and Spearman correlation were computed per column, one
-member of every pair correlated at or above 0.90 was flagged, and variance inflation was computed
-for the leading columns. Four columns fell below both association thresholds: three climate
-anomalies and camel stock.
+The association measures are diagnostics, not filters. They describe how each candidate relates to the
+label on its own, and they are not used to choose the feature set, because a marginal measure and a
+fitted model disagree about what matters (Chapter~\ref{ch:results}). Selection is driven by
+attribution instead, in Section~\ref{sec:shapselect}.
 
-Only one column was actually removed, on structural grounds: \texttt{equids} is exactly the sum of
-horses, asses and mules, which a tree can rebuild from its parts. All flagged columns were retained,
-so the model uses @FEATURES@ features.
+One column is removed structurally: \texttt{equids} is exactly the sum of horses, asses and mules,
+which a tree can rebuild from its parts. No projection or principal component analysis is applied;
+with @SELN@ retained features and @ROWS@ rows the binding constraint proved to be signal rather than
+dimensionality, which the ablation in Section~\ref{sec:ablation} supports.
 
-The reason is visible in Chapter~\ref{ch:results}. Those screens measure marginal association, which
-is a poor guide to what a fitted model uses: \texttt{temp\_mean\_anom}, flagged as no signal, is third
-by conditional attribution, ahead of every population variable except total population. A univariate
-pruning rule would have deleted one of the model's strongest predictors, which is the same
-marginal-versus-conditional disagreement the results chapter examines across the full feature set.
+\section{Feature Selection by SHAP}
+\label{sec:shapselect}
 
-No projection or principal component analysis was applied either. With @FEATURES@ features and
-@ROWS@ rows the binding constraint proved to be signal rather than dimensionality, which the
-ablation in Section~\ref{sec:ablation} supports.
+\subsection*{What SHAP is}
 
-The selection criterion is itself examined in Section~\ref{sec:selection}, where marginal and
-conditional importance are compared.
+SHAP attributes a prediction to its inputs using Shapley values, a construction from cooperative game
+theory. The inputs are players, the prediction is the payout, and a feature's contribution is its
+average marginal effect over every order in which the features could be introduced. For feature $j$,
+with $F$ the full set and $f$ the model,
+\[
+\phi_j = \sum_{S \subseteq F \setminus \{j\}}
+\frac{|S|!\,\big(|F|-|S|-1\big)!}{|F|!}
+\Big[ f\big(S \cup \{j\}\big) - f(S) \Big],
+\]
+where $f(S)$ is the model output using only the features in $S$, the rest marginalised. The values
+satisfy local accuracy ($\sum_j \phi_j$ equals the prediction minus the base rate), missingness (an
+absent feature receives zero) and consistency (if a feature's marginal effect rises in every subset,
+its value cannot fall). The implementation is \texttt{shap.TreeExplainer}, which computes exact
+TreeSHAP values for the tree ensembles, so the attribution is not sampled. Global importance is the
+mean absolute value over the $n$ explained rows, $\bar{\phi}_j = \frac{1}{n}\sum_i |\phi_{ij}|$.
+
+\subsection*{Why attribution rather than association}
+
+The measures in Section~\ref{sec:assoc} ask how a feature relates to the label on its own. Selection
+needs a different question: how much a feature adds to a model that already has the others. The two
+answers diverge here. Mutual information and Spearman correlation rank \texttt{longitude} first and
+\texttt{temp\_mean\_anom} near the bottom, while attribution reverses them, because longitude stands in
+for which continent a country occupies, and the model recovers that from region, population and
+reporting variables. Selecting on association would keep proxy columns and drop conditional signal.
+
+SHAP was the only attribution method used, for three reasons. It is additive and signed, so the same
+values supply the global ranking selection needs and the per-prediction factor list the risk engine
+returns, keeping one explanation mechanism in the platform rather than two. \texttt{TreeExplainer} is
+exact for the tree families in use, and cheap enough to recompute on every training run. And it
+carries the consistency guarantee above, which permutation importance and impurity gain do not:
+impurity gain is biased toward high-cardinality columns, and permutation importance is unstable with
+the correlated inputs this panel has many of.
+
+\subsection*{Procedure and the retained set}
+
+The ranking is computed on the training years only, 2005 to @SELTRAINEND@. Fitting on the full panel
+would let the held-out years influence which features were chosen, making the temporal-holdout score
+optimistic. The @SELCAND@ numeric candidates are ranked by mean absolute SHAP on that window and the
+first @SELK@ are kept, together with the two categorical columns, which are retained because region and
+income band are the reporting-capacity proxies the discussion turns on.
+
+\begin{table}[htbp]
+\centering
+\caption{The @SELN@ features the reported models use, in rank order by mean absolute SHAP on the
+training years, with the unit each variable is measured in. The set carries @SELSHARE@ of the total
+attribution across all @SELCAND@ candidates.}
+\label{tab:selected}
+\small
+\begin{tabular}{@{}rlp{4.6cm}r@{}}
+\toprule
+\textbf{Rank} & \textbf{Feature} & \textbf{Unit as measured} & \textbf{Mean $|\phi|$} \\
+\midrule
+@SELROWS@
+\bottomrule
+\end{tabular}
+\end{table}
 
 \section{Models}
 

@@ -15,6 +15,7 @@ any reported number, and it keeps each row readable.
 from __future__ import annotations
 
 import importlib.util
+import json
 import pathlib
 import sys
 
@@ -33,12 +34,22 @@ _spec.loader.exec_module(TE)
 OUT = ROOT / "data" / "processed" / "model_matrix.csv"
 
 IDENTIFIERS = ["iso3", "year"]
-FEATURES = C.FULL + C.CATEGORICAL
 TARGET = "y_occ_next"
+
+_spec = ROOT / "reports" / "selected_features.json"
+
+
+def feature_list() -> list[str]:
+    """The features the reported models use: the SHAP-selected set, not all candidates."""
+    if _spec.exists():
+        sel = json.loads(_spec.read_text())
+        return sel["numeric"] + sel["categorical"]
+    return C.FULL + C.CATEGORICAL
 
 
 def main() -> None:
     df = TE.load_level1()
+    FEATURES = feature_list()
 
     missing = [c for c in FEATURES if c not in df.columns]
     if missing:
@@ -48,7 +59,7 @@ def main() -> None:
 
     # Round the numeric features so each row stays readable in an editor. Integer
     # stock counts are left exact. This file is an export, not a training input.
-    num_cols = [c for c in C.FULL if c in out.columns
+    num_cols = [c for c in FEATURES if c in out.columns
                 and out[c].dtype.kind == "f"]
     out[num_cols] = out[num_cols].round(6)
 
@@ -56,7 +67,8 @@ def main() -> None:
 
     print(f"wrote {OUT.relative_to(ROOT)}")
     print(f"  rows      : {len(out):,}")
-    print(f"  features  : {len(FEATURES)} ({len(C.FULL)} numeric + {len(C.CATEGORICAL)} categorical)")
+    n_num = sum(1 for f in FEATURES if f in C.FULL)
+    print(f"  features  : {len(FEATURES)} ({n_num} numeric + {len(FEATURES) - n_num} categorical)")
     print(f"  positives : {int(out[TARGET].sum())}")
     print(f"  prevalence: {out[TARGET].mean() * 100:.2f}%")
     print(f"  countries : {out.iso3.nunique()}")

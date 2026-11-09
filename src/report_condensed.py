@@ -326,23 +326,19 @@ than loaded whole. Names are matched through \texttt{pycountry} with overrides f
 ``World'' never enters the panel as a country.
 
 Combining the four sources produces a grid of @PANELROWS@ country-year rows across
-@PANELCOUNTRIES@ countries for 2000 to 2024, in 60 columns of raw stocks, covariates, derived rates
-and label fields.
+@PANELCOUNTRIES@ countries for 2000 to 2024, in 60 columns: 44 engineered candidate features, three
+identifiers, five label fields and eight intermediate quantities.
 
-Preprocessing reduces that grid to @ROWS@ rows and @FEATURES@ feature columns, excluding the target.
-The row loss comes from the equine-holding filter, which keeps 162 of the @PANELCOUNTRIES@ countries
-on a maximum equid stock of at least one thousand, and from the 2005 to 2023 year window; applying
-the third restriction, an observable next-year label, removes nothing further. The column loss is the
-16 panel columns that are identifiers, intermediate quantities or label fields rather than
-predictors. Imputation and scaling happen inside the training pipeline, not here, so the test period
-cannot influence them.
+Preprocessing reduces that grid to @ROWS@ rows, and selection keeps @SELN@ of the 44 candidates, which
+is the matrix every model was trained and evaluated on. The row loss comes from the equine-holding
+filter, which keeps 162 of the @PANELCOUNTRIES@ countries on a maximum equid stock of at least one
+thousand, and from the 2005 to 2023 year window; the observable-label restriction then removes nothing
+further. Imputation and scaling happen inside the training pipeline, so the test period cannot
+influence them.
 
-This is the matrix every model was trained and evaluated on: @ROWS@ rows by @FEATURES@ feature
-columns, with @POSITIVES@ positives, plus the target column. It is committed as
-\texttt{model\_matrix.csv} under \texttt{data/}\allowbreak\texttt{processed/}, one row per
-country-year, with the feature columns in pipeline order and the binary next-year label. The file is
-written by \texttt{src/11\_export\_model\_matrix.py} from the same loader and feature definitions the
-training script uses, so it cannot drift from what the models saw.
+The matrix is committed as \texttt{model\_matrix.csv} under \texttt{data/}\allowbreak\texttt{processed/}:
+@ROWS@ rows by @SELN@ feature columns plus the target, written by
+\texttt{src/11\_export\_model\_matrix.py} from the same loader and selection the training script uses.
 
 Events are de-duplicated on country, year and source record identifier, so one paper reporting
 several cases cannot contribute multiple counts. Missing values are median-imputed inside the training
@@ -373,18 +369,15 @@ Three derived features need definition. Equid share is horses, asses and mules o
 Livestock units weight cattle and camels at 0.8 and small ruminants at 0.1, so one number expresses
 grazing pressure across species. Years since the last event uses 99 for no event in the window.
 
-Every numeric candidate was screened, but the screens were read rather than obeyed. Four columns
-fell below both association thresholds, with mutual information under 0.002 and absolute Spearman
-correlation under 0.02, and three near-duplicate pairs were flagged. Only one column was actually
-removed, on structural grounds: \texttt{equids} is exactly the sum of horses, asses and mules, which
-a tree can rebuild from its parts. The flagged columns were retained, so the model uses @FEATURES@
-features.
+The association measures above are diagnostics: they say how each candidate relates to the label on
+its own, and they are not used to choose the feature set, because a marginal measure and a fitted
+model disagree about what matters, as Chapter~\ref{ch:results} shows. Selection is driven by
+attribution instead (Section~\ref{sec:shapselect}).
 
-The reason is visible in Chapter~\ref{ch:results}. Those screens measure marginal
-association, which is a poor guide to what a fitted model uses: \texttt{temp\_mean\_anom}, flagged as
-no signal, is third by conditional attribution, ahead of every population variable except total
-population. A univariate pruning rule would have deleted one of the strongest predictors. No projection was applied either; with @FEATURES@ features and @ROWS@ rows the binding
-constraint is signal rather than dimensionality.
+One column is removed structurally: \texttt{equids} is exactly the sum of horses, asses and mules,
+which a tree can rebuild from its parts. No projection or principal component analysis is applied;
+with @SELN@ retained features and @ROWS@ rows the binding constraint is signal rather than
+dimensionality.
 
 \section{Statistical Association Measures}
 \label{sec:assoc}
@@ -422,6 +415,76 @@ reconstructed from the others, and so how unstable its coefficient would be:
 \]
 where $R_j^2$ comes from regressing $x_j$ on the remaining features. This is the measure behind the
 collinearity result in Chapter~\ref{ch:results}.
+
+\section{Feature Selection by SHAP}
+\label{sec:shapselect}
+
+\subsection{What SHAP is}
+
+SHAP attributes a prediction to its inputs using Shapley values, a construction from cooperative game
+theory. The inputs are players, the prediction is the payout, and a feature's contribution is its
+average marginal effect over every order in which the features could be introduced. For feature $j$,
+with $F$ the full set and $f$ the model,
+\[
+\phi_j = \sum_{S \subseteq F \setminus \{j\}}
+\frac{|S|!\,\big(|F|-|S|-1\big)!}{|F|!}
+\Big[ f\big(S \cup \{j\}\big) - f(S) \Big],
+\]
+where $f(S)$ is the model output using only the features in $S$, with the rest marginalised. The
+values satisfy local accuracy ($\sum_j \phi_j$ equals the prediction minus the base rate),
+missingness (an absent feature gets zero) and consistency (if a feature's marginal effect rises in
+every subset, its value does not fall). The implementation is \texttt{shap.TreeExplainer}, which
+computes exact TreeSHAP values for the tree ensembles, so the attribution is not sampled. Global
+importance is the mean absolute value, $\bar{\phi}_j = \frac{1}{n}\sum_i |\phi_{ij}|$, over the $n$
+rows explained.
+
+\subsection{Why attribution rather than association}
+
+The four measures in Section~\ref{sec:assoc} ask how a feature relates to the label on its own.
+Selection needs a different question: how much a feature adds to a model that already has the others.
+The two answers diverge sharply here. Mutual information and Spearman correlation rank
+\texttt{longitude} first and \texttt{temp\_mean\_anom} near the bottom, while attribution reverses
+them, because longitude is a stand-in for which continent a country sits in and the model can recover
+that from region, population and reporting variables. Selecting on association would therefore keep
+proxy columns and drop the conditional signal.
+
+SHAP was the only attribution method used, for three reasons. It is additive and signed, so the same
+values supply both the global ranking that selection needs and the per-prediction top-factor list the
+risk engine returns, which keeps one explanation mechanism in the platform rather than two.
+\texttt{TreeExplainer} is exact for the tree families in use and therefore cheap enough to recompute
+on every training run. And it carries the consistency guarantee above, which permutation importance
+and impurity-based gain do not: impurity gain is biased toward high-cardinality columns, and
+permutation importance is unstable with correlated inputs, of which this panel has many.
+
+\subsection{Procedure and the retained set}
+
+The ranking is computed on the training years only, 2005 to @SELTRAINEND@. Fitting on the full panel
+would let the held-out years influence which features were chosen, and the temporal-holdout score
+reported in Chapter~\ref{ch:results} would then be optimistic. The @SELCAND@ numeric candidates are
+ranked by mean absolute SHAP on that training window and the first @SELK@ are kept, plus the
+@SELN@-column set's two categorical columns, which are retained because region and income band are
+the reporting-capacity proxies the discussion turns on.
+
+\begin{table}[htbp]
+\centering
+\caption{The @SELN@ features the reported models use, in rank order by mean absolute SHAP on the
+training years, with the unit each variable is measured in. The retained set carries @SELSHARE@ of the
+total attribution across all @SELCAND@ candidates.}
+\label{tab:selected}
+\small
+\begin{tabular}{@{}rlp{4.6cm}r@{}}
+\toprule
+\textbf{Rank} & \textbf{Feature} & \textbf{Unit as measured} & \textbf{Mean $|\phi|$} \\
+\midrule
+@SELROWS@
+\bottomrule
+\end{tabular}
+\end{table}
+
+The set is deliberately small. @SELN@ columns against @ROWS@ rows leaves roughly a hundred rows per
+column, which is what the positive count can support: with @POSITIVES@ events, a model given forty
+inputs has more directions to fit than it has events to learn from, and Chapter~\ref{ch:results}
+reports what that costs in transfer.
 
 \section{Models}
 
@@ -970,12 +1033,18 @@ and leave-country-out validation is the cost of generalising to an unseen countr
 \label{fig:comparison}
 \end{figure}
 
-Against a base rate of @PREVALENCE@, the strongest temporal result of @BESTPR@ is an approximately
-@LIFT@-fold lift. Every tree-based model beats the logistic baseline and the single tree is weakest, so
-the relationships are interactive. The more important pattern is the decline under leave-country-out
-validation: for Random Forest the score falls from @RFPR@ to @RFLOCOR@, beyond the bootstrap interval
-width for every family. That is the signature of learning country-specific structure, and the figure
-to quote for deployment.
+Two results need separating. On the forward temporal holdout the best discrimination comes from
+@BESTTEMPM@ at @BESTTEMPPR@ against a base rate of @PREVALENCE@, roughly a @BESTLIFT@-fold lift. Under
+leave-country-out validation the ranking inverts: @BESTTEMPM@ falls to @BESTTEMPLOCO@, while logistic
+regression holds @CHAMPLOCO@ and becomes the strongest model on the criterion that governs selection.
+Its temporal score is @CHAMPPR@, about a @LIFT@-fold lift.
+
+Because deployment means an unseen country rather than an unseen year, the champion is
+@CHAMP@, and every number quoted below refers to it. The inversion is the more informative result.
+With @SELN@ retained features the relationships are close enough to additive that a regularised linear
+model transfers best, and the flexible ensembles pay for their extra capacity in exactly the setting
+the project cares about. The single decision tree is weakest on both schemes, which confirms that the
+signal is not concentrated in one or two splits.
 
 \subsection{Calibration}
 
@@ -1015,10 +1084,11 @@ help most; the cause is label sparsity, since few events are recorded in those s
 The alert layer turns the calibrated probability into messages, so its economics are reported
 separately from model skill.
 
-Alerting the six per cent of country-years at highest predicted risk captures about half of all
-observed events, and twenty-eight per cent captures eighty per cent (Figure~\ref{fig:alerts}).
-Uniform alerting would need full coverage for the same recall, so the model is roughly eight times
-more efficient than arbitrary selection at the fifty per cent point.
+Alerting the six per cent of country-years at highest predicted risk captures @ALERT6REC@ per cent of
+observed events, half of them are reached at an alert budget of @ALERT50BUD@ per cent, and eighty per
+cent at @ALERT80BUD@ per cent (Figure~\ref{fig:alerts}). Uniform alerting would need full coverage for
+the same recall, so the model is about @ALERTEFF@ times more efficient than arbitrary selection at the
+fifty per cent point.
 
 \begin{figure}[htbp]
 \centering
@@ -1033,13 +1103,13 @@ Chapter~\ref{ch:rag} but has not been run against the corpus, so its five metric
 
 \section{Discussion}
 
-The risk model has predictive skill: a precision-recall AUC of @BESTPR@ against a base rate of
-@PREVALENCE@ is not explainable by chance, survives a forward-looking split, and is calibrated to
-within two points. It does not transfer intact: leave-country-out performance is roughly forty per
-cent lower, so a new country needs local validation first. The signal it learns is surveillance rather
-than biology, since the highest features are population and connectivity measures, the label
-concentrates in countries with reference laboratories, and the best-scoring cells are India, the
-United States and Australia.
+The risk model has predictive skill: @CHAMP@ reaches a precision-recall AUC of @CHAMPPR@ against a base
+rate of @PREVALENCE@ on the forward split, and holds @CHAMPLOCO@ across unseen countries, with
+calibration error @ECE@. The gap between those two figures is smaller than the full-feature model
+showed, which is the practical gain from selecting features on conditional evidence. The signal it
+learns is surveillance rather than biology: the leading features are population, connectivity and
+reporting measures, the label concentrates in countries with reference laboratories, and the
+best-scoring cells are India, the United States and Australia.
 """
 
 
@@ -1057,12 +1127,11 @@ owns the animals. Four sources new to the disease formed a country-year panel ac
 equine-holding countries, and six model families were trained under three validation schemes. Around the model, delivery was decomposed into three components with fixed contracts: a risk
 engine, an explanation layer and an alert service.
 
-Prediction is possible, and the performance is moderate: on a forward-looking temporal holdout the
-strongest model reaches a precision-recall AUC of @BESTPR@ against a base rate of @PREVALENCE@, an
-approximately @LIFT@-fold lift with a calibration error of @ECE@, capturing half of all events while
-alerting six per cent of country-years. The skill is fragile across geography, though:
-leave-country-out performance is about forty per cent lower, and the decline concentrates where early
-warning would help most.
+Prediction is possible, and the performance is moderate: @CHAMP@ reaches a precision-recall AUC of
+@CHAMPPR@ against a base rate of @PREVALENCE@ on a forward split, about a @LIFT@-fold lift with a
+calibration error of @ECE@, and holds @CHAMPLOCO@ across unseen countries. Alerting six per cent of
+country-years captures @ALERT6REC@ per cent of events. The skill is fragile across geography, and the
+decline concentrates where early warning would help most.
 
 What the model learns is less encouraging. Three analyses converge: the highest-ranked features are
 population size and reporting capacity rather than biological drivers, the label concentrates in

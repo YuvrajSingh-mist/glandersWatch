@@ -217,7 +217,9 @@ def fig_shap() -> None:
 # 7. Alert-level evaluation
 # --------------------------------------------------------------------------- #
 def fig_alerts() -> None:
-    best = "Random Forest"
+    # use whichever model the pipeline selected as champion, not a hardcoded name
+    _R = json.loads((REP / "results.json").read_text())
+    best = _R.get("best_model", "Random Forest")
     d = pd.read_csv(REP / f"pred_L1_{best.replace(' ', '_')}.csv")
     y, p = d.y_true.to_numpy().astype(int), d.p_pred.to_numpy()
     order = np.argsort(-p)

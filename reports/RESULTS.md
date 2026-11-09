@@ -45,27 +45,27 @@ chained ML pipeline over livestock-census and reanalysis covariates.
 
 | Model | Family | PR-AUC (95% CI) | ROC-AUC | PR-AUC LOCO | PR-AUC rep-CV | Brier | Prec | Rec | F1 | Threshold |
 |---|---|---|---|---|---|---|---|---|---|---|
-| Logistic Regression | linear | 0.454 (0.34-0.58) | 0.812 | 0.223 | 0.414 | 0.0547 | 0.25 | 0.57 | 0.35 | 0.14 |
-| Decision Tree | tree | 0.389 (0.29-0.50) | 0.861 | 0.267 | 0.360 | 0.0602 | 0.49 | 0.53 | 0.51 | 0.18 |
-| Random Forest | bagged trees | 0.554 (0.43-0.66) | 0.870 | 0.304 | 0.476 | 0.0503 | 0.53 | 0.50 | 0.51 | 0.24 |
-| Extra Trees | bagged trees | 0.530 (0.42-0.64) | 0.854 | 0.363 | 0.476 | 0.0535 | 0.47 | 0.51 | 0.49 | 0.23 |
-| XGBoost | boosted trees | 0.485 (0.37-0.60) | 0.844 | 0.281 | 0.423 | 0.0536 | 0.61 | 0.38 | 0.47 | 0.35 |
-| LightGBM | boosted trees | 0.496 (0.38-0.61) | 0.841 | 0.339 | 0.397 | 0.0534 | 0.65 | 0.30 | 0.41 | 0.35 |
+| Logistic Regression | linear | 0.446 (0.34-0.57) | 0.863 | 0.336 | 0.424 | 0.0543 | 0.30 | 0.65 | 0.41 | 0.20 |
+| Decision Tree | tree | 0.424 (0.32-0.53) | 0.860 | 0.240 | 0.339 | 0.0590 | 0.44 | 0.49 | 0.46 | 0.21 |
+| Random Forest | bagged trees | 0.518 (0.40-0.63) | 0.865 | 0.318 | 0.449 | 0.0524 | 0.52 | 0.49 | 0.50 | 0.30 |
+| Extra Trees | bagged trees | 0.516 (0.41-0.62) | 0.860 | 0.284 | 0.453 | 0.0543 | 0.46 | 0.51 | 0.49 | 0.24 |
+| XGBoost | boosted trees | 0.432 (0.32-0.55) | 0.842 | 0.292 | 0.397 | 0.0557 | 0.52 | 0.43 | 0.47 | 0.31 |
+| LightGBM | boosted trees | 0.452 (0.34-0.57) | 0.840 | 0.311 | 0.385 | 0.0548 | 0.58 | 0.38 | 0.46 | 0.33 |
 
-Selected by leave-country-out PR-AUC: **Extra Trees**.
-Prevalence 0.056 -> the best temporal PR-AUC (0.554, Random Forest) is a
-lift of roughly 9.9x over chance.
+Selected by leave-country-out PR-AUC: **Logistic Regression**.
+Prevalence 0.056 -> the best temporal PR-AUC (0.518, Random Forest) is a
+lift of roughly 9.3x over chance.
 
 ## 3. Level 2 - coarse resolution (country x 5-year period)
 
 | Model | PR-AUC | ROC-AUC | PR-AUC LOCO | ROC-AUC LOCO | Brier |
 |---|---|---|---|---|---|
-| Logistic Regression | 0.509 | 0.810 | 0.422 | 0.808 | 0.1060 |
-| Decision Tree | 0.521 | 0.790 | 0.461 | 0.804 | 0.1094 |
-| Random Forest | 0.587 | 0.836 | 0.572 | 0.854 | 0.0963 |
-| Extra Trees | 0.581 | 0.826 | 0.556 | 0.843 | 0.1048 |
-| XGBoost | 0.608 | 0.823 | 0.495 | 0.826 | 0.0977 |
-| LightGBM | 0.576 | 0.823 | 0.514 | 0.846 | 0.0990 |
+| Logistic Regression | 0.533 | 0.814 | 0.508 | 0.824 | 0.1047 |
+| Decision Tree | 0.475 | 0.797 | 0.507 | 0.830 | 0.1062 |
+| Random Forest | 0.550 | 0.829 | 0.536 | 0.848 | 0.0996 |
+| Extra Trees | 0.590 | 0.825 | 0.550 | 0.821 | 0.1079 |
+| XGBoost | 0.598 | 0.816 | 0.490 | 0.836 | 0.0999 |
+| LightGBM | 0.573 | 0.819 | 0.509 | 0.839 | 0.1017 |
 
 ## 4. Ablation settings
 
@@ -89,52 +89,52 @@ Stage 2 (occurrence) with and without the chained population signal:
 
 | Variant | PR-AUC (temporal) | ROC-AUC | PR-AUC (LOCO) |
 |---|---|---|---|
-| plain | 0.530 | 0.854 | 0.363 |
-| chained | 0.527 | 0.853 | 0.344 |
+| plain | 0.454 | 0.812 | 0.223 |
+| chained | 0.456 | 0.812 | 0.223 |
 
 Stage 3 (intensity | occurrence): MAE 0.150,
 Spearman 0.465.
 
-Hurdle chain (P x intensity) ranks next-year event burden with Spearman 0.326;
-the top-10% highest-risk cells capture **70/106** observed events.
+Hurdle chain (P x intensity) ranks next-year event burden with Spearman 0.291;
+the top-10% highest-risk cells capture **68/106** observed events.
 
 ## 5b. Highest-risk cells in the temporal holdout
 
 | Country | Year | Predicted risk | Observed event |
 |---|---|---|---|
-| IND | 2018 | 0.549 | 1 |
-| IND | 2019 | 0.547 | 1 |
-| IND | 2022 | 0.543 | 1 |
-| IND | 2021 | 0.542 | 1 |
-| IND | 2020 | 0.540 | 1 |
-| IND | 2023 | 0.540 | 1 |
-| USA | 2021 | 0.534 | 1 |
-| USA | 2019 | 0.534 | 1 |
-| USA | 2020 | 0.532 | 1 |
-| USA | 2018 | 0.531 | 1 |
-| AUS | 2021 | 0.529 | 1 |
-| USA | 2022 | 0.526 | 0 |
-| AUS | 2023 | 0.522 | 1 |
-| AUS | 2022 | 0.517 | 1 |
-| USA | 2023 | 0.514 | 1 |
+| USA | 2022 | 0.726 | 0 |
+| IND | 2022 | 0.721 | 1 |
+| BRA | 2023 | 0.720 | 0 |
+| IND | 2020 | 0.704 | 1 |
+| IND | 2021 | 0.700 | 1 |
+| IND | 2023 | 0.684 | 1 |
+| IND | 2019 | 0.677 | 1 |
+| USA | 2023 | 0.676 | 1 |
+| USA | 2019 | 0.669 | 1 |
+| USA | 2021 | 0.657 | 1 |
+| CHN | 2023 | 0.653 | 1 |
+| CHN | 2019 | 0.649 | 0 |
+| USA | 2020 | 0.643 | 1 |
+| USA | 2018 | 0.610 | 1 |
+| CHN | 2020 | 0.607 | 1 |
 
 ## 6. Subgroup performance (leave-country-out)
 
 | Grouped by | Group | n | events | ROC-AUC | PR-AUC |
 |---|---|---|---|---|---|
-| region | East Asia & Pacific | 456 | 48 | 0.865 | 0.396 |
-| region | Europe & Central Asia | 912 | 31 | 0.826 | 0.163 |
-| region | Latin America & Caribbean | 551 | 12 | 0.903 | 0.381 |
-| region | Middle East, North Africa, Afghanistan & Pakistan | 380 | 23 | 0.834 | 0.220 |
-| region | Sub-Saharan Africa | 665 | 27 | 0.699 | 0.073 |
-| income | High income | 1045 | 66 | 0.875 | 0.303 |
-| income | Low income | 361 | 10 | 0.720 | 0.062 |
-| income | Lower middle income | 741 | 42 | 0.878 | 0.541 |
-| income | Upper middle income | 912 | 54 | 0.867 | 0.329 |
+| region | East Asia & Pacific | 456 | 48 | 0.860 | 0.410 |
+| region | Europe & Central Asia | 912 | 31 | 0.840 | 0.167 |
+| region | Latin America & Caribbean | 551 | 12 | 0.905 | 0.418 |
+| region | Middle East, North Africa, Afghanistan & Pakistan | 380 | 23 | 0.815 | 0.210 |
+| region | Sub-Saharan Africa | 665 | 27 | 0.627 | 0.088 |
+| income | High income | 1045 | 66 | 0.888 | 0.503 |
+| income | Low income | 361 | 10 | 0.650 | 0.052 |
+| income | Lower middle income | 741 | 42 | 0.832 | 0.486 |
+| income | Upper middle income | 912 | 54 | 0.881 | 0.335 |
 
 ## 7. Calibration
 
-Model `Extra Trees`: ECE 0.016, Brier 0.0535.
+Model `Logistic Regression`: ECE 0.025, Brier 0.0543.
 
 ## 8. Figures
 

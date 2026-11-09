@@ -179,6 +179,8 @@ CRAMV_INCOME = f"{_cv.get('income', float('nan')):.3f}"
 PANEL_ROWS = f"{AUD['panel_rows']:,}"
 PANEL_COUNTRIES = str(AUD['countries_in_panel'])
 RUNTIME = f"{R['runtime_seconds']/60:.1f} minutes"
+CHAMP_LOCO = f"{L1[R.get('best_model', 'Random Forest')]['loco']['pr_auc']:.3f}"
+CHAMP_NAME = R.get("best_model", "Random Forest")
 BEST_PR = f"{temporal_val:.3f}"
 LIFT = f"{lift:.0f}"
 ECE = f"{R['calibration']['ece']:.3f}"
@@ -270,6 +272,7 @@ SIMPLE_BODY = (simple_body.BODY
     .replace("PANEL_ROWS", PANEL_ROWS)
     .replace("PANEL_COUNTRIES", PANEL_COUNTRIES)
     .replace("RUNTIME", RUNTIME)
+    .replace("CHAMP_LOCO", CHAMP_LOCO)
     .replace("BEST_PR", BEST_PR)
     .replace("LIFT", LIFT)
     .replace("ECE", ECE)

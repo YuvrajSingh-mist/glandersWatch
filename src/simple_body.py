@@ -210,8 +210,8 @@ tree models are indifferent to it.
 \label{sec:features}
 % =====================================================================
 
-A feature is an input column, and all 44 of them use information available in the current
-year or earlier. They fall into four groups.
+A feature is an input column. Forty-four were engineered and fourteen are used, all of them built
+from information available in the current year or earlier. The candidates fall into four groups.
 
 \begin{itemize}
 \setlength{\itemsep}{0.15em}
@@ -384,14 +384,14 @@ The two PR-AUC columns measure the same thing on different tests. Time split tra
 to 2017 and tests on 2018 to 2023. Country split trains without some countries and tests on
 those, which is harder and closer to real use. Neither is a precision score.
 
-PR-AUC sits at 0.056 for a model with no skill, and our best reaches BEST_PR, about LIFT
-times better than guessing. Precision 0.53 means that when the model warns about a country
-it is right slightly more than half the time. Recall 0.50 means it catches half the real
-events and misses the rest. The uncertainty column is wide: with 74 positives in the test
-years the score could sit anywhere in that range. We can say these models beat the
-baseline. We cannot say 0.554 is reliably better than 0.530.
+PR-AUC sits at 0.056 for a model with no skill. On the time split the best model reaches
+BEST_PR; on the country split, which is closer to real use, the logistic regression leads at
+CHAMP_LOCO. The uncertainty column is wide: with 74 positives in the test years a score can
+move a long way within that range, so neighbouring models should not be separated with
+confidence.
 
-Every tree-based model beats logistic regression and the single tree comes last, so the real
-relationships involve combinations of factors rather than one at a time.
+The ensembles lead on the time split, but on the country split the logistic regression is
+ahead, and the single tree comes last on both. With only fourteen inputs the relationships are
+close enough to additive that a regularised linear model transfers best.
 
 """

@@ -1,289 +1,289 @@
 level,scheme,model,metric,value
-L1 country-year,temporal_holdout,Logistic Regression,roc_auc,0.8124510925179077
-L1 country-year,temporal_holdout,Logistic Regression,pr_auc,0.454261544578025
-L1 country-year,temporal_holdout,Logistic Regression,brier,0.05468052476429895
-L1 country-year,temporal_holdout,Logistic Regression,f1,0.34710743801652894
-L1 country-year,temporal_holdout,Logistic Regression,precision,0.25
-L1 country-year,temporal_holdout,Logistic Regression,recall,0.5675675675675675
-L1 country-year,temporal_holdout,Logistic Regression,mcc,0.2996810577429229
-L1 country-year,temporal_holdout,Logistic Regression,specificity,0.8596881959910914
-L1 country-year,leave_country_out,Logistic Regression,roc_auc,0.8247731237695867
-L1 country-year,leave_country_out,Logistic Regression,pr_auc,0.22291508040323524
-L1 country-year,leave_country_out,Logistic Regression,brier,0.053603778017496787
-L1 country-year,leave_country_out,Logistic Regression,f1,0.3347457627118644
-L1 country-year,leave_country_out,Logistic Regression,precision,0.2633333333333333
-L1 country-year,leave_country_out,Logistic Regression,recall,0.45930232558139533
-L1 country-year,leave_country_out,Logistic Regression,mcc,0.2968045717129518
-L1 country-year,leave_country_out,Logistic Regression,specificity,0.9239504473503097
-L1 country-year,repeated_stratified_cv,Logistic Regression,roc_auc,0.8601896904026418
-L1 country-year,repeated_stratified_cv,Logistic Regression,pr_auc,0.41437288023593566
-L1 country-year,repeated_stratified_cv,Logistic Regression,brier,0.12496280184297397
-L1 country-year,repeated_stratified_cv,Logistic Regression,f1,0.44551230299437883
-L1 country-year,repeated_stratified_cv,Logistic Regression,precision,0.5090875945674961
-L1 country-year,repeated_stratified_cv,Logistic Regression,recall,0.3992248062015504
-L1 country-year,repeated_stratified_cv,Logistic Regression,mcc,0.42124129060897103
-L1 country-year,repeated_stratified_cv,Logistic Regression,specificity,0.9767148428538656
-L1 country-year,temporal_holdout,Decision Tree,roc_auc,0.8609522662974779
-L1 country-year,temporal_holdout,Decision Tree,pr_auc,0.3886866943821967
-L1 country-year,temporal_holdout,Decision Tree,brier,0.060190982943507346
-L1 country-year,temporal_holdout,Decision Tree,f1,0.5098039215686274
-L1 country-year,temporal_holdout,Decision Tree,precision,0.4936708860759494
-L1 country-year,temporal_holdout,Decision Tree,recall,0.527027027027027
-L1 country-year,temporal_holdout,Decision Tree,mcc,0.46827104713173784
-L1 country-year,temporal_holdout,Decision Tree,specificity,0.955456570155902
-L1 country-year,leave_country_out,Decision Tree,roc_auc,0.810030170137166
-L1 country-year,leave_country_out,Decision Tree,pr_auc,0.2670988233761873
-L1 country-year,leave_country_out,Decision Tree,brier,0.04645190339956583
-L1 country-year,leave_country_out,Decision Tree,f1,0.3561643835616438
-L1 country-year,leave_country_out,Decision Tree,precision,0.26843657817109146
-L1 country-year,leave_country_out,Decision Tree,recall,0.5290697674418605
-L1 country-year,leave_country_out,Decision Tree,mcc,0.32556226947004935
-L1 country-year,leave_country_out,Decision Tree,specificity,0.9146593255333793
-L1 country-year,repeated_stratified_cv,Decision Tree,roc_auc,0.8326397669616991
-L1 country-year,repeated_stratified_cv,Decision Tree,pr_auc,0.3596675691945687
-L1 country-year,repeated_stratified_cv,Decision Tree,brier,0.13540677230120146
-L1 country-year,repeated_stratified_cv,Decision Tree,f1,0.4317144043171441
-L1 country-year,repeated_stratified_cv,Decision Tree,precision,0.5880434782608696
-L1 country-year,repeated_stratified_cv,Decision Tree,recall,0.3430232558139535
-L1 country-year,repeated_stratified_cv,Decision Tree,mcc,0.42430068799916226
-L1 country-year,repeated_stratified_cv,Decision Tree,specificity,0.9854324386327139
-L1 country-year,temporal_holdout,Random Forest,roc_auc,0.8703575513152351
-L1 country-year,temporal_holdout,Random Forest,pr_auc,0.553517348210571
-L1 country-year,temporal_holdout,Random Forest,brier,0.05032310054851604
-L1 country-year,temporal_holdout,Random Forest,f1,0.5138888888888888
-L1 country-year,temporal_holdout,Random Forest,precision,0.5285714285714286
-L1 country-year,temporal_holdout,Random Forest,recall,0.5
-L1 country-year,temporal_holdout,Random Forest,mcc,0.47524628796499574
+L1 country-year,temporal_holdout,Logistic Regression,roc_auc,0.8627580810208872
+L1 country-year,temporal_holdout,Logistic Regression,pr_auc,0.44589124662903096
+L1 country-year,temporal_holdout,Logistic Regression,brier,0.054318332325176195
+L1 country-year,temporal_holdout,Logistic Regression,f1,0.41379310344827586
+L1 country-year,temporal_holdout,Logistic Regression,precision,0.3037974683544304
+L1 country-year,temporal_holdout,Logistic Regression,recall,0.6486486486486487
+L1 country-year,temporal_holdout,Logistic Regression,mcc,0.3782041913075657
+L1 country-year,temporal_holdout,Logistic Regression,specificity,0.8775055679287305
+L1 country-year,leave_country_out,Logistic Regression,roc_auc,0.857280046095488
+L1 country-year,leave_country_out,Logistic Regression,pr_auc,0.3355702128276659
+L1 country-year,leave_country_out,Logistic Regression,brier,0.043918365045115364
+L1 country-year,leave_country_out,Logistic Regression,f1,0.39759036144578314
+L1 country-year,leave_country_out,Logistic Regression,precision,0.30368098159509205
+L1 country-year,leave_country_out,Logistic Regression,recall,0.5755813953488372
+L1 country-year,leave_country_out,Logistic Regression,mcc,0.3713157921927318
+L1 country-year,leave_country_out,Logistic Regression,specificity,0.921885753613214
+L1 country-year,repeated_stratified_cv,Logistic Regression,roc_auc,0.8723897896359843
+L1 country-year,repeated_stratified_cv,Logistic Regression,pr_auc,0.4241464036068004
+L1 country-year,repeated_stratified_cv,Logistic Regression,brier,0.1290813134152986
+L1 country-year,repeated_stratified_cv,Logistic Regression,f1,0.4701119552693967
+L1 country-year,repeated_stratified_cv,Logistic Regression,precision,0.4519042672110034
+L1 country-year,repeated_stratified_cv,Logistic Regression,recall,0.49224806201550386
+L1 country-year,repeated_stratified_cv,Logistic Regression,mcc,0.43833844366226815
+L1 country-year,repeated_stratified_cv,Logistic Regression,specificity,0.9643266804312915
+L1 country-year,temporal_holdout,Decision Tree,roc_auc,0.8602901342322278
+L1 country-year,temporal_holdout,Decision Tree,pr_auc,0.4235627260329654
+L1 country-year,temporal_holdout,Decision Tree,brier,0.05904182684835464
+L1 country-year,temporal_holdout,Decision Tree,f1,0.4645161290322581
+L1 country-year,temporal_holdout,Decision Tree,precision,0.4444444444444444
+L1 country-year,temporal_holdout,Decision Tree,recall,0.4864864864864865
+L1 country-year,temporal_holdout,Decision Tree,mcc,0.41872862967725716
+L1 country-year,temporal_holdout,Decision Tree,specificity,0.9498886414253898
+L1 country-year,leave_country_out,Decision Tree,roc_auc,0.8330459034235504
+L1 country-year,leave_country_out,Decision Tree,pr_auc,0.24043812113773472
+L1 country-year,leave_country_out,Decision Tree,brier,0.046672994044026306
+L1 country-year,leave_country_out,Decision Tree,f1,0.36075949367088606
+L1 country-year,leave_country_out,Decision Tree,precision,0.3958333333333333
+L1 country-year,leave_country_out,Decision Tree,recall,0.3313953488372093
+L1 country-year,leave_country_out,Decision Tree,mcc,0.3278887512806183
+L1 country-year,leave_country_out,Decision Tree,specificity,0.9700619408121128
+L1 country-year,repeated_stratified_cv,Decision Tree,roc_auc,0.8379765601242019
+L1 country-year,repeated_stratified_cv,Decision Tree,pr_auc,0.3393595851740498
+L1 country-year,repeated_stratified_cv,Decision Tree,brier,0.1307759778519422
+L1 country-year,repeated_stratified_cv,Decision Tree,f1,0.4234393871861792
+L1 country-year,repeated_stratified_cv,Decision Tree,precision,0.3476463592708004
+L1 country-year,repeated_stratified_cv,Decision Tree,recall,0.5445736434108527
+L1 country-year,repeated_stratified_cv,Decision Tree,mcc,0.392938399237638
+L1 country-year,repeated_stratified_cv,Decision Tree,specificity,0.9392062399632944
+L1 country-year,temporal_holdout,Random Forest,roc_auc,0.8649702040570637
+L1 country-year,temporal_holdout,Random Forest,pr_auc,0.5177862751714207
+L1 country-year,temporal_holdout,Random Forest,brier,0.052383270102766555
+L1 country-year,temporal_holdout,Random Forest,f1,0.5034965034965035
+L1 country-year,temporal_holdout,Random Forest,precision,0.5217391304347826
+L1 country-year,temporal_holdout,Random Forest,recall,0.4864864864864865
+L1 country-year,temporal_holdout,Random Forest,mcc,0.4644568189608094
 L1 country-year,temporal_holdout,Random Forest,specificity,0.9632516703786191
-L1 country-year,leave_country_out,Random Forest,roc_auc,0.8640223114966629
-L1 country-year,leave_country_out,Random Forest,pr_auc,0.30449864056319215
-L1 country-year,leave_country_out,Random Forest,brier,0.04666349078435006
-L1 country-year,leave_country_out,Random Forest,f1,0.39037433155080214
-L1 country-year,leave_country_out,Random Forest,precision,0.3613861386138614
-L1 country-year,leave_country_out,Random Forest,recall,0.42441860465116277
-L1 country-year,leave_country_out,Random Forest,mcc,0.35249839498397145
-L1 country-year,leave_country_out,Random Forest,specificity,0.9556090846524432
-L1 country-year,repeated_stratified_cv,Random Forest,roc_auc,0.8867966303344591
-L1 country-year,repeated_stratified_cv,Random Forest,pr_auc,0.4761841285795933
-L1 country-year,repeated_stratified_cv,Random Forest,brier,0.06352173930821486
-L1 country-year,repeated_stratified_cv,Random Forest,f1,0.4693293332375707
-L1 country-year,repeated_stratified_cv,Random Forest,precision,0.5179490386294625
-L1 country-year,repeated_stratified_cv,Random Forest,recall,0.43217054263565885
-L1 country-year,repeated_stratified_cv,Random Forest,mcc,0.4438559117956391
-L1 country-year,repeated_stratified_cv,Random Forest,specificity,0.9757972011929342
-L1 country-year,temporal_holdout,Extra Trees,roc_auc,0.854376091013062
-L1 country-year,temporal_holdout,Extra Trees,pr_auc,0.5304683125048172
-L1 country-year,temporal_holdout,Extra Trees,brier,0.0534736537914433
-L1 country-year,temporal_holdout,Extra Trees,f1,0.49032258064516127
-L1 country-year,temporal_holdout,Extra Trees,precision,0.4691358024691358
+L1 country-year,leave_country_out,Random Forest,roc_auc,0.8650846684485988
+L1 country-year,leave_country_out,Random Forest,pr_auc,0.31808523188939186
+L1 country-year,leave_country_out,Random Forest,brier,0.044582913772333435
+L1 country-year,leave_country_out,Random Forest,f1,0.39487179487179486
+L1 country-year,leave_country_out,Random Forest,precision,0.3532110091743119
+L1 country-year,leave_country_out,Random Forest,recall,0.4476744186046512
+L1 country-year,leave_country_out,Random Forest,mcc,0.35738916088447875
+L1 country-year,leave_country_out,Random Forest,specificity,0.9514796971782519
+L1 country-year,repeated_stratified_cv,Random Forest,roc_auc,0.887630910652646
+L1 country-year,repeated_stratified_cv,Random Forest,pr_auc,0.4489294540736049
+L1 country-year,repeated_stratified_cv,Random Forest,brier,0.07257263347319555
+L1 country-year,repeated_stratified_cv,Random Forest,f1,0.46104211388386185
+L1 country-year,repeated_stratified_cv,Random Forest,precision,0.5309200244850104
+L1 country-year,repeated_stratified_cv,Random Forest,recall,0.44186046511627913
+L1 country-year,repeated_stratified_cv,Random Forest,mcc,0.44490308484663776
+L1 country-year,repeated_stratified_cv,Random Forest,specificity,0.9715531085111264
+L1 country-year,temporal_holdout,Extra Trees,roc_auc,0.8595226629747789
+L1 country-year,temporal_holdout,Extra Trees,pr_auc,0.5163582123746672
+L1 country-year,temporal_holdout,Extra Trees,brier,0.05428990906592249
+L1 country-year,temporal_holdout,Extra Trees,f1,0.48717948717948717
+L1 country-year,temporal_holdout,Extra Trees,precision,0.4634146341463415
 L1 country-year,temporal_holdout,Extra Trees,recall,0.5135135135135135
-L1 country-year,temporal_holdout,Extra Trees,mcc,0.4467998227282465
-L1 country-year,temporal_holdout,Extra Trees,specificity,0.9521158129175946
-L1 country-year,leave_country_out,Extra Trees,roc_auc,0.8692980841562765
-L1 country-year,leave_country_out,Extra Trees,pr_auc,0.36321577961640533
-L1 country-year,leave_country_out,Extra Trees,brier,0.04421766063298167
-L1 country-year,leave_country_out,Extra Trees,f1,0.39080459770114945
-L1 country-year,leave_country_out,Extra Trees,precision,0.38636363636363635
-L1 country-year,leave_country_out,Extra Trees,recall,0.3953488372093023
-L1 country-year,leave_country_out,Extra Trees,mcc,0.3543346282079979
-L1 country-year,leave_country_out,Extra Trees,specificity,0.9628355127322781
-L1 country-year,repeated_stratified_cv,Extra Trees,roc_auc,0.8806645699621739
-L1 country-year,repeated_stratified_cv,Extra Trees,pr_auc,0.4762580224934217
-L1 country-year,repeated_stratified_cv,Extra Trees,brier,0.10740082477491346
-L1 country-year,repeated_stratified_cv,Extra Trees,f1,0.48128395901133314
-L1 country-year,repeated_stratified_cv,Extra Trees,precision,0.5113974974287138
-L1 country-year,repeated_stratified_cv,Extra Trees,recall,0.46124031007751937
-L1 country-year,repeated_stratified_cv,Extra Trees,mcc,0.4547544441384464
-L1 country-year,repeated_stratified_cv,Extra Trees,specificity,0.9729295710025235
-L1 country-year,temporal_holdout,XGBoost,roc_auc,0.8439475109853729
-L1 country-year,temporal_holdout,XGBoost,pr_auc,0.4852763434013063
-L1 country-year,temporal_holdout,XGBoost,brier,0.05355134961032239
-L1 country-year,temporal_holdout,XGBoost,f1,0.4666666666666667
-L1 country-year,temporal_holdout,XGBoost,precision,0.6086956521739131
-L1 country-year,temporal_holdout,XGBoost,recall,0.3783783783783784
-L1 country-year,temporal_holdout,XGBoost,mcc,0.44756635987058274
-L1 country-year,temporal_holdout,XGBoost,specificity,0.9799554565701559
-L1 country-year,leave_country_out,XGBoost,roc_auc,0.8269078410345876
-L1 country-year,leave_country_out,XGBoost,pr_auc,0.281064307513683
-L1 country-year,leave_country_out,XGBoost,brier,0.04740239269167916
-L1 country-year,leave_country_out,XGBoost,f1,0.3688888888888889
-L1 country-year,leave_country_out,XGBoost,precision,0.29856115107913667
-L1 country-year,leave_country_out,XGBoost,recall,0.48255813953488375
-L1 country-year,leave_country_out,XGBoost,mcc,0.332916426918219
-L1 country-year,leave_country_out,XGBoost,specificity,0.9328974535443909
-L1 country-year,repeated_stratified_cv,XGBoost,roc_auc,0.8631806953803144
-L1 country-year,repeated_stratified_cv,XGBoost,pr_auc,0.422680613652954
-L1 country-year,repeated_stratified_cv,XGBoost,brier,0.06031902077945387
-L1 country-year,repeated_stratified_cv,XGBoost,f1,0.44062336219820647
-L1 country-year,repeated_stratified_cv,XGBoost,precision,0.4831903973509934
-L1 country-year,repeated_stratified_cv,XGBoost,recall,0.4069767441860465
-L1 country-year,repeated_stratified_cv,XGBoost,mcc,0.41285156946417656
-L1 country-year,repeated_stratified_cv,XGBoost,specificity,0.9740766230786878
-L1 country-year,temporal_holdout,LightGBM,roc_auc,0.8407873352194066
-L1 country-year,temporal_holdout,LightGBM,pr_auc,0.49646727086276077
-L1 country-year,temporal_holdout,LightGBM,brier,0.053367007173847576
-L1 country-year,temporal_holdout,LightGBM,f1,0.4074074074074074
-L1 country-year,temporal_holdout,LightGBM,precision,0.6470588235294118
-L1 country-year,temporal_holdout,LightGBM,recall,0.2972972972972973
-L1 country-year,temporal_holdout,LightGBM,mcc,0.4098556833157735
-L1 country-year,temporal_holdout,LightGBM,specificity,0.9866369710467706
-L1 country-year,leave_country_out,LightGBM,roc_auc,0.8511419837065254
-L1 country-year,leave_country_out,LightGBM,pr_auc,0.3390691227705297
-L1 country-year,leave_country_out,LightGBM,brier,0.04483101843348187
-L1 country-year,leave_country_out,LightGBM,f1,0.3930635838150289
-L1 country-year,leave_country_out,LightGBM,precision,0.39080459770114945
-L1 country-year,leave_country_out,LightGBM,recall,0.3953488372093023
-L1 country-year,leave_country_out,LightGBM,mcc,0.3569269793861791
-L1 country-year,leave_country_out,LightGBM,specificity,0.9635237439779766
-L1 country-year,repeated_stratified_cv,LightGBM,roc_auc,0.8579736124671222
-L1 country-year,repeated_stratified_cv,LightGBM,pr_auc,0.39745877614163555
-L1 country-year,repeated_stratified_cv,LightGBM,brier,0.05128402055594342
-L1 country-year,repeated_stratified_cv,LightGBM,f1,0.4221607095523652
-L1 country-year,repeated_stratified_cv,LightGBM,precision,0.3987279313196999
-L1 country-year,repeated_stratified_cv,LightGBM,recall,0.45542635658914726
-L1 country-year,repeated_stratified_cv,LightGBM,mcc,0.388222805921226
-L1 country-year,repeated_stratified_cv,LightGBM,specificity,0.9587061252580867
-L2 country-period,temporal_holdout,Logistic Regression,roc_auc,0.810308257918552
-L2 country-period,temporal_holdout,Logistic Regression,pr_auc,0.5087588030104545
-L2 country-period,temporal_holdout,Logistic Regression,brier,0.10600304000173764
-L2 country-period,temporal_holdout,Logistic Regression,f1,0.4861111111111111
-L2 country-period,temporal_holdout,Logistic Regression,precision,0.3804347826086957
-L2 country-period,temporal_holdout,Logistic Regression,recall,0.6730769230769231
-L2 country-period,temporal_holdout,Logistic Regression,mcc,0.37732442156271934
-L2 country-period,temporal_holdout,Logistic Regression,specificity,0.7904411764705882
-L2 country-period,leave_country_out,Logistic Regression,roc_auc,0.8078233558579995
-L2 country-period,leave_country_out,Logistic Regression,pr_auc,0.4223622882280839
-L2 country-period,leave_country_out,Logistic Regression,brier,0.10459466382717338
-L2 country-period,leave_country_out,Logistic Regression,f1,0.5059288537549407
-L2 country-period,leave_country_out,Logistic Regression,precision,0.4050632911392405
-L2 country-period,leave_country_out,Logistic Regression,recall,0.6736842105263158
-L2 country-period,leave_country_out,Logistic Regression,mcc,0.414927016519842
-L2 country-period,leave_country_out,Logistic Regression,specificity,0.8300180831826401
-L2 country-period,repeated_stratified_cv,Logistic Regression,roc_auc,0.8302972621426985
-L2 country-period,repeated_stratified_cv,Logistic Regression,pr_auc,0.5403712361593073
-L2 country-period,repeated_stratified_cv,Logistic Regression,brier,0.14297143203099946
-L2 country-period,repeated_stratified_cv,Logistic Regression,f1,0.5509334315892901
-L2 country-period,repeated_stratified_cv,Logistic Regression,precision,0.5001260245024688
-L2 country-period,repeated_stratified_cv,Logistic Regression,recall,0.6280701754385966
-L2 country-period,repeated_stratified_cv,Logistic Regression,mcc,0.4712641546806911
-L2 country-period,repeated_stratified_cv,Logistic Regression,specificity,0.8878842676311031
-L2 country-period,temporal_holdout,Decision Tree,roc_auc,0.7895220588235295
-L2 country-period,temporal_holdout,Decision Tree,pr_auc,0.5214185346900574
-L2 country-period,temporal_holdout,Decision Tree,brier,0.10937547374637449
-L2 country-period,temporal_holdout,Decision Tree,f1,0.5116279069767442
-L2 country-period,temporal_holdout,Decision Tree,precision,0.42857142857142855
-L2 country-period,temporal_holdout,Decision Tree,recall,0.6346153846153846
-L2 country-period,temporal_holdout,Decision Tree,mcc,0.40777096727485995
-L2 country-period,temporal_holdout,Decision Tree,specificity,0.8382352941176471
-L2 country-period,leave_country_out,Decision Tree,roc_auc,0.8040829922908537
-L2 country-period,leave_country_out,Decision Tree,pr_auc,0.46107559636494355
-L2 country-period,leave_country_out,Decision Tree,brier,0.09896150171156287
-L2 country-period,leave_country_out,Decision Tree,f1,0.5446808510638298
-L2 country-period,leave_country_out,Decision Tree,precision,0.45714285714285713
-L2 country-period,leave_country_out,Decision Tree,recall,0.6736842105263158
-L2 country-period,leave_country_out,Decision Tree,mcc,0.460890161487325
-L2 country-period,leave_country_out,Decision Tree,specificity,0.8625678119349005
-L2 country-period,repeated_stratified_cv,Decision Tree,roc_auc,0.7973858697376354
-L2 country-period,repeated_stratified_cv,Decision Tree,pr_auc,0.4657458529712076
-L2 country-period,repeated_stratified_cv,Decision Tree,brier,0.1631637997028307
-L2 country-period,repeated_stratified_cv,Decision Tree,f1,0.5100874729023718
-L2 country-period,repeated_stratified_cv,Decision Tree,precision,0.4639411536972513
-L2 country-period,repeated_stratified_cv,Decision Tree,recall,0.5894736842105263
-L2 country-period,repeated_stratified_cv,Decision Tree,mcc,0.42422858549221626
-L2 country-period,repeated_stratified_cv,Decision Tree,specificity,0.8770343580470162
-L2 country-period,temporal_holdout,Random Forest,roc_auc,0.8361142533936652
-L2 country-period,temporal_holdout,Random Forest,pr_auc,0.5871557836056359
-L2 country-period,temporal_holdout,Random Forest,brier,0.09630903161725952
-L2 country-period,temporal_holdout,Random Forest,f1,0.5892857142857143
-L2 country-period,temporal_holdout,Random Forest,precision,0.55
-L2 country-period,temporal_holdout,Random Forest,recall,0.6346153846153846
-L2 country-period,temporal_holdout,Random Forest,mcc,0.5058792812343964
-L2 country-period,temporal_holdout,Random Forest,specificity,0.9007352941176471
-L2 country-period,leave_country_out,Random Forest,roc_auc,0.8537736746930618
-L2 country-period,leave_country_out,Random Forest,pr_auc,0.5715098574738185
-L2 country-period,leave_country_out,Random Forest,brier,0.08698102081315097
-L2 country-period,leave_country_out,Random Forest,f1,0.6082949308755761
-L2 country-period,leave_country_out,Random Forest,precision,0.5409836065573771
-L2 country-period,leave_country_out,Random Forest,recall,0.6947368421052632
-L2 country-period,leave_country_out,Random Forest,mcc,0.5369713282137577
-L2 country-period,leave_country_out,Random Forest,specificity,0.8987341772151899
-L2 country-period,repeated_stratified_cv,Random Forest,roc_auc,0.8654420862282288
-L2 country-period,repeated_stratified_cv,Random Forest,pr_auc,0.6074774716605699
-L2 country-period,repeated_stratified_cv,Random Forest,brier,0.10301939379835395
-L2 country-period,repeated_stratified_cv,Random Forest,f1,0.6043469236655173
-L2 country-period,repeated_stratified_cv,Random Forest,precision,0.6179796107506951
-L2 country-period,repeated_stratified_cv,Random Forest,recall,0.5929824561403508
-L2 country-period,repeated_stratified_cv,Random Forest,mcc,0.5387758250079203
-L2 country-period,repeated_stratified_cv,Random Forest,specificity,0.9367088607594937
-L2 country-period,temporal_holdout,Extra Trees,roc_auc,0.8262160633484164
-L2 country-period,temporal_holdout,Extra Trees,pr_auc,0.5813541893497548
-L2 country-period,temporal_holdout,Extra Trees,brier,0.10484673102384487
-L2 country-period,temporal_holdout,Extra Trees,f1,0.512396694214876
-L2 country-period,temporal_holdout,Extra Trees,precision,0.4492753623188406
-L2 country-period,temporal_holdout,Extra Trees,recall,0.5961538461538461
-L2 country-period,temporal_holdout,Extra Trees,mcc,0.4092444159708632
-L2 country-period,temporal_holdout,Extra Trees,specificity,0.8602941176470589
-L2 country-period,leave_country_out,Extra Trees,roc_auc,0.8431331493290187
-L2 country-period,leave_country_out,Extra Trees,pr_auc,0.555775029309381
-L2 country-period,leave_country_out,Extra Trees,brier,0.09306904894756723
-L2 country-period,leave_country_out,Extra Trees,f1,0.5412844036697247
-L2 country-period,leave_country_out,Extra Trees,precision,0.4796747967479675
-L2 country-period,leave_country_out,Extra Trees,recall,0.6210526315789474
-L2 country-period,leave_country_out,Extra Trees,mcc,0.4557837886503122
-L2 country-period,leave_country_out,Extra Trees,specificity,0.8842676311030742
-L2 country-period,repeated_stratified_cv,Extra Trees,roc_auc,0.846178737984201
-L2 country-period,repeated_stratified_cv,Extra Trees,pr_auc,0.5934527131415743
-L2 country-period,repeated_stratified_cv,Extra Trees,brier,0.13648558007430034
-L2 country-period,repeated_stratified_cv,Extra Trees,f1,0.575724100421725
-L2 country-period,repeated_stratified_cv,Extra Trees,precision,0.5246379066661481
-L2 country-period,repeated_stratified_cv,Extra Trees,recall,0.6385964912280702
-L2 country-period,repeated_stratified_cv,Extra Trees,mcc,0.498016304741985
-L2 country-period,repeated_stratified_cv,Extra Trees,specificity,0.9005424954792044
-L2 country-period,temporal_holdout,XGBoost,roc_auc,0.8228223981900452
-L2 country-period,temporal_holdout,XGBoost,pr_auc,0.6076349790890142
-L2 country-period,temporal_holdout,XGBoost,brier,0.09773388528569722
-L2 country-period,temporal_holdout,XGBoost,f1,0.5510204081632653
-L2 country-period,temporal_holdout,XGBoost,precision,0.5869565217391305
-L2 country-period,temporal_holdout,XGBoost,recall,0.5192307692307693
-L2 country-period,temporal_holdout,XGBoost,mcc,0.4726029747226493
-L2 country-period,temporal_holdout,XGBoost,specificity,0.9301470588235294
-L2 country-period,leave_country_out,XGBoost,roc_auc,0.8264966213000856
-L2 country-period,leave_country_out,XGBoost,pr_auc,0.4948992174410766
-L2 country-period,leave_country_out,XGBoost,brier,0.09804951613936753
-L2 country-period,leave_country_out,XGBoost,f1,0.5454545454545454
-L2 country-period,leave_country_out,XGBoost,precision,0.5925925925925926
-L2 country-period,leave_country_out,XGBoost,recall,0.5052631578947369
-L2 country-period,leave_country_out,XGBoost,mcc,0.47656753575276406
-L2 country-period,leave_country_out,XGBoost,specificity,0.9403254972875226
-L2 country-period,repeated_stratified_cv,XGBoost,roc_auc,0.8447638082548142
-L2 country-period,repeated_stratified_cv,XGBoost,pr_auc,0.5862839507418223
-L2 country-period,repeated_stratified_cv,XGBoost,brier,0.10313638557672866
-L2 country-period,repeated_stratified_cv,XGBoost,f1,0.5731842906017941
-L2 country-period,repeated_stratified_cv,XGBoost,precision,0.5553090428090428
-L2 country-period,repeated_stratified_cv,XGBoost,recall,0.6035087719298246
-L2 country-period,repeated_stratified_cv,XGBoost,mcc,0.49964737354638505
-L2 country-period,repeated_stratified_cv,XGBoost,specificity,0.9132007233273055
-L2 country-period,temporal_holdout,LightGBM,roc_auc,0.8231052036199095
-L2 country-period,temporal_holdout,LightGBM,pr_auc,0.576003083397815
-L2 country-period,temporal_holdout,LightGBM,brier,0.0989855823656749
-L2 country-period,temporal_holdout,LightGBM,f1,0.56
-L2 country-period,temporal_holdout,LightGBM,precision,0.5833333333333334
-L2 country-period,temporal_holdout,LightGBM,recall,0.5384615384615384
-L2 country-period,temporal_holdout,LightGBM,mcc,0.48039725921104687
-L2 country-period,temporal_holdout,LightGBM,specificity,0.9264705882352942
-L2 country-period,leave_country_out,LightGBM,roc_auc,0.8457028647568288
-L2 country-period,leave_country_out,LightGBM,pr_auc,0.5143514952155234
-L2 country-period,leave_country_out,LightGBM,brier,0.09374777617966576
-L2 country-period,leave_country_out,LightGBM,f1,0.5703422053231939
-L2 country-period,leave_country_out,LightGBM,precision,0.44642857142857145
-L2 country-period,leave_country_out,LightGBM,recall,0.7894736842105263
-L2 country-period,leave_country_out,LightGBM,mcc,0.5014764262648197
-L2 country-period,leave_country_out,LightGBM,specificity,0.8318264014466547
-L2 country-period,repeated_stratified_cv,LightGBM,roc_auc,0.8498461343231497
-L2 country-period,repeated_stratified_cv,LightGBM,pr_auc,0.6068882333559779
-L2 country-period,repeated_stratified_cv,LightGBM,brier,0.10128597040352637
-L2 country-period,repeated_stratified_cv,LightGBM,f1,0.5781637717121588
-L2 country-period,repeated_stratified_cv,LightGBM,precision,0.5261134484259394
-L2 country-period,repeated_stratified_cv,LightGBM,recall,0.6421052631578948
-L2 country-period,repeated_stratified_cv,LightGBM,mcc,0.5007728039148046
-L2 country-period,repeated_stratified_cv,LightGBM,specificity,0.9005424954792044
+L1 country-year,temporal_holdout,Extra Trees,mcc,0.4432538677529498
+L1 country-year,temporal_holdout,Extra Trees,specificity,0.9510022271714922
+L1 country-year,leave_country_out,Extra Trees,roc_auc,0.8559756078042222
+L1 country-year,leave_country_out,Extra Trees,pr_auc,0.28448492239368084
+L1 country-year,leave_country_out,Extra Trees,brier,0.04589213565513371
+L1 country-year,leave_country_out,Extra Trees,f1,0.34172661870503596
+L1 country-year,leave_country_out,Extra Trees,precision,0.24739583333333334
+L1 country-year,leave_country_out,Extra Trees,recall,0.5523255813953488
+L1 country-year,leave_country_out,Extra Trees,mcc,0.31479446394086025
+L1 country-year,leave_country_out,Extra Trees,specificity,0.9005505849965588
+L1 country-year,repeated_stratified_cv,Extra Trees,roc_auc,0.8794875078026215
+L1 country-year,repeated_stratified_cv,Extra Trees,pr_auc,0.452611447337411
+L1 country-year,repeated_stratified_cv,Extra Trees,brier,0.11658966908496426
+L1 country-year,repeated_stratified_cv,Extra Trees,f1,0.49075974469641687
+L1 country-year,repeated_stratified_cv,Extra Trees,precision,0.4902109053408017
+L1 country-year,repeated_stratified_cv,Extra Trees,recall,0.49224806201550386
+L1 country-year,repeated_stratified_cv,Extra Trees,mcc,0.4608063231721931
+L1 country-year,repeated_stratified_cv,Extra Trees,specificity,0.9696031199816472
+L1 country-year,temporal_holdout,XGBoost,roc_auc,0.8423373261903329
+L1 country-year,temporal_holdout,XGBoost,pr_auc,0.43182144655439586
+L1 country-year,temporal_holdout,XGBoost,brier,0.05567727503751565
+L1 country-year,temporal_holdout,XGBoost,f1,0.4740740740740741
+L1 country-year,temporal_holdout,XGBoost,precision,0.5245901639344263
+L1 country-year,temporal_holdout,XGBoost,recall,0.43243243243243246
+L1 country-year,temporal_holdout,XGBoost,mcc,0.4375626089583123
+L1 country-year,temporal_holdout,XGBoost,specificity,0.967706013363029
+L1 country-year,leave_country_out,XGBoost,roc_auc,0.8467585108596489
+L1 country-year,leave_country_out,XGBoost,pr_auc,0.29152877631564345
+L1 country-year,leave_country_out,XGBoost,brier,0.0460771652277216
+L1 country-year,leave_country_out,XGBoost,f1,0.38253638253638256
+L1 country-year,leave_country_out,XGBoost,precision,0.2977346278317152
+L1 country-year,leave_country_out,XGBoost,recall,0.5348837209302325
+L1 country-year,leave_country_out,XGBoost,mcc,0.3517450199966033
+L1 country-year,leave_country_out,XGBoost,specificity,0.9253269098417068
+L1 country-year,repeated_stratified_cv,XGBoost,roc_auc,0.8765685270250804
+L1 country-year,repeated_stratified_cv,XGBoost,pr_auc,0.3972603240152823
+L1 country-year,repeated_stratified_cv,XGBoost,brier,0.06492150873200242
+L1 country-year,repeated_stratified_cv,XGBoost,f1,0.43321369160295337
+L1 country-year,repeated_stratified_cv,XGBoost,precision,0.3721401515151515
+L1 country-year,repeated_stratified_cv,XGBoost,recall,0.5271317829457364
+L1 country-year,repeated_stratified_cv,XGBoost,mcc,0.401907319341177
+L1 country-year,repeated_stratified_cv,XGBoost,specificity,0.9460885524202798
+L1 country-year,temporal_holdout,LightGBM,roc_auc,0.839929573225787
+L1 country-year,temporal_holdout,LightGBM,pr_auc,0.45238339247881176
+L1 country-year,temporal_holdout,LightGBM,brier,0.05475803115909629
+L1 country-year,temporal_holdout,LightGBM,f1,0.45901639344262296
+L1 country-year,temporal_holdout,LightGBM,precision,0.5833333333333334
+L1 country-year,temporal_holdout,LightGBM,recall,0.3783783783783784
+L1 country-year,temporal_holdout,LightGBM,mcc,0.4358906206925771
+L1 country-year,temporal_holdout,LightGBM,specificity,0.977728285077951
+L1 country-year,leave_country_out,LightGBM,roc_auc,0.8580663102802542
+L1 country-year,leave_country_out,LightGBM,pr_auc,0.31143055153829013
+L1 country-year,leave_country_out,LightGBM,brier,0.045170985024935245
+L1 country-year,leave_country_out,LightGBM,f1,0.38578680203045684
+L1 country-year,leave_country_out,LightGBM,precision,0.34234234234234234
+L1 country-year,leave_country_out,LightGBM,recall,0.4418604651162791
+L1 country-year,leave_country_out,LightGBM,mcc,0.3477129308115452
+L1 country-year,leave_country_out,LightGBM,specificity,0.9497591190640055
+L1 country-year,repeated_stratified_cv,LightGBM,roc_auc,0.8746505492512151
+L1 country-year,repeated_stratified_cv,LightGBM,pr_auc,0.3846904056443532
+L1 country-year,repeated_stratified_cv,LightGBM,brier,0.05021409223436648
+L1 country-year,repeated_stratified_cv,LightGBM,f1,0.4269732267822475
+L1 country-year,repeated_stratified_cv,LightGBM,precision,0.43203814906393506
+L1 country-year,repeated_stratified_cv,LightGBM,recall,0.4302325581395349
+L1 country-year,repeated_stratified_cv,LightGBM,mcc,0.3951010156084573
+L1 country-year,repeated_stratified_cv,LightGBM,specificity,0.96501491167699
+L2 country-period,temporal_holdout,Logistic Regression,roc_auc,0.8137726244343891
+L2 country-period,temporal_holdout,Logistic Regression,pr_auc,0.5331309128960373
+L2 country-period,temporal_holdout,Logistic Regression,brier,0.1047424730458501
+L2 country-period,temporal_holdout,Logistic Regression,f1,0.5112781954887218
+L2 country-period,temporal_holdout,Logistic Regression,precision,0.41975308641975306
+L2 country-period,temporal_holdout,Logistic Regression,recall,0.6538461538461539
+L2 country-period,temporal_holdout,Logistic Regression,mcc,0.4077862096248241
+L2 country-period,temporal_holdout,Logistic Regression,specificity,0.8272058823529411
+L2 country-period,leave_country_out,Logistic Regression,roc_auc,0.8241553250214142
+L2 country-period,leave_country_out,Logistic Regression,pr_auc,0.5077342747229556
+L2 country-period,leave_country_out,Logistic Regression,brier,0.09894994371606546
+L2 country-period,leave_country_out,Logistic Regression,f1,0.5188679245283019
+L2 country-period,leave_country_out,Logistic Regression,precision,0.4700854700854701
+L2 country-period,leave_country_out,Logistic Regression,recall,0.5789473684210527
+L2 country-period,leave_country_out,Logistic Regression,mcc,0.4292837571424421
+L2 country-period,leave_country_out,Logistic Regression,specificity,0.8878842676311031
+L2 country-period,repeated_stratified_cv,Logistic Regression,roc_auc,0.8407410932394276
+L2 country-period,repeated_stratified_cv,Logistic Regression,pr_auc,0.5835694979919155
+L2 country-period,repeated_stratified_cv,Logistic Regression,brier,0.1426928868473285
+L2 country-period,repeated_stratified_cv,Logistic Regression,f1,0.5739696569474076
+L2 country-period,repeated_stratified_cv,Logistic Regression,precision,0.5568847230559678
+L2 country-period,repeated_stratified_cv,Logistic Regression,recall,0.5929824561403509
+L2 country-period,repeated_stratified_cv,Logistic Regression,mcc,0.4986122213660211
+L2 country-period,repeated_stratified_cv,Logistic Regression,specificity,0.918625678119349
+L2 country-period,temporal_holdout,Decision Tree,roc_auc,0.7970164027149321
+L2 country-period,temporal_holdout,Decision Tree,pr_auc,0.4753627288400598
+L2 country-period,temporal_holdout,Decision Tree,brier,0.10617472453766441
+L2 country-period,temporal_holdout,Decision Tree,f1,0.5043478260869565
+L2 country-period,temporal_holdout,Decision Tree,precision,0.4603174603174603
+L2 country-period,temporal_holdout,Decision Tree,recall,0.5576923076923077
+L2 country-period,temporal_holdout,Decision Tree,mcc,0.40130518399470383
+L2 country-period,temporal_holdout,Decision Tree,specificity,0.875
+L2 country-period,leave_country_out,Decision Tree,roc_auc,0.8296183496716474
+L2 country-period,leave_country_out,Decision Tree,pr_auc,0.5065892638201452
+L2 country-period,leave_country_out,Decision Tree,brier,0.09433502990522882
+L2 country-period,leave_country_out,Decision Tree,f1,0.5700934579439252
+L2 country-period,leave_country_out,Decision Tree,precision,0.5126050420168067
+L2 country-period,leave_country_out,Decision Tree,recall,0.6421052631578947
+L2 country-period,leave_country_out,Decision Tree,mcc,0.4907694164755157
+L2 country-period,leave_country_out,Decision Tree,specificity,0.895117540687161
+L2 country-period,repeated_stratified_cv,Decision Tree,roc_auc,0.8291964087433774
+L2 country-period,repeated_stratified_cv,Decision Tree,pr_auc,0.5044920563571395
+L2 country-period,repeated_stratified_cv,Decision Tree,brier,0.1540957610293587
+L2 country-period,repeated_stratified_cv,Decision Tree,f1,0.5319922347021652
+L2 country-period,repeated_stratified_cv,Decision Tree,precision,0.4516142520675168
+L2 country-period,repeated_stratified_cv,Decision Tree,recall,0.6526315789473685
+L2 country-period,repeated_stratified_cv,Decision Tree,mcc,0.4451730219364301
+L2 country-period,repeated_stratified_cv,Decision Tree,specificity,0.8607594936708861
+L2 country-period,temporal_holdout,Random Forest,roc_auc,0.8286199095022625
+L2 country-period,temporal_holdout,Random Forest,pr_auc,0.5495077200764664
+L2 country-period,temporal_holdout,Random Forest,brier,0.09964112417808885
+L2 country-period,temporal_holdout,Random Forest,f1,0.5871559633027523
+L2 country-period,temporal_holdout,Random Forest,precision,0.5614035087719298
+L2 country-period,temporal_holdout,Random Forest,recall,0.6153846153846154
+L2 country-period,temporal_holdout,Random Forest,mcc,0.5046464560747866
+L2 country-period,temporal_holdout,Random Forest,specificity,0.9080882352941176
+L2 country-period,leave_country_out,Random Forest,roc_auc,0.8483677548301132
+L2 country-period,leave_country_out,Random Forest,pr_auc,0.535511806706767
+L2 country-period,leave_country_out,Random Forest,brier,0.08930211131969196
+L2 country-period,leave_country_out,Random Forest,f1,0.5781990521327014
+L2 country-period,leave_country_out,Random Forest,precision,0.5258620689655172
+L2 country-period,leave_country_out,Random Forest,recall,0.6421052631578947
+L2 country-period,leave_country_out,Random Forest,mcc,0.5006769190043202
+L2 country-period,leave_country_out,Random Forest,specificity,0.9005424954792043
+L2 country-period,repeated_stratified_cv,Random Forest,roc_auc,0.8610830874654991
+L2 country-period,repeated_stratified_cv,Random Forest,pr_auc,0.5825851419949767
+L2 country-period,repeated_stratified_cv,Random Forest,brier,0.10925306005446533
+L2 country-period,repeated_stratified_cv,Random Forest,f1,0.6149392134862578
+L2 country-period,repeated_stratified_cv,Random Forest,precision,0.608643626583826
+L2 country-period,repeated_stratified_cv,Random Forest,recall,0.624561403508772
+L2 country-period,repeated_stratified_cv,Random Forest,mcc,0.5487548429081625
+L2 country-period,repeated_stratified_cv,Random Forest,specificity,0.9300783604581073
+L2 country-period,temporal_holdout,Extra Trees,roc_auc,0.8249434389140272
+L2 country-period,temporal_holdout,Extra Trees,pr_auc,0.5895347113453087
+L2 country-period,temporal_holdout,Extra Trees,brier,0.10788012769651437
+L2 country-period,temporal_holdout,Extra Trees,f1,0.52
+L2 country-period,temporal_holdout,Extra Trees,precision,0.3979591836734694
+L2 country-period,temporal_holdout,Extra Trees,recall,0.75
+L2 country-period,temporal_holdout,Extra Trees,mcc,0.4260082058208024
+L2 country-period,temporal_holdout,Extra Trees,specificity,0.7830882352941176
+L2 country-period,leave_country_out,Extra Trees,roc_auc,0.8205386884933854
+L2 country-period,leave_country_out,Extra Trees,pr_auc,0.5501507400564822
+L2 country-period,leave_country_out,Extra Trees,brier,0.0966476723512188
+L2 country-period,leave_country_out,Extra Trees,f1,0.5230769230769231
+L2 country-period,leave_country_out,Extra Trees,precision,0.4121212121212121
+L2 country-period,leave_country_out,Extra Trees,recall,0.7157894736842105
+L2 country-period,leave_country_out,Extra Trees,mcc,0.4387429884099969
+L2 country-period,leave_country_out,Extra Trees,specificity,0.8245931283905967
+L2 country-period,repeated_stratified_cv,Extra Trees,roc_auc,0.8294343453570635
+L2 country-period,repeated_stratified_cv,Extra Trees,pr_auc,0.5806786756166891
+L2 country-period,repeated_stratified_cv,Extra Trees,brier,0.14841537143511035
+L2 country-period,repeated_stratified_cv,Extra Trees,f1,0.5400841652014646
+L2 country-period,repeated_stratified_cv,Extra Trees,precision,0.515811475668746
+L2 country-period,repeated_stratified_cv,Extra Trees,recall,0.5824561403508771
+L2 country-period,repeated_stratified_cv,Extra Trees,mcc,0.4608961409358448
+L2 country-period,repeated_stratified_cv,Extra Trees,specificity,0.9017480409885472
+L2 country-period,temporal_holdout,XGBoost,roc_auc,0.8164592760180995
+L2 country-period,temporal_holdout,XGBoost,pr_auc,0.5982847981940518
+L2 country-period,temporal_holdout,XGBoost,brier,0.09992555224455477
+L2 country-period,temporal_holdout,XGBoost,f1,0.5945945945945946
+L2 country-period,temporal_holdout,XGBoost,precision,0.559322033898305
+L2 country-period,temporal_holdout,XGBoost,recall,0.6346153846153846
+L2 country-period,temporal_holdout,XGBoost,mcc,0.5126817062376995
+L2 country-period,temporal_holdout,XGBoost,specificity,0.9044117647058824
+L2 country-period,leave_country_out,XGBoost,roc_auc,0.8360521557057199
+L2 country-period,leave_country_out,XGBoost,pr_auc,0.48968919366032837
+L2 country-period,leave_country_out,XGBoost,brier,0.09860548871791114
+L2 country-period,leave_country_out,XGBoost,f1,0.583732057416268
+L2 country-period,leave_country_out,XGBoost,precision,0.5350877192982456
+L2 country-period,leave_country_out,XGBoost,recall,0.6421052631578947
+L2 country-period,leave_country_out,XGBoost,mcc,0.5074627969120822
+L2 country-period,leave_country_out,XGBoost,specificity,0.9041591320072333
+L2 country-period,repeated_stratified_cv,XGBoost,roc_auc,0.8459883886932523
+L2 country-period,repeated_stratified_cv,XGBoost,pr_auc,0.553031922598241
+L2 country-period,repeated_stratified_cv,XGBoost,brier,0.10631159545058311
+L2 country-period,repeated_stratified_cv,XGBoost,f1,0.5641692096335027
+L2 country-period,repeated_stratified_cv,XGBoost,precision,0.5052017135056254
+L2 country-period,repeated_stratified_cv,XGBoost,recall,0.6491228070175438
+L2 country-period,repeated_stratified_cv,XGBoost,mcc,0.486102148417126
+L2 country-period,repeated_stratified_cv,XGBoost,specificity,0.8878842676311031
+L2 country-period,temporal_holdout,LightGBM,roc_auc,0.8190752262443439
+L2 country-period,temporal_holdout,LightGBM,pr_auc,0.5727673972422215
+L2 country-period,temporal_holdout,LightGBM,brier,0.10170096125149147
+L2 country-period,temporal_holdout,LightGBM,f1,0.5607476635514018
+L2 country-period,temporal_holdout,LightGBM,precision,0.5454545454545454
+L2 country-period,temporal_holdout,LightGBM,recall,0.5769230769230769
+L2 country-period,temporal_holdout,LightGBM,mcc,0.4742206998578872
+L2 country-period,temporal_holdout,LightGBM,specificity,0.9080882352941176
+L2 country-period,leave_country_out,LightGBM,roc_auc,0.8389835347863329
+L2 country-period,leave_country_out,LightGBM,pr_auc,0.5093363648783533
+L2 country-period,leave_country_out,LightGBM,brier,0.09629448900156638
+L2 country-period,leave_country_out,LightGBM,f1,0.5615763546798029
+L2 country-period,leave_country_out,LightGBM,precision,0.5277777777777778
+L2 country-period,leave_country_out,LightGBM,recall,0.6
+L2 country-period,leave_country_out,LightGBM,mcc,0.4819340181290568
+L2 country-period,leave_country_out,LightGBM,specificity,0.9077757685352622
+L2 country-period,repeated_stratified_cv,LightGBM,roc_auc,0.8612226769455286
+L2 country-period,repeated_stratified_cv,LightGBM,pr_auc,0.5828674385796703
+L2 country-period,repeated_stratified_cv,LightGBM,brier,0.10424442951861802
+L2 country-period,repeated_stratified_cv,LightGBM,f1,0.5800503047925728
+L2 country-period,repeated_stratified_cv,LightGBM,precision,0.5471515151515152
+L2 country-period,repeated_stratified_cv,LightGBM,recall,0.6210526315789474
+L2 country-period,repeated_stratified_cv,LightGBM,mcc,0.5054338363683278
+L2 country-period,repeated_stratified_cv,LightGBM,specificity,0.9113924050632911

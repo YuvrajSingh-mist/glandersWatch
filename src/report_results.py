@@ -147,10 +147,11 @@ on the temporal holdout.}
 \end{tabular}}
 \end{table}
 
-Against a base rate of @PREVALENCE@, the strongest temporal result of @BESTPR@ represents an
-approximately @LIFT@-fold lift. Every tree-based model exceeds the logistic baseline, and the
-single decision tree is the weakest of the six, which indicates that the relationships are
-interactive rather than additive.
+Two results need separating. On the forward temporal holdout the best discrimination comes from
+@BESTTEMPM@ at @BESTTEMPPR@, against a base rate of @PREVALENCE@, roughly a @BESTLIFT@-fold lift.
+Under leave-country-out validation the ranking inverts: @BESTTEMPM@ falls to @BESTTEMPLOCO@, while
+logistic regression holds @CHAMPLOCO@ at a temporal score of @CHAMPPR@ and so becomes the champion on
+the criterion that governs selection. The single decision tree is weakest on both schemes.
 
 The more important pattern is the systematic decline under leave-country-out validation. For
 Random Forest the score falls from @RFPR@ to @RFLOCOR@, and the decline exceeds the width of the
@@ -283,12 +284,12 @@ architectures for this problem class.
 \section{Alert Economics}
 \label{sec:alerts}
 
-The operating characteristics of the model as a warning system are shown in
-Figure~\ref{fig:alerts}. Alerting the six per cent of country-years with the highest predicted
-risk captures approximately half of all observed events, and alerting twenty-eight per cent
-captures eighty per cent. Uniform alerting would require full coverage for the same recall, so the
-model is roughly eight times more efficient than arbitrary selection at the fifty per cent
-operating point.
+The operating characteristics of the champion model as a warning system are shown in
+Figure~\ref{fig:alerts}. Alerting the six per cent of country-years at highest predicted risk
+captures @ALERT6REC@ per cent of observed events, half of them are reached at an alert budget of
+@ALERT50BUD@ per cent, and eighty per cent at @ALERT80BUD@ per cent. Uniform alerting would require
+full coverage for the same recall, so the model is about @ALERTEFF@ times more efficient than
+arbitrary selection at the fifty per cent operating point.
 
 \begin{figure}[htbp]
 \centering
@@ -330,9 +331,9 @@ are few recorded events from which to learn in those strata.
 
 The results support four conclusions.
 
-The model has predictive skill. A precision-recall AUC of @BESTPR@ against a base rate of
-@PREVALENCE@ is not explainable by chance, it survives a strictly forward-looking temporal split,
-and the probabilities are calibrated to within two percentage points.
+The model has predictive skill. @CHAMP@ reaches a precision-recall AUC of @CHAMPPR@ against a base
+rate of @PREVALENCE@, survives a strictly forward-looking temporal split, holds @CHAMPLOCO@ across
+unseen countries, and is calibrated to within @ECE@.
 
 The skill does not transfer intact. Leave-country-out performance is roughly forty per cent lower
 in relative terms, and this is the correct figure for planning. Any deployment to a new country
@@ -368,7 +369,7 @@ probability, the retrieval-augmented layer that explains it against official gui
 alert service that turns it into a small number of messages.
 
 Prediction is possible, and the achievable performance is moderate. On a strictly forward-looking temporal holdout the strongest model reaches a
-precision-recall AUC of @BESTPR@ against a base rate of @PREVALENCE@, an approximately @LIFT@-fold
+precision-recall AUC of @CHAMPPR@ against a base rate of @PREVALENCE@, an approximately @LIFT@-fold
 lift, with an expected calibration error of @ECE@. Used as a warning system, it captures half of
 all observed events while alerting six per cent of country-years.
 

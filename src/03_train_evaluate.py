@@ -404,12 +404,14 @@ def run_subgroups(df: pd.DataFrame, oof: np.ndarray, model_label: str) -> list[d
     return rows
 
 
-def run_shap(df: pd.DataFrame, model_name: str = "XGBoost") -> list[dict]:
+def run_shap(df: pd.DataFrame, model_name: str = "XGBoost",
+             numeric: list[str] | None = None,
+             cats: list[str] | None = None) -> list[dict]:
     import shap
 
-    log("\n=== SHAP attribution ===")
-    numeric = [c for c in C.FULL if c in df.columns]
-    cats = C.CATEGORICAL
+    log("\n=== SHAP attribution (production feature set) ===")
+    numeric = list(numeric) if numeric else [c for c in C.FULL if c in df.columns]
+    cats = list(cats) if cats else C.CATEGORICAL
     X = df[numeric + cats]
     y = df.y_occ_next.to_numpy().astype(int)
     spec = {s.name: s for s in C.model_zoo(int(y.sum()), int((1 - y).sum()))}[model_name]
@@ -455,8 +457,24 @@ def main() -> None:
     RESULTS["audit"]["level1_positives"] = int(l1.y_occ_next.sum())
     RESULTS["audit"]["level1_prevalence"] = float(l1.y_occ_next.mean())
 
-    numeric = [c for c in C.FULL if c in l1.columns]
-    cats = C.CATEGORICAL
+    # ---- feature selection: SHAP on the training period only ----------------
+    # Ranking on the training years keeps the held-out years out of the choice of
+    # features, so the temporal-holdout score is not inflated by selection.
+    import shap_select as SS
+    sel_rows = SS.rank_by_shap(l1)
+    sel = SS.select(sel_rows)
+    RESULTS["selection"] = {
+        "top_k": sel["top_k"],
+        "train_end": sel["train_end"],
+        "numeric": sel["numeric"],
+        "categorical": sel["categorical"],
+        "ranking": sel["ranking"][:25],
+        "n_candidates": sel["n_candidates"],
+    }
+    log(f"\n>> SHAP selection: top {sel['top_k']} of {sel['n_candidates']} numeric features "
+        f"plus {len(sel['categorical'])} categorical")
+    numeric = [c for c in sel["numeric"] if c in l1.columns]
+    cats = sel["categorical"]
     RESULTS["level1"] = run_level(l1, "y_occ_next", numeric, cats, "L1 country-year",
                                   n_iter=2 if FAST else 8)
 
@@ -504,7 +522,7 @@ def main() -> None:
 
     # SHAP
     if not FAST:
-        RESULTS["shap"] = run_shap(l1, "XGBoost")
+        RESULTS["shap"] = run_shap(l1, "XGBoost", numeric, cats)
 
     # Level 2 (coarse resolution)
     l2 = load_level2(l1)
