@@ -228,8 +228,9 @@ the correlated inputs this panel has many of.
 The ranking is computed on the training years only, 2005 to @SELTRAINEND@. Fitting on the full panel
 would let the held-out years influence which features were chosen, making the temporal-holdout score
 optimistic. The @SELCAND@ numeric candidates are ranked by mean absolute SHAP on that window and the
-first @SELK@ are kept, together with the two categorical columns, which are retained because region and
-income band are the reporting-capacity proxies the discussion turns on.
+first @SELK@ are kept. No categorical column is carried into the model: region and income band are
+analysed as association strata and as subgroup breakdowns, not as predictors, because both are proxies
+for reporting capacity and neither can transfer to a country that does not appear in training.
 
 \begin{table}[htbp]
 \centering

@@ -173,22 +173,41 @@ development indicators and NASA POWER reanalysis climatology. @PANELROWS@ countr
 @ROWS@ modelling observations across @COUNTRIES@ equine-holding countries from 2005 to 2023, with
 @POSITIVES@ positive labels. Candidate features are screened by attribution rather than association:
 the top @SELK@ of @SELCAND@ numeric candidates, ranked by mean absolute SHAP on the training years
-alone, are kept with two categorical columns, and six model families are trained under three
+alone, are kept, with no categorical columns, and six model families are trained under three
 validation schemes.
 
 \vspace{0.5em}
 \noindent
-On a forward temporal holdout the strongest model reaches a precision-recall AUC of @BESTTEMPPR@
-against a base rate of @PREVALENCE@. Under leave-country-out validation the ranking inverts and
-@CHAMP@ leads at @CHAMPLOCO@, with calibration error @ECE@, so it is the champion and the estimate to
-quote for an unseen country. Asking the coarser question instead, whether a country is a
-glanders-reporting country at all, raises discrimination to about 0.95, which reflects how stable
-reporting status is rather than any gain in predictive skill. The dominant limitation is that the
-label reflects documented activity rather than true incidence, so the model largely learns where
-disease is reported. Reporting effort is the principal confounder and the main target for future
-work. The explanation and alert components are specified to the level of their interfaces, rule
-semantics and evaluation protocol, and are not reported as measured results because they are not
-deployed.
+Two tests were run, because they answer different questions. The first asks how well the model predicts
+years it has never seen: the best model reaches a precision-recall AUC of @BESTTEMPPR@ against a base
+rate of @PREVALENCE@, roughly eight times better than chance, which is useful but not accurate enough
+to act on without a person in the loop. The second asks how well it predicts countries it has never
+seen, which is what deployment actually requires. That test changes the ranking. @CHAMP@ leads at
+@CHAMPLOCO@ and its probabilities are well calibrated, with an error of @ECE@, so a predicted 0.20
+means roughly one chance in five. It is therefore the champion and the estimate to quote for an
+unseen country.
+
+\vspace{0.4em}
+\noindent
+An easier question was tested alongside. Instead of asking whether glanders appears in one particular
+year, ask whether a country reports glanders at all. Discrimination there rises to about 0.95. That is
+not a better model but a simpler question: whether a country reports the disease is a stable national
+characteristic, while the timing is the part that is genuinely hard.
+
+\vspace{0.4em}
+\noindent
+The main limitation follows from the label. A positive means glanders was documented, not that it
+occurred, and a negative may mean no disease or simply no report. The model therefore learns where
+glanders is reported, and reporting effort is the principal confounder: a country with a reference
+laboratory and an open-access publishing record looks riskier than a country with the same disease
+burden and weaker surveillance. Estimating and correcting for that capacity is the main item of future
+work.
+
+\vspace{0.4em}
+\noindent
+The explanation and alert components are described through their interfaces, rules and evaluation
+plan. They carry no measured results because they are not deployed, and measuring them is what a pilot
+would supply.
 
 \vspace{0.7em}
 \noindent
