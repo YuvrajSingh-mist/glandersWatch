@@ -839,13 +839,20 @@ regional and global aggregates are excluded by requiring a three-character ISO c
 prevents rows such as ``World'' or ``South Asia'' from entering the panel as if they were
 countries.
 
-The full grid contains 6,700 country-year rows across 268 countries for 2000
-to 2024. For modelling, three restrictions are applied: only equine-holding countries are
-retained, defined as a maximum equid stock of at least one thousand animals; only the years 2005
-to 2023 are used; and only rows with an observable next-year label are kept.
+Combining the four sources produces a grid of 6,700 country-year rows across
+268 countries for 2000 to 2024, in 60 columns: raw stocks, covariates, derived rates
+and label fields.
 
-This yields the modelling matrix, 3,078 rows by 44 features with 172 positive
-labels, which is the dataset every model in this report was trained and evaluated on. It is
+Preprocessing reduces that grid to 3,078 rows and 44 feature columns, excluding the target,
+which is the matrix every model here was trained and evaluated on. The row loss comes from two
+restrictions: the equine-holding filter, which keeps 162 of the 268 countries on a
+maximum equid stock of at least one thousand animals, and the 2005 to 2023 year window. The column
+loss is the 16 panel columns that are identifiers, intermediate quantities or label fields rather
+than predictors. The third restriction, an observable next-year label, then removes no further rows.
+Imputation and scaling happen inside the training pipeline, so the test period cannot influence
+them.
+
+The exported file is therefore 3,078 rows by 44 feature columns, plus the target column. It is
 committed as \texttt{model\_matrix.csv} under \texttt{data/processed/}, with one row per
 country-year, the 44 feature columns in the order the pipeline receives them, and the
 binary next-year label. The file is written by \texttt{src/11\_export\_model\_matrix.py} from
@@ -1008,9 +1015,8 @@ trees are bagged ensembles \cite{breiman2001}, differing in the degree of random
 split selection.
 XGBoost and LightGBM are boosted ensembles, differing in tree growth strategy \cite{chen2016,ke2017}.
 
-Neural networks were excluded on evidential grounds. With 172 positive observations and
-44 features, a network has far more parameters to estimate than it has positive examples
-from which to learn, and would be expected to memorise the training period and fail on new data.
+Neural networks were excluded on evidential grounds: with 172 positives and 44
+features a network has more parameters than examples and would memorise the training period.
 
 \section{Chained Pipeline}
 
@@ -1045,26 +1051,25 @@ Three validation schemes are reported, each answering a different question.
         stability check on the ranking metrics.
 \end{itemize}
 
-Precision-recall AUC is the primary metric. At 5.59\% prevalence, ROC-AUC is dominated by
-the true-negative mass and overstates performance, a well-characterised property of imbalanced
-problems \cite{saito2015,davis2006}. ROC-AUC is reported for comparability. Brier score and
-expected calibration error are reported because an uncalibrated probability cannot support a
-threshold-based alert \cite{niculescu2005,huang2020}. Precision, recall, specificity, F1 and the
-Matthews correlation coefficient are computed at a threshold tuned on training data only, and
-bootstrap percentile intervals with one thousand resamples quantify sampling uncertainty.
+Precision-recall AUC is the primary metric. At 5.59\% prevalence, ROC-AUC is dominated by the
+true-negative mass and overstates performance, a well-characterised property of imbalanced problems
+\cite{saito2015,davis2006}, so it is reported only for comparability. Brier score and expected
+calibration error are reported because an uncalibrated probability cannot support a threshold-based
+alert \cite{niculescu2005,huang2020}. Precision, recall, specificity, F1 and the Matthews
+correlation are computed at a threshold tuned on training data only, with bootstrap percentile
+intervals over one thousand resamples.
 
-Grouped rather than random splitting is essential. A random row split would place the same country
-in both training and test partitions, allowing the model to memorise country identity. Given the
-geographic proxy effects described in Section~\ref{sec:selection}, this would inflate all reported
-scores \cite{roberts2017}.
+Grouped rather than random splitting is essential, since a random row split would put the same
+country in both partitions and let the model memorise country identity, inflating every score
+\cite{roberts2017}.
 
 \section{Leakage Controls}
 
 Six controls are applied: features use year $t$ or earlier and only target columns use $t+1$; the
-split is chronological, so no future observation enters training; hyperparameters are tuned inside
-training folds with grouped cross-validation; probability calibration is fitted on training folds
-only; the alert threshold is fixed on the training period and applied unchanged to test; and
-imputation values and missing indicators are generated inside the pipeline.
+split is chronological; hyperparameters are tuned inside training folds with grouped
+cross-validation; calibration is fitted on training folds only; the alert threshold is fixed on the
+training period and applied unchanged to test; and imputation values and missing indicators are
+generated inside the pipeline.
 
 % =====================================================================
 \chapter{MLOps and Model Serving}

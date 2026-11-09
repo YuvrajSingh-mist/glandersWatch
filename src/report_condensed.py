@@ -325,13 +325,20 @@ than loaded whole. Names are matched through \texttt{pycountry} with overrides f
 ``T\"urkiye'', and World Bank aggregates are excluded by requiring a three-character ISO code, so
 ``World'' never enters the panel as a country.
 
-The grid holds @PANELROWS@ country-year rows across @PANELCOUNTRIES@ countries for 2000 to 2024.
-Three restrictions produce the modelling matrix: only equine-holding countries, defined as a maximum
-equid stock of at least one thousand; only 2005 to 2023; and only rows with an observable next-year
-label. The result has @ROWS@ rows, @FEATURES@ features and @POSITIVES@ positives.
+Combining the four sources produces a grid of @PANELROWS@ country-year rows across
+@PANELCOUNTRIES@ countries for 2000 to 2024, in 60 columns of raw stocks, covariates, derived rates
+and label fields.
 
-This yields the modelling matrix, @ROWS@ rows by @FEATURES@ features with @POSITIVES@ positives,
-which is the dataset every model was trained and evaluated on. It is committed as
+Preprocessing reduces that grid to @ROWS@ rows and @FEATURES@ feature columns, excluding the target.
+The row loss comes from the equine-holding filter, which keeps 162 of the @PANELCOUNTRIES@ countries
+on a maximum equid stock of at least one thousand, and from the 2005 to 2023 year window; applying
+the third restriction, an observable next-year label, removes nothing further. The column loss is the
+16 panel columns that are identifiers, intermediate quantities or label fields rather than
+predictors. Imputation and scaling happen inside the training pipeline, not here, so the test period
+cannot influence them.
+
+This is the matrix every model was trained and evaluated on: @ROWS@ rows by @FEATURES@ feature
+columns, with @POSITIVES@ positives, plus the target column. It is committed as
 \texttt{model\_matrix.csv} under \texttt{data/}\allowbreak\texttt{processed/}, one row per
 country-year, with the feature columns in pipeline order and the binary next-year label. The file is
 written by \texttt{src/11\_export\_model\_matrix.py} from the same loader and feature definitions the
