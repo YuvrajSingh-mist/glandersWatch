@@ -1617,26 +1617,34 @@ control; checking its output is.
 
 \section{Evaluation}
 
-The layer is evaluated on four things, none of which is whether the prose reads well.
+Five quantities are defined below, following the criteria set out in the project proposal. None is
+reported as a measurement, because the layer has not been run against the corpus; measuring them is
+listed as future work in Chapter~\ref{ch:concl}.
 
-\textbf{Retrieval quality.} A hand-built set of questions with known relevant passages, scored by
-recall@5 and mean reciprocal rank. This isolates retrieval from generation: if the right passage is
-not retrieved, no amount of generation quality helps.
+\textbf{Retrieval quality.} Recall@$k$, the fraction of hand-built questions whose known relevant
+passage appears among the top $k$ retrieved results, reported at $k=5$, together with mean reciprocal
+rank, which rewards returning that passage near the top rather than merely inside the cut-off. This
+isolates retrieval from generation: if the right passage is not retrieved, no amount of generation
+quality helps.
 
-\textbf{Faithfulness.} Whether each claim in an answer is supported by the retrieved context,
-scored by a judge model and reviewed manually on a sample. This is the metric that catches a
-model that cites a passage but states something the passage does not say.
+\textbf{Faithfulness.} The fraction of claims in an answer that the retrieved context supports,
+scored by a judge model and reviewed manually on a sample. This is the RAGAS-style metric that catches
+a model citing a passage while stating something the passage does not say.
 
-\textbf{Citation precision.} The fraction of citations that resolve to a passage that supports
-the sentence they are attached to. Distinct from resolution, which only checks existence.
+\textbf{Answer relevance.} Whether the answer addresses the question asked rather than reciting
+correct but tangential guidance. Scored on the same sample as faithfulness and reported beside it,
+because an answer can be fully grounded and still unhelpful.
 
-\textbf{Refusal behaviour.} The refusal rate on a set of deliberately out-of-scope and
-underdetermined questions, and the false refusal rate on questions the corpus does answer. A layer
-that never refuses is unsafe; a layer that always refuses is useless. Both numbers are reported.
+\textbf{Citation precision.} The fraction of citations that resolve to a passage supporting the
+sentence they are attached to. Distinct from resolution, which only checks existence.
 
-The evaluation set is built from the questions the layer is designed to answer, not from
-generic reading-comprehension data, because the failure modes that matter here are specific to
-control guidance.
+\textbf{Refusal behaviour.} The refusal rate on deliberately out-of-scope and underdetermined
+questions, and the false refusal rate on questions the corpus does answer. A layer that never refuses
+is unsafe; one that always refuses is useless, so both numbers matter.
+
+The evaluation set is built from the questions the layer is designed to answer, not from generic
+reading-comprehension data, because the failure modes that matter here are specific to control
+guidance.
 
 \section{Worked Example}
 
@@ -1859,25 +1867,28 @@ and a smartphone without duplicating the decision logic.
 
 \section{Evaluation of the Alert Layer}
 
-The service is evaluated as a warning system, not as a messaging system. Four quantities matter.
+The service is evaluated as a warning system, not as a messaging system. The proposal states the
+criterion as missed events against false alerts, since unnecessary warnings cause alert fatigue, and
+the four quantities below turn that into measurable terms. The first two are computed from historical
+predictions and labels; the last two require a deployed service, so no measured value is reported for
+them here.
 
-\textbf{Alert precision.} Of the area-periods that triggered a HIGH alert, what fraction were
-followed by a documented event. This is the number that determines whether recipients trust the
-message.
+\textbf{Alert precision and the false-alert rate.} Precision is the fraction of HIGH area-periods
+followed by a documented event. Its complement, the false-alert rate, is the share of messages sent
+for areas where nothing was subsequently reported, and it is the quantity that drives alert fatigue:
+at a fixed threshold the two are one number seen from opposite sides.
 
-\textbf{Event coverage at budget.} The fraction of events captured as a function of the number of
-areas alerted, which is the operating curve already reported in Chapter~\ref{ch:results}. The
-thresholds are read off this curve, which is what connects the modelling in this report to the
-behaviour of the service.
+\textbf{Event coverage at budget and the missed-event rate.} Coverage is the fraction of observed
+events preceded by an alert at a given alert budget, which is the operating curve in
+Chapter~\ref{ch:results}; its complement is the missed-event rate. Coverage and precision trade
+against each other, and that curve is the schedule of the trade, so the thresholds are read from it.
+This is what connects the modelling in this report to the behaviour of the service.
 
-\textbf{Noise per recipient.} Messages per subscriber per year. This is the maintainability metric,
-because it predicts whether the service will still be read in its second year.
+\textbf{Noise per recipient.} Messages per subscriber per year, which predicts whether the service
+will still be read in its second year.
 
-\textbf{Delivery reliability.} The fraction of queued deliveries that reached a terminal success
-state within the retry window, reported per channel, since channels fail differently.
-
-The first two are computed from historical predictions and labels. The last two require a deployed
-service and are stated as the protocol that would measure them rather than as results.
+\textbf{Delivery reliability.} The fraction of queued deliveries reaching a terminal success state
+within the retry window, reported per channel, since channels fail differently.
 
 % =====================================================================
 \chapter{Results and Discussion}

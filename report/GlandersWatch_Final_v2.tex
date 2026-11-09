@@ -796,31 +796,27 @@ single-threaded because tree ensembles are not bitwise reproducible across threa
 \section{The Problem This Layer Solves}
 
 A calibrated probability of 0.24 is actionable for a veterinary officer and meaningless to an equine
-owner. The owner needs to know what happened, what it means for their animals, and what to do next.
-The officer needs to know which factors drove the number, because a forecast they cannot interrogate
-is a forecast they will not act on.
+owner. The owner needs to know what happened and what to do next; the officer needs the factors behind
+the number, because a forecast they cannot interrogate is one they will not act on.
 
 Asking a large language model is the obvious answer and the obvious hazard. A model asked about
-glanders answers from training data that may be outdated, may conflate glanders with melioidosis,
-and may invent a treatment protocol. For a zoonosis under statutory control, an invented instruction
-is worse than no instruction. Retrieval-augmented generation \cite{lewis2020} changes what the model
-may use: it is not asked what it knows, but given a small set of passages from official guidance
-plus the prediction's own numbers, and required to answer only from those. Each claim traces to a
-passage, and the passage is shown to the reader.
+glanders answers from training data that may be outdated, may conflate glanders with melioidosis, and
+may invent a treatment protocol; for a zoonosis under statutory control, an invented instruction is
+worse than none. Retrieval-augmented generation \cite{lewis2020} changes what the model may use: it is
+given a small set of passages from official guidance plus the prediction's own numbers, and required
+to answer only from those, so each claim traces to a passage the reader can see.
 
-The goal is therefore narrow and testable: an answer a veterinary officer would accept as consistent
-with the National Action Plan, and a refusal rather than a guess when the corpus does not support
-one.
+The goal is narrow and testable: an answer a veterinary officer would accept as consistent with the
+National Action Plan, and a refusal rather than a guess when the corpus does not support one.
 
-Fine-tuning would produce fluent text with no citations and no way to tell guidance from the base
-model's priors, and it would freeze the knowledge at training time, so a revised plan would require
-retraining. Retrieval keeps knowledge in a corpus that a re-ingestion can update, makes every answer
-auditable by construction, and allows a refusal path that fine-tuning does not. The cost is latency
-and possible retrieval failure, both handled explicitly below.
+Fine-tuning would produce fluent text with no citations and no way to separate guidance from the
+base model's priors, and it would freeze knowledge at training time. Retrieval keeps knowledge in a
+corpus a re-ingestion can update, makes every answer auditable, and allows a refusal path. The cost is
+latency and possible retrieval failure, both handled below.
 
 \section{Knowledge Base}
 
-The corpus is restricted to sources with authority, because the layer's value is that it cites them.
+The corpus is restricted to authoritative sources, because the layer's value is that it cites them.
 Each document carries an authority tier, used as a tie-breaker during retrieval.
 
 \begin{table}[htbp]
@@ -840,39 +836,33 @@ Open-access research papers & 3 & Epidemiology, risk factors, regional situation
 \end{tabular}
 \end{table}
 
-Tier 3 may inform an explanation but never overrides tier 1 on a control instruction. When passages
-conflict the higher tier wins and the conflict is logged, because a silent contradiction between
-sources is exactly the failure this layer exists to prevent.
+Tier 3 may inform an explanation but never overrides tier 1 on a control instruction. Conflicts
+resolve to the higher tier and are logged, because a silent contradiction between sources is the
+failure this layer exists to prevent.
 
 \section{Ingestion, Embedding and Retrieval}
 
-Ingestion runs offline as a job. A document is parsed, split at section boundaries, and each chunk
-is stored with enough metadata to be cited and filtered.
-
-Chunking is section-aware rather than fixed-width, because a fixed window cuts control instructions
-in half and lets the model complete a truncated sentence. The splitter respects headings first, then
-paragraphs, and falls back to a sliding window only for a section longer than the ceiling. Chunks
-target 400 to 700 tokens with 15 per cent overlap inside a section, sections under 80 tokens merge
-into the parent, and the retained metadata is document id, title, full section path, page, year and
-authority tier. The section path is kept in full, for example
-\texttt{NAP-2025 > 5.2 Movement control}, so a citation points to a subsection rather than to a
-90-page document.
+Ingestion runs offline as a job and stores each chunk with enough metadata to be cited and filtered.
+Chunking is section-aware rather than fixed-width, because a fixed window cuts control instructions in
+half and lets the model complete a truncated sentence. The splitter respects headings first, then
+paragraphs, falling back to a sliding window only past the ceiling. Chunks target 400 to 700 tokens
+with 15 per cent overlap inside a section, and sections under 80 tokens merge into the parent. The
+full section path is retained, for example \texttt{NAP-2025 > 5.2 Movement control}, so a citation
+points to a subsection rather than a 90-page document.
 
 Chunks are embedded with a compact sentence-transformer \cite{reimers2019} producing 384-dimensional
-vectors, cheap enough to embed on a laptop, with a multilingual variant for Hindi because an
-English-only embedding degrades on Devanagari. Vectors live in pgvector beside the relational tables,
-so re-ingestion and prediction share one transaction boundary. The index is HNSW with cosine distance
-\cite{malkov2020}, acceptable because the reranker corrects recall at the head of the list and it keeps
-query cost flat as the corpus grows.
+vectors, with a multilingual variant for Hindi because an English-only embedding degrades on
+Devanagari. Vectors live in pgvector beside the relational tables, so re-ingestion and prediction share
+one transaction boundary. The index is HNSW with cosine distance \cite{malkov2020}; the reranker
+corrects recall at the head of the list, and the index keeps query cost flat as the corpus grows.
 
 \input{fig_rag.tex}
 
 Retrieval is hybrid, because dense and lexical search \cite{robertson2009} fail differently here. A
-dense query for ``what should I do if I suspect glanders'' retrieves passages about suspicion, which
-helps. A dense query for ``movement control'' may miss a passage using ``restriction of equid
-movement'', where a lexical match succeeds; conversely a lexical query for a rare acronym retrieves
-noise a dense query ignores. Both lists are retrieved and fused by reciprocal rank fusion
-\cite{cormack2009}, which combines rankings without requiring comparable scores:
+dense query for ``movement control'' may miss a passage using ``restriction of equid movement'', where
+a lexical match succeeds; conversely a lexical query for a rare acronym retrieves noise a dense query
+ignores. Both lists are fused by reciprocal rank fusion \cite{cormack2009}, which combines rankings
+without requiring comparable scores:
 
 \[
 \mathrm{RRF}(d) = \sum_{i \in \{\text{dense},\text{lexical}\}} \frac{1}{k + \mathrm{rank}_i(d)},
@@ -880,8 +870,8 @@ noise a dense query ignores. Both lists are retrieved and fused by reciprocal ra
 \]
 
 The fused top fifty are reranked by a cross-encoder scoring each passage against the question
-jointly. A cross-encoder is far slower per pair than an embedding dot product, which is why it runs
-on fifty candidates rather than on the corpus, and the top five become the context.
+jointly. It is far slower per pair than an embedding dot product, which is why it runs on fifty
+candidates rather than the corpus, and the top five become the context.
 
 \begin{table}[htbp]
 \centering
@@ -902,23 +892,23 @@ Relevance floor & rerank score below 0.30 discarded & Prevents padding the conte
 \end{table}
 
 The relevance floor drives the refusal path: if fewer than two passages clear it, the layer returns a
-refusal with the SHAP factors, because a context built from marginal passages produces a confident
-answer built on nothing.
+refusal with the SHAP factors, because marginal passages produce a confident answer built on
+nothing.
 
 \section{Context, Generation and Guardrails}
 
 The prompt has three parts in fixed order: a system instruction, the retrieved passages with
 identifiers, and the structured prediction facts. Those facts make the answer specific to this
-forecast rather than to glanders in general, and they are injected as structured data so the model
-cannot restate an association as a cause. The system instruction states four constraints: answer only
-from the passages, cite every claim, never diagnose an individual animal, and state that the output is
-a population-level forecast.
+forecast rather than to glanders in general, and are injected as structured data so the model cannot
+restate an association as a cause. The instruction states four constraints: answer only from the
+passages, cite every claim, never diagnose an individual animal, and state that the output is a
+population-level forecast.
 
-Generation uses temperature 0.1 and a bounded output length. Low temperature is chosen for
-consistency rather than caution: two officers asking the same question about the same area should
-receive the same instruction. The provider sits behind a single-method interface, so the same
-retrieval, grounding and citation code runs against a local Ollama model or a hosted API, and
-switching model cannot silently disable the guardrails.
+Generation uses temperature 0.1 and a bounded output length, chosen for consistency rather than
+caution: two officers asking the same question about the same area should receive the same
+instruction. The provider sits behind a single-method interface, so one retrieval, grounding and
+citation path serves a local Ollama model or a hosted API, and switching model cannot silently
+disable the guardrails.
 
 The layer is designed to refuse, and four checks can terminate a response.
 
@@ -939,28 +929,40 @@ Out-of-scope & Question is about glanders control, not unrelated topics & Refusa
 \end{tabular}
 \end{table}
 
-The citation check is mechanical. The answer is parsed for identifiers and each is looked up in the
-retrieved set; one that does not resolve means the model cited a document it was not given, which is a
-hallucination whether or not the sentence is true. Asking a model to be accurate is not a control;
-checking its output is.
+The citation check is mechanical: the answer is parsed for identifiers and each is looked up in the
+retrieved set, and one that does not resolve means the model cited a document it was not given, which
+is a hallucination whether or not the sentence is true. Asking a model to be accurate is not a
+control; checking its output is.
 
 \section{Evaluation}
 
-Four quantities are measured, none of them whether the prose reads well. Retrieval quality is
-recall@5 and mean reciprocal rank on a hand-built question set, which isolates retrieval from
-generation, since no generation quality helps if the right passage is never retrieved. Faithfulness
-is whether each claim is supported by the retrieved context, scored by a judge model and reviewed
-by hand on a sample; this catches a model that cites a passage but says something it does not say.
-Citation precision is the fraction of citations resolving to a passage that supports the sentence,
-which is distinct from resolution, since resolution only checks existence. Refusal
-behaviour is the refusal rate on out-of-scope questions and the false refusal rate in scope: a layer
-that never refuses is unsafe and one that always refuses is useless, so both are reported.
+Five quantities are defined below, following the project proposal. None is reported as a measurement,
+because the layer has not been run against the corpus; measuring them is future work
+(Chapter~\ref{ch:concl}).
 
-Because the layer is specified rather than deployed, the validation that would precede deployment is
-stated so the claim is falsifiable: recall@5 above 0.85, faithfulness above 0.90 on 100 manually
-reviewed answers, citation precision above 0.95, zero individual-animal diagnoses on an adversarial
-probe set, refusal on every out-of-scope question with a false refusal rate below 10 per cent, and
-p95 latency under two seconds. These are targets, not results.
+\textbf{Retrieval quality.} Recall@$k$, the fraction of hand-built questions whose known relevant
+passage appears in the top $k$ results, at $k=5$, with mean reciprocal rank, which rewards returning it
+near the top rather than merely inside the cut-off. This isolates retrieval from generation, since no
+generation quality helps if the right passage is never retrieved.
+
+\textbf{Faithfulness.} The fraction of claims the retrieved context supports, scored by a judge model
+and reviewed by hand on a sample; the RAGAS-style metric that catches a model citing a passage while
+saying something the passage does not say.
+
+\textbf{Answer relevance.} Whether the answer addresses the question asked rather than reciting
+correct but tangential guidance, scored on the same sample, since an answer can be grounded and still
+unhelpful.
+
+\textbf{Citation precision.} The fraction of citations resolving to a passage that supports the
+sentence, distinct from resolution, which only checks existence.
+
+\textbf{Refusal behaviour.} The refusal rate on out-of-scope questions and the false refusal rate in
+scope: a layer that never refuses is unsafe and one that always refuses is useless.
+
+Deployment targets, stated so the claim is falsifiable: recall@5 above 0.85, faithfulness above 0.90
+on 100 reviewed answers, answer relevance above 0.85, citation precision above 0.95, no
+individual-animal diagnosis on an adversarial probe set, refusal on every out-of-scope question, a
+false refusal rate below 10 per cent, and p95 latency under two seconds.
 
 % =====================================================================
 \chapter{The Alert Service}
@@ -1090,14 +1092,26 @@ logic.
 
 \section{Evaluation of the Alert Layer}
 
-The service is evaluated as a warning system, not as a messaging system. Alert precision is the
-fraction of HIGH area-periods followed by a documented event, and it determines whether recipients
-trust the message. Event coverage at budget is the operating curve already reported in
-Chapter~\ref{ch:results}, and the thresholds are read from it. Noise per recipient is messages per
-subscriber per year, which predicts whether the service will still be read in its second year.
-Delivery reliability is the fraction of queued deliveries reaching a terminal success state within
-the retry window, reported per channel. The first two come from historical predictions and labels;
-the last two need a deployed service and are stated as the protocol that would measure them.
+The service is evaluated as a warning system, not a messaging system. The proposal states the
+criterion as missed events against false alerts, since unnecessary warnings cause alert fatigue, and
+the four quantities below make that measurable. The first two come from historical predictions and
+labels; the last two need a deployed service, so no measured value is reported.
+
+\textbf{Alert precision and false-alert rate.} Precision is the fraction of HIGH area-periods followed
+by a documented event. Its complement, the false-alert rate, is the share of messages sent where
+nothing was reported, and it drives alert fatigue: at a fixed threshold the two are one number seen
+from opposite sides.
+
+\textbf{Event coverage and missed-event rate.} Coverage is the fraction of observed events preceded by
+an alert at a given budget, which is the operating curve in Chapter~\ref{ch:results}; its complement
+is the missed-event rate. The two trade against each other, and the thresholds are read from that
+curve.
+
+\textbf{Noise per recipient.} Messages per subscriber per year, which predicts whether the service
+will still be read in its second year.
+
+\textbf{Delivery reliability.} The fraction of queued deliveries reaching terminal success within the
+retry window, per channel, since channels fail differently.
 
 % =====================================================================
 \chapter{Results and Discussion}
