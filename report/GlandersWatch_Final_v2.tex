@@ -258,17 +258,15 @@ carriers remain infectious for long periods. Human infection is rare but carries
 fatality rate and follows occupational contact. The disease is notifiable to the World
 Organisation for Animal Health and is classified as a potential bioterrorism agent.
 
-The economic weight of the disease sits in low and middle income countries, where equids remain
-essential to transport, construction, agriculture and brick manufacture. India recorded 5.44 lakh
-equids in the 2019 Livestock Census, many held by households that depend on them for daily income.
-The loss of a working animal is a direct loss of livelihood, which makes early warning useful even
-where mass treatment is not feasible.
+The economic weight sits in low and middle income countries, where equids remain essential to
+transport, construction and agriculture. India recorded 5.44 lakh equids in the 2019 Livestock
+Census, many held by households that depend on them for daily income, so losing a working animal is a
+direct loss of livelihood. Early warning is useful even where mass treatment is not feasible.
 
-Surveillance data show the disease is neither rare nor geographically contained. A national
-programme screening 158,798 equid sera from 391 districts between 2019 and 2023 found 728
-seropositive animals in 138 districts, with roughly sixty per cent of positives in Uttar Pradesh.
-Earlier surveillance covering 2006 to 2018 reported 1,145 positive equids among 128,404 sera
-tested. These are persistent, spatially structured figures, not isolated outbreaks.
+Surveillance shows the disease is neither rare nor geographically contained. A national programme
+screening 158,798 sera from 391 districts in 2019 to 2023 found 728 seropositive animals in 138
+districts, roughly sixty per cent of them in Uttar Pradesh; earlier surveillance covering 2006 to 2018
+reported 1,145 positives among 128,404 sera.
 
 \section{Problem Definition}
 
@@ -277,10 +275,9 @@ in the coming year? Answering it means combining the history of the disease near
 the susceptible population, and the conditions that permit transmission.
 
 Surveillance reports what has already happened, and forecasting systems exist for several livestock
-diseases but not for glanders. A prediction alone would still not be usable. An owner cannot act on
-a probability of 0.24, and an officer cannot defend a forecast whose basis is hidden, so the output
-must be explained and cited. A warning that arrives for every area every month also teaches its
-recipients to ignore it, which is the failure mode that matters for a rare disease.
+diseases but not for glanders. A prediction alone would still not be usable: an owner cannot act on a
+probability of 0.24, and an officer cannot defend a forecast whose basis is hidden. A warning that
+arrives for every area every month also teaches its recipients to ignore it.
 
 The problem therefore has four parts. Two concern producing the prediction, two concern turning it
 into something a person can act on.
@@ -305,35 +302,32 @@ into something a person can act on.
 There is one research objective and three engineering objectives.
 
 \begin{enumerate}
-  \item \textbf{Research.} Assemble a country-year panel for glanders from public sources not
-        previously applied to the disease, compare six model families under three validation
-        schemes, and report the achievable skill, including negative results.
-  \item \textbf{Prediction as a service.} Package the trained model as a versioned, portable
-        artefact behind a REST interface, so any consumer can call it without knowing how it works.
-  \item \textbf{Cited explanation.} Build a retrieval-augmented layer that explains a prediction
-        from official guidance, cites every claim, and refuses rather than guesses.
-  \item \textbf{Owner alerts.} Convert a calibrated probability into a small number of messages,
-        using threshold, suppression and deduplication rules so that a rare disease does not train
-        its users to ignore warnings.
+  \item \textbf{Research.} Assemble a country-year panel from public sources not previously applied
+        to the disease, compare six model families under three validation schemes, and report the
+        achievable skill including negative results.
+  \item \textbf{Prediction as a service.} Package the trained model as a versioned artefact behind a
+        REST interface, so any consumer can call it without knowing how it works.
+  \item \textbf{Cited explanation.} Build a retrieval-augmented layer that explains a prediction from
+        official guidance, cites every claim, and refuses rather than guesses.
+  \item \textbf{Owner alerts.} Convert a calibrated probability into few enough messages that they
+        are read, using threshold, suppression and deduplication rules.
 \end{enumerate}
 
-All four share one requirement: each component must be independently testable, independently
-replaceable, and free of any hardcoded reference to glanders, so the platform can be repointed at
-another disease without altering the components.
+All four share one requirement: each component must be independently testable and replaceable, and
+free of any hardcoded reference to glanders.
 
 \section{Scope and Limitations}
 
-The study is scoped to country-year resolution. District-level modelling for India was envisaged
-in the project proposal but is not attempted, because the required covariates could not be
-assembled from public sources within the project period. The explanation and alert layers are
-resolution-agnostic and apply unchanged once a district-level model exists. The model is a
-population-level tool: it does not diagnose an individual animal and does not replace laboratory
-confirmation.
+The study is scoped to country-year resolution. District-level modelling for India was envisaged but
+is not attempted, because the covariates could not be assembled from public sources within the project
+period. The explanation and alert layers are resolution-agnostic and apply unchanged once a
+district-level model exists. The model is a population-level tool: it does not diagnose an individual
+animal and does not replace laboratory confirmation.
 
-Three limitations shape every result that follows. The label comes from published reports, so a
-negative may mean no disease or no reporting. Occurrence is reconstructed by an automated extractor
-that has not been validated against a hand-annotated set. And with 172 positive observations the
-uncertainty on every headline metric is substantial, which is quantified rather than hidden.
+Three limitations shape every result. The label comes from published reports, so a negative may mean
+no disease or no reporting. Occurrence is reconstructed by an extractor not validated against a
+hand-annotated set. And with 172 positives the uncertainty on every headline metric is substantial,
+which is quantified rather than hidden.
 
 % =====================================================================
 \chapter{Literature Review and Gap Analysis}
@@ -433,8 +427,7 @@ glanders + gradient boosting & 4 \\
 \end{table}
 
 The decisive cells pair glanders with NASA POWER, which returns zero records, and with gradient
-boosting, which returns four, none of them a glanders risk model. The nearest prior work is
-descriptive cluster detection in Brazil and a risk-factor analysis of the Indian serosurvey.
+boosting, which returns four, none a glanders risk model.
 
 \section{Research and Deployment Gap}
 
@@ -463,42 +456,38 @@ disease.
 
 \section{What the Platform Has to Do}
 
-The platform answers one question and produces three outputs: whether glanders is likely to be
-documented in an area next period, expressed as a number on a map, an explanation in words, and a
-message to an owner. Each is read by a different person, at a different time, through a different
-device, and each can fail without the others failing.
-
-That asymmetry is why the system is three components rather than one application. One service serving
-all three would tie alert delivery to the latency of an LLM call and make the risk model impossible to
-test on its own.
+The platform answers one question: whether glanders is likely to be documented in an area next
+period. It produces three outputs from it, a number on a map, an explanation in words and a message to
+an owner, each read by a different person on a different device, and each able to fail without the
+others failing. One service serving all three would tie alert delivery to the latency of an LLM call
+and make the risk model impossible to test alone.
 
 \input{fig_architecture.tex}
 
 \section{Design Principles}
 
-Five rules govern the decomposition. Every later design decision follows from them, and they are
-the part of the project that transfers to other diseases.
+Five rules govern the decomposition, and every later design decision follows from them.
 
 \textbf{One responsibility per component.} The risk engine turns features into a calibrated
-probability, the RAG layer turns a prediction into a cited explanation, and the alert service turns
-a prediction into a delivered message. None computes what another could compute instead.
+probability, the RAG layer a prediction into a cited explanation, and the alert service a prediction
+into a delivered message. None computes what another could.
 
-\textbf{Contracts before implementations.} Components exchange versioned schemas, never shared
-tables or in-process calls, so each side can be built and tested against a fixture. This is what let
-the RAG layer be developed while the alert service was still being written.
+\textbf{Contracts before implementations.} Components exchange versioned schemas, never shared tables
+or in-process calls, so each side is built and tested against a fixture. That is what let the RAG
+layer be developed while the alert service was still being written.
 
 \textbf{The core is disease-agnostic.} A disease is a configuration record: which label extractor,
-knowledge-base collection, templates and thresholds to use. A second disease is a configuration
-change plus a retrain, not a code fork.
+knowledge collection, templates and thresholds to use. A second disease is a configuration change plus
+a retrain, not a code fork.
 
 \textbf{Fail soft, never fail silent.} A degraded component returns a degraded answer. If the RAG
-layer is unavailable the alert still goes out, with the level and standing action text but no
-explanation. If retrieval finds nothing above the relevance floor, the layer returns a refusal plus
-the model's own SHAP factors. Neither case produces a wrong statement, and neither produces silence.
+layer is unavailable the alert still goes out without its explanation; if retrieval finds nothing
+above the relevance floor, the layer returns a refusal plus the model's own SHAP factors. Neither
+case produces a wrong statement, and neither produces silence.
 
 \textbf{Every output is traceable.} Each prediction carries its model version, each explanation the
-document identifiers it was grounded in, each alert the prediction that triggered it and the rule
-outcomes that allowed it, so a decision can be reconstructed after the fact.
+documents it was grounded in, each alert the prediction and rule outcomes behind it, so a decision can
+be reconstructed afterwards.
 
 \section{The Three Components}
 
@@ -507,66 +496,45 @@ outcomes that allowed it, so a decision can be reconstructed after the fact.
 \caption{Component responsibilities, interfaces and failure behaviour.}
 \label{tab:components}
 \small
-\begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.3cm}>{\raggedright\arraybackslash}p{3.5cm}>{\raggedright\arraybackslash}p{3.4cm}>{\raggedright\arraybackslash}p{4.2cm}@{}}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.2cm}>{\raggedright\arraybackslash}p{3.6cm}>{\raggedright\arraybackslash}p{3.4cm}>{\raggedright\arraybackslash}p{4.2cm}@{}}
 \toprule
 \textbf{Component} & \textbf{Responsibility} & \textbf{Interface} & \textbf{On failure} \\
 \midrule
-ML risk engine & Features to calibrated probability, with attribution & \texttt{POST /v1/predict}, \texttt{GET /v1/risk-map} & \texttt{503} with the champion version id; the last good prediction stays in the table, marked stale. \\
-RAG layer & Prediction plus question to a cited explanation & \texttt{POST /v1/explain}, \texttt{POST /v1/chat} & Alert text is sent without the explanation; chat returns a refusal rather than an ungrounded answer. \\
-Alert service & Prediction to a delivered, deduplicated message & \texttt{POST /v1/alerts/evaluate}; consumes \texttt{predictions\_ready} & Alerts queue in Redis and drain on recovery; map and explanations are unaffected. \\
+ML risk engine & Features to calibrated probability, with attribution & \texttt{POST /v1/predict}, \texttt{GET /v1/risk-map} & \texttt{503} with the champion id; the last good prediction is marked stale. \\
+RAG layer & Prediction plus question to a cited explanation & \texttt{POST /v1/explain}, \texttt{POST /v1/chat} & Alert text is sent without the explanation; chat returns a refusal. \\
+Alert service & Prediction to a delivered, deduplicated message & \texttt{POST /v1/alerts/evaluate} & Alerts queue in Redis and drain on recovery; map is unaffected. \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \section{Component Contracts}
 
-A contract is a JSON schema plus the guarantees that accompany it. A narrow contract is what makes
-a component replaceable, so all three are deliberately small.
+A contract is a JSON schema plus its guarantees, and a narrow contract is what makes a component
+replaceable. The risk engine emits a \texttt{PredictionRecord} with area, period, calibrated
+probability, risk level, model identifier, a freshness block and the top SHAP factors. Three
+guarantees follow: the probability is calibrated on held-out data and reads as a frequency; the risk
+level is derived from it by the threshold configuration, so the two cannot contradict each other; and
+the factors come from the model, so they survive the RAG layer being unavailable.
 
-The risk engine emits a \texttt{PredictionRecord} with the area, period, calibrated probability,
-discrete risk level, model identifier, a data-freshness block and the top SHAP factors. Three
-guarantees accompany it: the probability is calibrated on held-out data and may be read as a
-frequency; the risk level is derived from that probability by the threshold configuration, so the
-two cannot contradict each other; and the top factors come from the model itself, so they remain
-available when the RAG layer does not.
+The RAG layer takes an \texttt{ExplainRequest} and returns an \texttt{ExplainResponse} with an answer,
+resolved citations, a \texttt{grounded} flag and a refusal reason; a refusal carries no answer text.
+The alert service emits an \texttt{AlertEvent} with its identifier, area, period, both levels, source
+prediction, rule outcomes and recipient count. Components share a database but not tables, and spatial
+columns use PostGIS while embeddings use pgvector.
 
-The RAG layer takes an \texttt{ExplainRequest}, wrapping a prediction with a question and a
-language, and returns an \texttt{ExplainResponse} with an answer, resolved citations, a
-\texttt{grounded} flag and a refusal reason. A refusal carries no answer text, so a caller cannot
-render one as an explanation.
-
-The alert service emits an \texttt{AlertEvent} with the alert identifier, area, period, current and
-previous level, the prediction it derives from, each rule outcome and a recipient count. The
-identifier is derived deterministically from its key (Chapter~\ref{ch:alerts}).
-
-The components share a database but not tables: each table has one owning writer and the others
-read it, and no component updates another's rows. Spatial columns use PostGIS and document
-embeddings use pgvector, so spatial and vector queries run beside the relational joins rather than
-in a second store that would need synchronising.
-
-\section{Modularity and Reuse}
+\section{Modularity, Reuse and Status}
 
 The decomposition justifies its overhead only if the parts are reusable. A second disease supplies a
-new gazetteer, guidance collection and thresholds, while the modelling code, which never refers to
-glanders by name, does not change. A second LLM provider is a configuration value, because the RAG
-layer calls a single-method interface. A second channel is an adapter plus a template, and the rules
-engine never learns which channel carries the message. The trained pipeline is a scikit-learn
-compatible object \cite{pedregosa2011} exported with a manifest, so any Python process can load it
-without the API. A replacement model needs no downstream change, since the record carries
-\texttt{model\_id} and the registry keeps previous versions.
+new gazetteer, guidance collection and thresholds, while the modelling code, which never names
+glanders, does not change. A second LLM provider is a configuration value, because the RAG layer calls
+a single-method interface; a second channel is an adapter plus a template. The pipeline is a
+scikit-learn compatible object \cite{pedregosa2011} exported with a manifest, so any Python process
+can load it without the API.
 
-\section{Deployment and Status}
-
-One Docker Compose file describes the API, worker, PostgreSQL with PostGIS and pgvector, Redis and the
-frontend, so local demonstration and server deployment share a structure. A Celery beat job runs the
-feature job, then the prediction job, then publishes \texttt{predictions\_ready}, from which
-explanations and alerts are computed; a failed explanation never blocks a prediction, and a failed
-prediction never sends an alert about stale data.
-
-The report distinguishes throughout between what has been built and what has been specified. The risk
-engine is built and evaluated, and every number in Chapter~\ref{ch:results} is reproducible from the
-committed scripts. Model serving, the RAG layer and the alert service are specified with fixed
-contracts and stated protocols but are not deployed, so no measured performance is reported for them.
+The report distinguishes throughout between what has been built and what has been specified: the risk
+engine is built and evaluated, with every number in Chapter~\ref{ch:results} reproducible from the
+committed scripts, while serving and the RAG and alert layers are specified but not deployed, so no
+measured performance is reported for them.
 
 % =====================================================================
 \chapter{Methodology}
@@ -592,53 +560,93 @@ documented activity throughout.
 \section{Panel Construction}
 
 All four sources are keyed on ISO 3166 alpha-3 code and calendar year, so they join once names are
-reconciled. FAOSTAT is streamed from its 32\,MB compressed archive and filtered to the seven stock
-series rather than loaded whole. Names are matched through \texttt{pycountry} with overrides for forms
-such as ``T\"urkiye'' and ``C\^ote d'Ivoire'', and World Bank regional and global aggregates are
-excluded by requiring a three-character ISO code, so rows such as ``World'' never enter the panel as
-though they were countries.
+reconciled. FAOSTAT is streamed from its 32\,MB archive and filtered to the seven stock series rather
+than loaded whole. Names are matched through \texttt{pycountry} with overrides for forms such as
+``T\"urkiye'', and World Bank aggregates are excluded by requiring a three-character ISO code, so
+``World'' never enters the panel as a country.
 
 The grid holds 6,700 country-year rows across 268 countries for 2000 to 2024.
 Three restrictions produce the modelling matrix: only equine-holding countries, defined as a maximum
 equid stock of at least one thousand; only 2005 to 2023; and only rows with an observable next-year
 label. The result has 3,078 rows, 44 features and 172 positives.
 
+The assembled panel is the project dataset, committed as \texttt{country\_year\_panel.csv} under
+\texttt{data/}\allowbreak\texttt{processed/}, with the extracted events in
+\texttt{literature\_events.csv} and the audit counts in \texttt{audit.json}. The 3,078-row matrix is not stored separately; it is derived from
+that panel at run time by the filters above, so the panel is the one artefact every number can be
+rebuilt from.
+
 Events are de-duplicated on country, year and source record identifier, so one paper reporting
 several cases cannot contribute multiple counts. Missing values are median-imputed inside the training
-pipeline, with a missing-indicator feature per affected column, so the test period cannot influence
-imputed values. Missingness is low: 0.00\% for FAOSTAT, 1.68\% for the World Bank, 2.19\% for
-climate, and 0.99\% overall, with no column above 5.8\%.
+pipeline, with a missing-indicator feature per affected column. Missingness is low: 0.00\% for
+FAOSTAT, 1.68\% for the World Bank, 2.19\% for climate, and 0.99\% overall, no column above
+5.8\%.
 
 \section{Label Definition}
 
 The target is binary: whether a glanders occurrence was documented in country $i$ during year $t+1$.
 Occurrence is extracted from Europe PMC by matching, within one sentence, a country name from a
-curated gazetteer and a term from an occurrence lexicon (\emph{outbreak}, \emph{case},
-\emph{detected}, \emph{seropositive}, \emph{surveillance}). An event is recorded for the year in the
-sentence, or the publication year where none is stated. Because the label depends on publication it
-is termed \emph{documented activity}: a negative may mean no disease or no report, so the model
-predicts surveillance-observable activity rather than biological presence.
+gazetteer and a term from an occurrence lexicon (\emph{outbreak}, \emph{case}, \emph{detected},
+\emph{seropositive}, \emph{surveillance}), recorded for the year in the sentence or the publication
+year. Because the label depends on publication it is termed \emph{documented activity}: a negative may
+mean no disease or no report, so the model predicts observable activity, not biological presence.
 
 \section{Feature Engineering}
 
-Four groups are built from information available at year $t$ or earlier. Seven disease-history
-features cover prior-year occurrence, a five-year total, years since the last event, and world and
-regional activity shares. Fourteen population features cover log equid and livestock stocks, equid
-share, density, growth and species counts. Ten climate features cover temperature, precipitation,
-humidity and wind, each with an anomaly against the country's own expanding mean, separating unusual
-conditions from latitude. Eleven socio-geographic features cover income, agriculture, GDP, rural
-share, connectivity and population, and largely proxy surveillance capacity.
+Four groups are built from information at year $t$ or earlier. Seven disease-history features cover
+prior-year occurrence, a five-year total, years since the last event and activity shares. Fourteen
+population features cover log stocks, equid share, density, growth and species counts. Ten climate
+features cover temperature, precipitation, humidity and wind, each with an anomaly against the
+country's own expanding mean, separating unusual conditions from latitude. Eleven socio-geographic
+features cover income, agriculture, GDP, rural share and connectivity, and largely proxy surveillance
+capacity.
 
-Three derived features need definition. Equid share is horses, asses and mules divided by total farm
-animals. Livestock units apply weights of 0.8 for cattle and camels and 0.1 for small ruminants, so
-one number expresses grazing pressure across species. Years since the last event uses 99 to denote no
-event in the window.
+Three derived features need definition. Equid share is horses, asses and mules over total farm animals.
+Livestock units weight cattle and camels at 0.8 and small ruminants at 0.1, so one number expresses
+grazing pressure across species. Years since the last event uses 99 for no event in the window.
 
 Selection ran in two stages. Columns with mutual information below 0.002 and absolute Spearman
 correlation below 0.02 were removed, then one member of each pair correlated at or above 0.90, plus a
 column that was exactly the sum of three others, which a tree can construct itself. No projection was
 applied: with 44 features and 3,078 rows the binding constraint is signal rather than
 dimensionality.
+
+\section{Statistical Association Measures}
+\label{sec:assoc}
+
+Four measures screen the features, each from a standard library routine rather than a handwritten
+implementation, with versions recorded in Section~\ref{ch:mlops}. Let $y\in\{0,1\}$ be the next-year
+label and $n$ the number of complete pairs.
+
+\textbf{Spearman's rank correlation} (\texttt{scipy.stats.spearmanr}) measures monotone association
+without assuming linearity, which matters because equid stock spans four orders of magnitude:
+\[
+\rho = \frac{\operatorname{cov}\big(R(x), R(y)\big)}{\sigma_{R(x)}\,\sigma_{R(y)}} .
+\]
+
+\textbf{Mutual information} (\texttt{sklearn.feature\_selection.mutual\_info\_classif}, $k=5$)
+captures non-monotone dependence that a rank correlation misses, estimated by the
+Kraskov--St\"ugbauer--Grassberger $k$-nearest-neighbour form:
+\[
+I(X;Y)=\iint p(x,y)\log\frac{p(x,y)}{p(x)\,p(y)}\,\mathrm{d}x\,\mathrm{d}y,
+\qquad
+\hat{I}=\psi(n)-\big\langle\psi(n_x{+}1)+\psi(n_y{+}1)\big\rangle+\psi(k),
+\]
+with $\psi$ the digamma function and $n_x$, $n_y$ per-point neighbour counts.
+
+\textbf{Cram\'er's $V$} (\texttt{scipy.stats.chi2\_contingency}) measures association between a
+categorical feature and the binary label, placing income band and region on one scale:
+\[
+V=\sqrt{\frac{\chi^2}{n\,\min(r-1,\,c-1)}} .
+\]
+
+\textbf{Variance inflation} (\texttt{numpy.linalg.lstsq}) quantifies how far one feature can be
+reconstructed from the others, and so how unstable its coefficient would be:
+\[
+\mathrm{VIF}_j=\frac{1}{1-R_j^2},
+\]
+where $R_j^2$ comes from regressing $x_j$ on the remaining features. This is the measure behind the
+collinearity result in Chapter~\ref{ch:results}.
 
 \section{Models}
 
@@ -762,14 +770,13 @@ why the alert service never calls it inline. A message must not wait on an LLM.
 
 \section{Monitoring and Retraining}
 
-Three classes of signal are monitored. Service health covers request rate, error rate and latency
-percentiles per endpoint on a Prometheus endpoint charted in Grafana, which catches the service being
-down, the least interesting failure. Data drift compares each feature's current distribution with the
-training distribution using a population stability index and a Kolmogorov-Smirnov statistic, because a
-tree asked to extrapolate outside its training range returns a confident answer with no basis.
-Prediction drift and calibration decay track the mean predicted probability per period against the
-observed event rate as labels arrive: a model that keeps saying 0.2 while the observed rate falls to
-0.05 has lost calibration even with its ranking intact.
+Three signals are monitored. Service health covers request rate, error rate and latency percentiles
+per endpoint on Prometheus and Grafana, catching the least interesting failure. Data drift compares
+each feature's current distribution with the training one using a population stability index and a
+Kolmogorov-Smirnov statistic, since a tree extrapolating outside its training range returns a
+confident answer with no basis. Calibration decay tracks the mean predicted probability against the
+observed event rate: a model that keeps saying 0.2 while the observed rate falls to 0.05 has lost
+calibration even with its ranking intact.
 
 Retraining follows from the third signal. Recalibrate when the observed-to-predicted ratio leaves a
 band for two consecutive periods, and retrain when a new year of labels is available and the champion's
@@ -809,10 +816,10 @@ to answer only from those, so each claim traces to a passage the reader can see.
 The goal is narrow and testable: an answer a veterinary officer would accept as consistent with the
 National Action Plan, and a refusal rather than a guess when the corpus does not support one.
 
-Fine-tuning would produce fluent text with no citations and no way to separate guidance from the
-base model's priors, and it would freeze knowledge at training time. Retrieval keeps knowledge in a
-corpus a re-ingestion can update, makes every answer auditable, and allows a refusal path. The cost is
-latency and possible retrieval failure, both handled below.
+Fine-tuning would produce fluent text with no citations, no way to separate guidance from the base
+model's priors, and knowledge frozen at training time. Retrieval keeps knowledge in a corpus a
+re-ingestion can update, makes every answer auditable, and allows a refusal path, at the cost of
+latency and possible retrieval failure.
 
 \section{Knowledge Base}
 
@@ -959,10 +966,9 @@ sentence, distinct from resolution, which only checks existence.
 \textbf{Refusal behaviour.} The refusal rate on out-of-scope questions and the false refusal rate in
 scope: a layer that never refuses is unsafe and one that always refuses is useless.
 
-Deployment targets, stated so the claim is falsifiable: recall@5 above 0.85, faithfulness above 0.90
-on 100 reviewed answers, answer relevance above 0.85, citation precision above 0.95, no
-individual-animal diagnosis on an adversarial probe set, refusal on every out-of-scope question, a
-false refusal rate below 10 per cent, and p95 latency under two seconds.
+Deployment targets, so the claim is falsifiable: recall@5 above 0.85, faithfulness and answer
+relevance above 0.90 and 0.85, citation precision above 0.95, a false refusal rate below 10 per cent,
+and p95 latency under two seconds.
 
 % =====================================================================
 \chapter{The Alert Service}
@@ -972,10 +978,9 @@ false refusal rate below 10 per cent, and p95 latency under two seconds.
 \section{Why the Alert Is the Hard Part}
 
 The risk engine produces a probability and the RAG layer explains it, but neither reaches the person
-who owns the animals, whose only interaction is a message on a phone competing with everything else
-on it. The design problem is therefore not how to send a message but how to send few enough that the
-ones which arrive are read. A system that warns about every area every month trains its users to
-ignore it, then fails silently at the moment it was built for.
+who owns the animals, whose only interaction is a message on a phone competing with everything else on
+it. The problem is not how to send a message but how to send few enough that the ones which arrive are
+read; a system that warns about every area every month fails silently at the moment it was built for.
 
 The service is event-driven: the prediction job publishes \texttt{predictions\_ready} and the evaluator
 consumes it, so an alert cannot be sent for a period whose predictions were not recomputed. For each
@@ -1093,9 +1098,9 @@ logic.
 \section{Evaluation of the Alert Layer}
 
 The service is evaluated as a warning system, not a messaging system. The proposal states the
-criterion as missed events against false alerts, since unnecessary warnings cause alert fatigue, and
-the four quantities below make that measurable. The first two come from historical predictions and
-labels; the last two need a deployed service, so no measured value is reported.
+criterion as missed events against false alerts, and the four quantities below make that measurable.
+The first two come from historical predictions and labels; the last two need a deployed service, so no
+measured value is reported.
 
 \textbf{Alert precision and false-alert rate.} Precision is the fraction of HIGH area-periods followed
 by a documented event. Its complement, the false-alert rate, is the share of messages sent where
@@ -1131,7 +1136,7 @@ hold 35.5\% of all positives.
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.84\textwidth]{fig10_label_anatomy.png}
+\includegraphics[width=0.52\textwidth]{fig10_label_anatomy.png}
 \caption{Label anatomy. Panel A gives annual positive counts against prevalence on the secondary
 axis. Panel B gives the distribution of positive years per country. Panel C gives prevalence by
 World Bank region.}
@@ -1152,41 +1157,39 @@ Figure~\ref{fig:comparison} plots the same comparison.
 \begin{table}[htbp]
 \centering
 \caption{Discrimination at the country-year level. Brackets give 95 per cent bootstrap intervals
-on the temporal holdout.}
+on the temporal holdout; Brier score and expected calibration error are reported in
+Section~8.1.3.}
 \label{tab:level1}
 \small
-\resizebox{\textwidth}{!}{%
-\begin{tabular}{@{}lcccccccc@{}}
+\begin{tabular}{@{}lcccc@{}}
 \toprule
-\textbf{Model} & \textbf{PR-AUC} & \textbf{95\% CI} & \textbf{ROC-AUC} &
-\textbf{PR-AUC} & \textbf{PR-AUC} & \textbf{Brier} & \textbf{Prec.} & \textbf{Rec.} \\
- & \textbf{(time)} & \textbf{on PR-AUC} & \textbf{(time)} & \textbf{(country)} &
-\textbf{(rep.\ CV)} & & & \\
+\textbf{Model} & \textbf{PR-AUC (time)} & \textbf{95\% CI} & \textbf{ROC-AUC (time)} &
+\textbf{PR-AUC (country)} \\
 \midrule
-Logistic regression & 0.454 & [0.34, 0.58] & 0.812 & 0.223 & 0.414 & 0.0547 & 0.25 / 0.57 \\
-Decision tree & 0.389 & [0.29, 0.50] & 0.861 & 0.267 & 0.360 & 0.0602 & 0.49 / 0.53 \\
-Random forest & 0.554 & [0.43, 0.66] & 0.870 & 0.304 & 0.476 & 0.0503 & 0.53 / 0.50 \\
-Extra trees & 0.530 & [0.42, 0.64] & 0.854 & 0.363 & 0.476 & 0.0535 & 0.47 / 0.51 \\
-XGBoost & 0.485 & [0.37, 0.60] & 0.844 & 0.281 & 0.423 & 0.0536 & 0.61 / 0.38 \\
-LightGBM & 0.496 & [0.38, 0.61] & 0.841 & 0.339 & 0.397 & 0.0534 & 0.65 / 0.30 \\
+Logistic regression & 0.454 & [0.34, 0.58] & 0.812 & 0.223 \\
+Decision tree & 0.389 & [0.29, 0.50] & 0.861 & 0.267 \\
+Random forest & 0.554 & [0.43, 0.66] & 0.870 & 0.304 \\
+Extra trees & 0.530 & [0.42, 0.64] & 0.854 & 0.363 \\
+XGBoost & 0.485 & [0.37, 0.60] & 0.844 & 0.281 \\
+LightGBM & 0.496 & [0.38, 0.61] & 0.841 & 0.339 \\
 \bottomrule
-\end{tabular}}
+\end{tabular}
 \end{table}
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.70\textwidth]{fig02_model_comparison.png}
+\includegraphics[width=0.44\textwidth]{fig02_model_comparison.png}
 \caption{Discrimination by model and validation scheme. The gap between repeated cross-validation
 and leave-country-out validation is the cost of generalising to an unseen country.}
 \label{fig:comparison}
 \end{figure}
 
 Against a base rate of 5.59\%, the strongest temporal result of 0.554 is an approximately
-10-fold lift. Every tree-based model beats the logistic baseline, and the single decision tree is
-weakest, so the relationships are interactive rather than additive. The more important pattern is the
-decline under leave-country-out validation: for Random Forest the score falls from 0.554 to 0.304,
-and the decline exceeds the bootstrap interval width for every family. That is the signature of
-learning country-specific structure, and the figure to quote for deployment.
+10-fold lift. Every tree-based model beats the logistic baseline and the single tree is weakest, so
+the relationships are interactive. The more important pattern is the decline under leave-country-out
+validation: for Random Forest the score falls from 0.554 to 0.304, beyond the bootstrap interval
+width for every family. That is the signature of learning country-specific structure, and the figure
+to quote for deployment.
 
 \subsection{Calibration}
 
@@ -1196,7 +1199,7 @@ per cent, which is what makes a threshold-based alert defensible.
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.64\textwidth]{fig04_calibration.png}
+\includegraphics[width=0.40\textwidth]{fig04_calibration.png}
 \caption{Reliability diagram for the selected model on the temporal holdout, with the distribution of
 predicted risk. Points on the diagonal are perfectly calibrated.}
 \label{fig:calib}
@@ -1204,8 +1207,7 @@ predicted risk. Points on the diagonal are perfectly calibrated.}
 
 \subsection{Subgroup Analysis}
 
-Table~\ref{tab:subgroup} and Figure~\ref{fig:subgroups} report leave-country-out performance by
-region. Skill is lowest in Sub-Saharan Africa and in low-income countries, where early warning would
+Table~\ref{tab:subgroup} reports leave-country-out performance by region. Skill is lowest in Sub-Saharan Africa and in low-income countries, where early warning would
 help most; the cause is label sparsity, since few events are recorded in those strata.
 
 \begin{table}[htbp]
@@ -1226,13 +1228,6 @@ Sub-Saharan Africa & 665 & 27 & 0.699 & 0.073 \\
 \end{tabular}
 \end{table}
 
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=0.58\textwidth]{fig08_subgroups.png}
-\caption{Regional performance under leave-country-out validation.}
-\label{fig:subgroups}
-\end{figure}
-
 \section{The Alert Service as a Warning System}
 
 The alert layer turns the calibrated probability into messages, so its economics are reported
@@ -1245,28 +1240,24 @@ more efficient than arbitrary selection at the fifty per cent point.
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.72\textwidth]{fig07_alert_budget.png}
+\includegraphics[width=0.40\textwidth]{fig07_alert_budget.png}
 \caption{Alert economics. Panel A gives the fraction of events captured as the alert budget grows,
 against random alerting. Panel B gives the alert volume required to reach a target recall.}
 \label{fig:alerts}
 \end{figure}
 
-\section{The Explanation Layer}
-
-No measured results are reported for the retrieval-augmented layer. Its corpus, retrieval parameters,
-guardrails and evaluation protocol are specified in Chapter~\ref{ch:rag}, but it has not been run
-against the corpus, so the five metrics defined there have no values.
+For the retrieval-augmented layer no measured results are reported: it is specified in
+Chapter~\ref{ch:rag} but has not been run against the corpus, so its five metrics have no values.
 
 \section{Discussion}
 
 The risk model has predictive skill: a precision-recall AUC of 0.554 against a base rate of
 5.59\% is not explainable by chance, survives a forward-looking split, and is calibrated to
-within two points. It does not transfer intact, though: leave-country-out performance is roughly forty
-per cent lower, so a new country needs local validation first.
-
-The principal signal is surveillance rather than biology. Three analyses agree: the highest features
-are population and connectivity measures, the label concentrates in countries with reference
-laboratories, and the best-scoring cells are India, the United States and Australia.
+within two points. It does not transfer intact: leave-country-out performance is roughly forty per
+cent lower, so a new country needs local validation first. The signal it learns is surveillance rather
+than biology, since the highest features are population and connectivity measures, the label
+concentrates in countries with reference laboratories, and the best-scoring cells are India, the
+United States and Australia.
 
 % =====================================================================
 \chapter{Conclusion and Future Work}

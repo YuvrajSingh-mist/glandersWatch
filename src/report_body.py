@@ -124,6 +124,52 @@ divided by total farm animals. Livestock units apply metabolic weights, with cat
 0.8 and small ruminants at 0.1, so that one number expresses grazing pressure across species.
 Years since the last event uses the value 99 to denote no recorded event within the panel window.
 
+\section{Statistical Association Measures}
+\label{sec:assoc}
+
+Feature screening uses four measures. Each is computed by a standard library routine rather than a
+handwritten implementation, and the versions are recorded with the run environment
+(Section~\ref{ch:mlops}). Let $y \in \{0,1\}$ be the next-year label, $x$ a numeric feature, and $n$
+the number of rows where both are present.
+
+\textbf{Spearman's rank correlation} (\texttt{scipy.stats.spearmanr}) measures monotone association
+without assuming linearity, which matters here because equid stock spans four orders of magnitude.
+It is the Pearson correlation of the mid-ranks,
+\[
+\rho = \frac{\operatorname{cov}\big(R(x), R(y)\big)}{\sigma_{R(x)}\,\sigma_{R(y)}},
+\]
+where $R(\cdot)$ denotes the mid-rank transform. With no ties this reduces to
+$\rho = 1 - 6\sum_i d_i^2 / \big(n(n^2-1)\big)$, with $d_i$ the rank difference.
+
+\textbf{Mutual information} (\texttt{sklearn.feature\_selection.mutual\_info\_classif}, $k=5$
+nearest neighbours) captures non-monotone dependence that a rank correlation misses, since a feature
+can matter strongly at one end of its range and not at all at the other:
+\[
+I(X;Y) = \iint p(x,y)\,\log\frac{p(x,y)}{p(x)\,p(y)}\,\mathrm{d}x\,\mathrm{d}y ,
+\]
+estimated by the Kraskov--St\"ugbauer--Grassberger $k$-nearest-neighbour form
+\[
+\hat{I} = \psi(n) - \big\langle \psi(n_x+1) + \psi(n_y+1) \big\rangle + \psi(k),
+\]
+where $\psi$ is the digamma function and $n_x$, $n_y$ are per-point neighbour counts.
+
+\textbf{Cram\'er's $V$} (\texttt{scipy.stats.chi2\_contingency}) measures association between a
+categorical feature and the binary label, and puts every categorical result on the same 0 to 1 scale
+so that income band and region are comparable:
+\[
+V = \sqrt{\frac{\chi^2}{n\,\min(r-1,\,c-1)}} ,
+\]
+where $\chi^2$ is the test statistic of the $r \times c$ contingency table.
+
+\textbf{Variance inflation factor} (\texttt{numpy.linalg.lstsq}) quantifies how far one feature can
+be reconstructed from the others, and therefore how unstable its coefficient would be in a linear
+model:
+\[
+\mathrm{VIF}_j = \frac{1}{1 - R_j^2},
+\]
+where $R_j^2$ is the coefficient of determination from regressing $x_j$ on the remaining features.
+This is the measure behind the collinearity result in Chapter~\ref{ch:results}.
+
 \section{Feature Selection}
 
 Selection proceeded in two stages. First, columns with no measurable association with the label

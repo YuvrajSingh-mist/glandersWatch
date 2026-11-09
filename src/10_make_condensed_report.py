@@ -76,6 +76,17 @@ def build() -> pathlib.Path:
 
     VALUES = dict(FB.VALUES)
     VALUES["BIBLIOGRAPHY"] = RW.bibliography_tex(long_form=True)
+
+    # 5-column variant of the model-comparison table for the condensed report
+    rows5 = []
+    for m in FB.ORDER:
+        t = FB.L1[m]["temporal"]
+        ci = t["pr_auc_ci"]
+        rows5.append(
+            f"{FB.PRETTY[m]} & {t['pr_auc']:.3f} & [{ci[0]:.2f}, {ci[1]:.2f}] & "
+            f"{t['roc_auc']:.3f} & {FB.L1[m]['loco']['pr_auc']:.3f} \\\\"
+        )
+    VALUES["LEVEL1ROWS5"] = "\n".join(rows5)
     for k, v in VALUES.items():
         doc = doc.replace(f"@{k}@", str(v))
 
