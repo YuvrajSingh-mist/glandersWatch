@@ -279,20 +279,28 @@ A district veterinary officer faces a narrow question: is glanders likely to app
 in the coming year? Answering it means combining the history of the disease nearby, the size of
 the susceptible population, and the conditions that permit transmission.
 
-Surveillance reports what has already happened. Forecasting systems exist for several livestock
-diseases but not for glanders. The problem addressed here is to build a population-level risk
-model for glanders from public data and to measure how well it works. It has four parts:
+Surveillance reports what has already happened, and forecasting systems exist for several livestock
+diseases but not for glanders. A prediction alone would still not be usable. An owner cannot act on
+a probability of 0.24, and an officer cannot defend a forecast whose basis is hidden, so the output
+must be explained and cited. A warning that arrives for every area every month also teaches its
+recipients to ignore it, which is the failure mode that matters for a rare disease.
+
+The problem therefore has four parts. Two concern producing the prediction, two concern turning it
+into something a person can act on.
 
 \begin{enumerate}
-  \item \textbf{Data assembly.} No public source records glanders occurrence completely. Occurrence
-        must be reconstructed from the literature and joined to population and environmental
-        covariates at a common resolution.
-  \item \textbf{Label construction.} The outcome is rare, so accuracy is useless and a negative
-        observation needs an explicit meaning.
+  \item \textbf{Data and label.} No public source records glanders occurrence completely, so
+        occurrence must be reconstructed from the literature and joined to population and
+        environmental covariates at a common resolution. The outcome is then rare, so accuracy is
+        useless and a negative observation needs an explicit meaning.
   \item \textbf{Model selection under distribution shift.} A model fitted on some countries must be
         evaluated on countries it has never seen, because that is the deployment condition.
-  \item \textbf{Threshold economics.} A probability is not an alert. The operating point must be
-        defensible against the number of warnings it produces.
+  \item \textbf{Grounded explanation.} The prediction must be explained in words a non-specialist
+        can act on, every claim must trace to official control guidance, and the layer must refuse
+        rather than generate an answer the corpus does not support.
+  \item \textbf{Delivery without alert fatigue.} A probability is not an alert. The operating point
+        and the message rules must keep volume low enough that messages are read, while the
+        threshold stays defensible against the events caught.
 \end{enumerate}
 
 \section{Objectives}

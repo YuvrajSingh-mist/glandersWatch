@@ -232,23 +232,30 @@ requires combining several kinds of evidence: the history of the disease in and 
 the size of the susceptible population, and the environmental conditions that permit
 transmission.
 
-Surveillance systems report what has already happened. Forecasting systems exist for several
-livestock diseases but not for glanders. The problem addressed here is therefore to build a
-population-level risk model for glanders from publicly accessible data and to measure how well it
-works.
+Surveillance systems report what has already happened, and forecasting systems exist for several
+livestock diseases but not for glanders. A prediction on its own would still not be usable, for two
+reasons. An equine owner cannot act on a probability of 0.24, and an officer cannot defend a forecast
+whose basis is hidden; for a zoonosis under statutory control, an explanation that is fluent but
+uncited is worse than no explanation. And a warning that arrives every month for every area teaches
+its recipients to ignore it, which is the failure mode that matters for a rare disease.
 
-The problem has four parts.
+The problem therefore has four parts. Two concern producing the prediction, and two concern
+turning it into something a person can act on.
 
 \begin{enumerate}
-  \item \textbf{Data assembly.} No single public source records glanders occurrence completely.
-        Occurrence must be reconstructed from the literature and joined to population and
-        environmental covariates at a common geographic and temporal resolution.
-  \item \textbf{Label construction.} The outcome is rare, which makes naive accuracy useless and
-        requires an explicit treatment of what a negative observation means.
+  \item \textbf{Data and label.} No single public source records glanders occurrence completely, so
+        occurrence must be reconstructed from the literature and joined to population and
+        environmental covariates at a common geographic and temporal resolution. The outcome is then
+        rare, which makes naive accuracy useless and requires an explicit treatment of what a
+        negative observation means.
   \item \textbf{Model selection under distribution shift.} A model fitted on some countries must
         be evaluated on countries it has never seen, because that is the deployment condition.
-  \item \textbf{Threshold economics.} A probability is not an alert. The operating point must be
-        chosen so that the volume of warnings is defensible relative to the events caught.
+  \item \textbf{Grounded explanation.} A prediction must be explained in words a non-specialist can
+        act on, every claim must trace to official control guidance, and the layer must refuse
+        rather than generate an answer the corpus does not support.
+  \item \textbf{Delivery without alert fatigue.} A probability is not an alert. The operating point
+        and the message rules must keep warning volume low enough that the messages are read, while
+        the threshold stays defensible against the events caught.
 \end{enumerate}
 
 \section{Objectives}
@@ -296,14 +303,12 @@ quantified rather than hidden.
 
 \section{Organisation of the Report}
 
-Chapter~\ref{ch:lit} reviews the epidemiological and machine learning literature and identifies
-the gap addressed here. Chapter~\ref{ch:arch} sets out the system architecture and the three
-components the platform is built from. Chapter~\ref{ch:method} describes the data, the panel
-construction, the feature engineering and the modelling approach for the risk engine.
-Chapter~\ref{ch:mlops} covers model serving and the operational layer that turns the trained model
-into a callable component. Chapter~\ref{ch:rag} specifies the retrieval-augmented explanation layer
-and Chapter~\ref{ch:alerts} the alert service. Chapter~\ref{ch:results} presents and discusses the
-evaluation results. Chapter~\ref{ch:concl} concludes and sets out future work.
+Chapter~\ref{ch:lit} reviews the literature and identifies the gap addressed here,
+Chapter~\ref{ch:arch} sets out the architecture and its three components, and
+Chapter~\ref{ch:method} describes the data, panel construction and modelling approach for the risk
+engine. Chapter~\ref{ch:mlops} covers model serving, Chapter~\ref{ch:rag} the explanation layer and
+Chapter~\ref{ch:alerts} the alert service. Chapter~\ref{ch:results} discusses the evaluation, and
+Chapter~\ref{ch:concl} concludes.
 
 % =====================================================================
 \chapter{Literature Review and Gap Analysis}
