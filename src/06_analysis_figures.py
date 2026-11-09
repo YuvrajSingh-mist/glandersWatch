@@ -52,7 +52,7 @@ def fig_labels() -> None:
     prev = [lab["prevalence_by_year"][str(y)] * 100 for y in years]
     pos = [lab["positives_by_year"][str(y)] for y in years]
 
-    fig, axes = plt.subplots(1, 3, figsize=(12, 3.5))
+    fig, axes = plt.subplots(1, 3, figsize=(11.0, 5.6))   # aspect ~2.0: legible at \textwidth
     ax = axes[0]
     ax.bar(years, pos, color=BLUE, alpha=0.85, width=0.75)
     ax2 = ax.twinx()
@@ -80,11 +80,11 @@ def fig_labels() -> None:
     y = np.arange(len(reg))
     ax.barh(y, reg.values * 100, color=[BLUE if r < 0.1 else ORANGE for r in reg.values])
     ax.set_yticks(y)
-    ax.set_yticklabels([r[:34] for r in reg.index], fontsize=6.8)
+    ax.set_yticklabels([r[:34] for r in reg.index], fontsize=8.2)
     ax.set_xlabel("prevalence (%)")
     ax.set_title("C. Regional prevalence")
     for yi, (r, n) in enumerate(zip(reg.values, regn.reindex(reg.index).values)):
-        ax.text(r * 100 + 0.4, yi, f"{r*100:.1f} (n={int(n)})", va="center", fontsize=6)
+        ax.text(r * 100 + 0.4, yi, f"{r*100:.1f} (n={int(n)})", va="center", fontsize=7.6)
     save(fig, "fig10_label_anatomy.png")
 
 
