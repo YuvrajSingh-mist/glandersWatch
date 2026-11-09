@@ -188,7 +188,7 @@ that a separate vector store would introduce.
 \section{Implementation Status}
 
 The report distinguishes throughout between what has been built and evaluated and what has been
-specified. Table~\ref{tab:status} is the honest summary.
+specified. Table~\ref{tab:status} summarises the position.
 
 \begin{table}[htbp]
 \centering
@@ -208,8 +208,7 @@ Dashboard & Out of scope & Named as the fourth consumer in the architecture; not
 \end{tabular}
 \end{table}
 
-The distinction matters for how the report should be read. The evaluation results in Chapter 8
-are measurements. The RAG and alert chapters specify behaviour precisely enough to be
+The evaluation results in Chapter 8 are measurements. The RAG and alert chapters specify behaviour precisely enough to be
 implemented and tested, and they state the tests that would validate them, but they do not report
 measured performance, because the system is not deployed.
 

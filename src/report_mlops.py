@@ -140,8 +140,8 @@ prediction from several calls.
 \end{table}
 
 Every response carries the \texttt{model\_id} that produced it and a \texttt{data\_freshness} block.
-The freshness block is not decoration: the alert service reads it before sending anything, so a
-prediction computed on stale upstream data cannot produce a message.
+The alert service reads the freshness block before sending anything, so a prediction computed on
+stale upstream data cannot produce a message.
 
 \input{fig_serving.tex}
 

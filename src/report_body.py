@@ -299,9 +299,9 @@ record is created and fanned out to notification channels.}
 \label{fig:alertarch}
 \end{figure}
 
-The thresholds used by this engine are taken from the operating curve in
-Section~\ref{sec:alerts} rather than from a default value. This is the practical link between the
-modelling work reported here and the alerting behaviour of the platform.
+The thresholds used by this engine come from the operating curve in
+Section~\ref{sec:alerts}, so the alerting behaviour of the platform is tied to measured
+performance rather than to a default value.
 
 \section{Reproducibility}
 

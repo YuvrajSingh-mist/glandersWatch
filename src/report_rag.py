@@ -361,8 +361,8 @@ when the probability falls below that threshold minus a margin.
 \]
 
 The margin is configurable per disease. A larger margin produces a more stable state at the cost of
-slower de-escalation, and for a disease where the cost of a missed warning exceeds the cost of a
-late all-clear, that trade is the right one.
+slower de-escalation, which suits a disease where a missed warning costs more than a late
+all-clear.
 
 \section{Rule 2: Suppression}
 
@@ -380,7 +380,7 @@ conditions are applied, and any one of them can stop the message.
 \midrule
 State change & Send only on a transition, not while the level is held & A monthly reminder at the same level carries no new information \\
 Cooldown & No repeat of the same level within a configurable window & Prevents oscillation at a level boundary from producing repeated messages \\
-Escalation bypass & An upward transition ignores the cooldown & A genuine worsening must never be delayed by a timer \\
+Escalation bypass & An upward transition ignores the cooldown & A worsening must never be delayed by a timer \\
 Per-user daily cap & At most one message per recipient per day & Protects against several areas escalating at once \\
 Quiet hours & Nothing sent between 21:00 and 07:00 local time; queued instead & A warning that wakes a household at night is resented, and is not actionable then \\
 Stale-data guard & No send if \texttt{data\_freshness.passes} is false & An alert about a prediction computed on stale inputs is worse than no alert \\

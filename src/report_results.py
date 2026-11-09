@@ -79,7 +79,7 @@ between mutual information and SHAP attribution \cite{lundberg2017} is @MIRHO@, 
 highest-ranked features are shared between the two orderings. \texttt{longitude} ranks first on
 marginal correlation and approximately twentieth on conditional importance, because once
 population and history are conditioned upon it carries little additional information. It
-functions as a proxy for which part of the world a country occupies, and therefore for publishing
+is a proxy for which part of the world a country occupies, and therefore for publishing
 activity.
 
 Figure~\ref{fig:views} shows the disagreement directly, and Table~\ref{tab:topfeat} gives the
@@ -277,8 +277,8 @@ forecasting it and appending the forecast supplies a less accurate copy of infor
 already holds. Chaining is expected to assist where the intermediate quantity cannot be observed
 directly, which is not the case here.
 
-This is reported as a negative result. It is a genuine finding about chained architectures for
-this problem class, and it is retained rather than removed.
+The result is kept rather than removed, because it says something reproducible about chained
+architectures for this problem class.
 
 \section{Alert Economics}
 \label{sec:alerts}
@@ -301,8 +301,8 @@ against random alerting. Panel B gives the alert volume required to reach a targ
 \section{Subgroup Analysis}
 
 Table~\ref{tab:subgroup} reports leave-country-out performance by region. Skill is lowest in
-Sub-Saharan Africa and in low-income countries, which are the settings in which early warning
-would be most valuable. The cause is label sparsity rather than a defect in the model, since there
+Sub-Saharan Africa and in low-income countries, which are the settings where early warning
+would help most. The cause is label sparsity rather than a defect in the model, since there
 are few recorded events from which to learn in those strata.
 
 \begin{table}[htbp]
@@ -330,7 +330,7 @@ are few recorded events from which to learn in those strata.
 
 The results support four conclusions.
 
-The model has genuine predictive skill. A precision-recall AUC of @BESTPR@ against a base rate of
+The model has predictive skill. A precision-recall AUC of @BESTPR@ against a base rate of
 @PREVALENCE@ is not explainable by chance, it survives a strictly forward-looking temporal split,
 and the probabilities are calibrated to within two percentage points.
 
@@ -357,9 +357,9 @@ BODY_CONCL = r"""
 
 \section{Conclusion}
 
-This project set out to build a usable warning system for glanders, not only a model. That meant
-two things: establishing whether population-level risk could be predicted from publicly available
-data, and designing how such a prediction reaches a person. Four sources that had not previously
+This project set out to build a usable warning system for glanders. That meant establishing
+whether population-level risk could be predicted from publicly available data, and designing how a
+prediction reaches the person who owns the animals. Four sources that had not previously
 been applied to the disease were assembled into a country-year panel covering 162 equine-holding
 countries, and six model families were trained and evaluated under three validation schemes,
 together with a three-stage chained pipeline. Around that model, the delivery problem was
@@ -367,35 +367,32 @@ decomposed into three components with fixed contracts: the risk engine that prod
 probability, the retrieval-augmented layer that explains it against official guidance, and the
 alert service that turns it into a small number of messages.
 
-The central finding is that prediction is possible, and that the achievable performance is
-moderate. On a strictly forward-looking temporal holdout the strongest model reaches a
+Prediction is possible, and the achievable performance is moderate. On a strictly forward-looking temporal holdout the strongest model reaches a
 precision-recall AUC of @BESTPR@ against a base rate of @PREVALENCE@, an approximately @LIFT@-fold
 lift, with an expected calibration error of @ECE@. Used as a warning system, it captures half of
 all observed events while alerting six per cent of country-years.
 
-The second finding is that the skill is fragile across geography. Leave-country-out performance is
-approximately forty per cent lower in relative terms, and the decline is concentrated in the
-regions where early warning would be most useful.
+The skill is fragile across geography. Leave-country-out performance is approximately forty per
+cent lower in relative terms, and the decline concentrates in the regions where early warning would
+help most.
 
-The third finding concerns what the model is learning. Three independent analyses
-converge on the same conclusion. The highest-ranked features are population size and reporting
-capacity rather than biological drivers. The label concentrates in countries that operate
+What the model learns is less encouraging than the headline score. Three independent analyses
+converge. The highest-ranked features are population size and reporting capacity rather than
+biological drivers. The label concentrates in countries that operate
 reference laboratories. And the highest-scoring cells are the countries with the strongest
 veterinary publishing record. The model predicts where glanders will be documented, which is
 useful for directing surveillance, and it is not a map of where the organism is present.
 
-The fourth finding is negative. The chained design specified in the project proposal does not
-improve discrimination, because the intermediate quantity is already available as a direct
-feature. This is reported rather than omitted, since it is a reproducible result about chained
-architectures for this problem class.
+The chained design specified in the project proposal does not improve discrimination, because the
+intermediate quantity is already available as a direct feature. That result is kept rather than
+omitted, since it is reproducible for this problem class.
 
-The fifth finding is architectural. Decomposing the system into three components with versioned
+The architecture also earned its keep. Decomposing the system into three components with versioned
 contracts, none of which hardcodes the disease, made each part testable on its own: the risk engine
 could be evaluated before any explanation existed, and the alert rules could be specified and
-checked against a policy before any message was sent. The cost is that the parts must be
-maintained together, and the benefit is that replacing the model, the language model or the
-notification channel is a local change. For a project whose useful life outlasts any single
-model, that trade is the right one.
+checked against a policy before any message was sent. The cost is that the parts must be maintained
+together. The benefit is that replacing the model, the language model or the notification channel
+is a local change.
 
 \section{Future Work}
 
@@ -434,7 +431,7 @@ per subscriber per year, and that can only be measured with real subscribers. A 
 district veterinary office would give both that number and the delivery reliability per channel,
 which the current specification states as a protocol rather than a result.
 
-Two smaller extensions are also worth noting. Incorporating WOAH WAHIS official outbreak records \cite{wahis} as a
+Two smaller extensions are also possible. Incorporating WOAH WAHIS official outbreak records \cite{wahis} as a
 second label source would allow the literature-derived label to be validated where the two
 overlap. And a cost-sensitive threshold, in which the relative cost of a missed outbreak and a
 false alert is stated explicitly, would replace the F1-optimal threshold used here with one

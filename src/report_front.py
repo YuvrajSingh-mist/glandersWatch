@@ -214,7 +214,7 @@ The economic significance of glanders is concentrated in low and middle income c
 equids remain essential to transport, construction, agriculture and brick manufacture. India
 recorded 5.44 lakh equids in the 2019 Livestock Census, a large proportion held by households
 that depend on the animals for daily income. For such households the loss of a working animal is
-a direct loss of livelihood, which makes early warning valuable even where mass treatment is not
+a direct loss of livelihood, which makes early warning useful even where mass treatment is not
 feasible.
 
 Surveillance data indicate that the disease is neither rare nor geographically contained. A
@@ -233,9 +233,9 @@ the size of the susceptible population, and the environmental conditions that pe
 transmission.
 
 Surveillance systems report what has already happened. Forecasting systems exist for several
-livestock diseases but not for glanders. The problem addressed here is therefore the construction
-and honest evaluation of a population-level risk model for glanders using only publicly
-accessible data.
+livestock diseases but not for glanders. The problem addressed here is therefore to build a
+population-level risk model for glanders from publicly accessible data and to measure how well it
+works.
 
 The problem has four parts.
 
@@ -313,7 +313,7 @@ evaluation results. Chapter~\ref{ch:concl} concludes and sets out future work.
 \section{Glanders Epidemiology and Burden}
 
 Glanders is reviewed in the veterinary literature as a neglected zoonosis with high case
-fatality and a genuine occupational risk to handlers \cite{khan2013,kanani2026}. A recent
+fatality and a real occupational risk to handlers \cite{khan2013,kanani2026}. A recent
 systematic review and meta-analysis consolidates seroprevalence estimates across published
 studies and identifies management practice and animal movement as the dominant epidemiological
 drivers \cite{purnama2026}. Regional reviews document continued circulation in Brazil
@@ -335,8 +335,8 @@ programme covering 2019 to 2023 screened samples from 391 districts and produced
 estimate together with a risk analysis \cite{singha2026}.
 
 These studies establish where glanders occurs, which districts carry the burden, and which
-animal-level factors are associated with seropositivity. None constructs a predictive model, and
-none uses population or reanalysis covariates as predictors.
+animal-level factors the risk analysis identified. None constructs a predictive model, and none
+uses population or reanalysis covariates as predictors.
 
 \section{Existing Forecasting Systems in India}
 
@@ -367,9 +367,8 @@ species distribution and ecological niche models have been compared as tools for
 disease epidemics \cite{hollings2017}.
 
 This body of work is descriptive. Cluster detection identifies where cases have already
-concentrated. It does not forecast which cells will be positive in a future period, and that
-distinction matters for an early warning application, where the value lies in anticipating
-rather than confirming.
+concentrated. It does not forecast which cells will be positive in a future period, which is the
+question an early warning application has to answer.
 
 \section{Machine Learning for Animal Disease Risk}
 

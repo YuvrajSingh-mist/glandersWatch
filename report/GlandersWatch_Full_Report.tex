@@ -266,7 +266,7 @@ The economic significance of glanders is concentrated in low and middle income c
 equids remain essential to transport, construction, agriculture and brick manufacture. India
 recorded 5.44 lakh equids in the 2019 Livestock Census, a large proportion held by households
 that depend on the animals for daily income. For such households the loss of a working animal is
-a direct loss of livelihood, which makes early warning valuable even where mass treatment is not
+a direct loss of livelihood, which makes early warning useful even where mass treatment is not
 feasible.
 
 Surveillance data indicate that the disease is neither rare nor geographically contained. A
@@ -285,9 +285,9 @@ the size of the susceptible population, and the environmental conditions that pe
 transmission.
 
 Surveillance systems report what has already happened. Forecasting systems exist for several
-livestock diseases but not for glanders. The problem addressed here is therefore the construction
-and honest evaluation of a population-level risk model for glanders using only publicly
-accessible data.
+livestock diseases but not for glanders. The problem addressed here is therefore to build a
+population-level risk model for glanders from publicly accessible data and to measure how well it
+works.
 
 The problem has four parts.
 
@@ -365,7 +365,7 @@ evaluation results. Chapter~\ref{ch:concl} concludes and sets out future work.
 \section{Glanders Epidemiology and Burden}
 
 Glanders is reviewed in the veterinary literature as a neglected zoonosis with high case
-fatality and a genuine occupational risk to handlers \cite{khan2013,kanani2026}. A recent
+fatality and a real occupational risk to handlers \cite{khan2013,kanani2026}. A recent
 systematic review and meta-analysis consolidates seroprevalence estimates across published
 studies and identifies management practice and animal movement as the dominant epidemiological
 drivers \cite{purnama2026}. Regional reviews document continued circulation in Brazil
@@ -387,8 +387,8 @@ programme covering 2019 to 2023 screened samples from 391 districts and produced
 estimate together with a risk analysis \cite{singha2026}.
 
 These studies establish where glanders occurs, which districts carry the burden, and which
-animal-level factors are associated with seropositivity. None constructs a predictive model, and
-none uses population or reanalysis covariates as predictors.
+animal-level factors the risk analysis identified. None constructs a predictive model, and none
+uses population or reanalysis covariates as predictors.
 
 \section{Existing Forecasting Systems in India}
 
@@ -419,9 +419,8 @@ species distribution and ecological niche models have been compared as tools for
 disease epidemics \cite{hollings2017}.
 
 This body of work is descriptive. Cluster detection identifies where cases have already
-concentrated. It does not forecast which cells will be positive in a future period, and that
-distinction matters for an early warning application, where the value lies in anticipating
-rather than confirming.
+concentrated. It does not forecast which cells will be positive in a future period, which is the
+question an early warning application has to answer.
 
 \section{Machine Learning for Animal Disease Risk}
 
@@ -709,7 +708,7 @@ that a separate vector store would introduce.
 \section{Implementation Status}
 
 The report distinguishes throughout between what has been built and evaluated and what has been
-specified. Table~\ref{tab:status} is the honest summary.
+specified. Table~\ref{tab:status} summarises the position.
 
 \begin{table}[htbp]
 \centering
@@ -729,8 +728,7 @@ Dashboard & Out of scope & Named as the fourth consumer in the architecture; not
 \end{tabular}
 \end{table}
 
-The distinction matters for how the report should be read. The evaluation results in Chapter 8
-are measurements. The RAG and alert chapters specify behaviour precisely enough to be
+The evaluation results in Chapter 8 are measurements. The RAG and alert chapters specify behaviour precisely enough to be
 implemented and tested, and they state the tests that would validate them, but they do not report
 measured performance, because the system is not deployed.
 
@@ -1283,8 +1281,8 @@ prediction from several calls.
 \end{table}
 
 Every response carries the \texttt{model\_id} that produced it and a \texttt{data\_freshness} block.
-The freshness block is not decoration: the alert service reads it before sending anything, so a
-prediction computed on stale upstream data cannot produce a message.
+The alert service reads the freshness block before sending anything, so a prediction computed on
+stale upstream data cannot produce a message.
 
 \input{fig_serving.tex}
 
@@ -1737,8 +1735,8 @@ when the probability falls below that threshold minus a margin.
 \]
 
 The margin is configurable per disease. A larger margin produces a more stable state at the cost of
-slower de-escalation, and for a disease where the cost of a missed warning exceeds the cost of a
-late all-clear, that trade is the right one.
+slower de-escalation, which suits a disease where a missed warning costs more than a late
+all-clear.
 
 \section{Rule 2: Suppression}
 
@@ -1756,7 +1754,7 @@ conditions are applied, and any one of them can stop the message.
 \midrule
 State change & Send only on a transition, not while the level is held & A monthly reminder at the same level carries no new information \\
 Cooldown & No repeat of the same level within a configurable window & Prevents oscillation at a level boundary from producing repeated messages \\
-Escalation bypass & An upward transition ignores the cooldown & A genuine worsening must never be delayed by a timer \\
+Escalation bypass & An upward transition ignores the cooldown & A worsening must never be delayed by a timer \\
 Per-user daily cap & At most one message per recipient per day & Protects against several areas escalating at once \\
 Quiet hours & Nothing sent between 21:00 and 07:00 local time; queued instead & A warning that wakes a household at night is resented, and is not actionable then \\
 Stale-data guard & No send if \texttt{data\_freshness.passes} is false & An alert about a prediction computed on stale inputs is worse than no alert \\
@@ -1950,7 +1948,7 @@ between mutual information and SHAP attribution \cite{lundberg2017} is -0.03, an
 highest-ranked features are shared between the two orderings. \texttt{longitude} ranks first on
 marginal correlation and approximately twentieth on conditional importance, because once
 population and history are conditioned upon it carries little additional information. It
-functions as a proxy for which part of the world a country occupies, and therefore for publishing
+is a proxy for which part of the world a country occupies, and therefore for publishing
 activity.
 
 Figure~\ref{fig:views} shows the disagreement directly, and Table~\ref{tab:topfeat} gives the
@@ -2167,8 +2165,8 @@ forecasting it and appending the forecast supplies a less accurate copy of infor
 already holds. Chaining is expected to assist where the intermediate quantity cannot be observed
 directly, which is not the case here.
 
-This is reported as a negative result. It is a genuine finding about chained architectures for
-this problem class, and it is retained rather than removed.
+The result is kept rather than removed, because it says something reproducible about chained
+architectures for this problem class.
 
 \section{Alert Economics}
 \label{sec:alerts}
@@ -2191,8 +2189,8 @@ against random alerting. Panel B gives the alert volume required to reach a targ
 \section{Subgroup Analysis}
 
 Table~\ref{tab:subgroup} reports leave-country-out performance by region. Skill is lowest in
-Sub-Saharan Africa and in low-income countries, which are the settings in which early warning
-would be most valuable. The cause is label sparsity rather than a defect in the model, since there
+Sub-Saharan Africa and in low-income countries, which are the settings where early warning
+would help most. The cause is label sparsity rather than a defect in the model, since there
 are few recorded events from which to learn in those strata.
 
 \begin{table}[htbp]
@@ -2224,7 +2222,7 @@ Sub-Saharan Africa & 665 & 27 & 0.699 & 0.073 \\
 
 The results support four conclusions.
 
-The model has genuine predictive skill. A precision-recall AUC of 0.554 against a base rate of
+The model has predictive skill. A precision-recall AUC of 0.554 against a base rate of
 5.59\% is not explainable by chance, it survives a strictly forward-looking temporal split,
 and the probabilities are calibrated to within two percentage points.
 
@@ -2249,9 +2247,9 @@ parsimony when positive examples are limited.
 
 \section{Conclusion}
 
-This project set out to build a usable warning system for glanders, not only a model. That meant
-two things: establishing whether population-level risk could be predicted from publicly available
-data, and designing how such a prediction reaches a person. Four sources that had not previously
+This project set out to build a usable warning system for glanders. That meant establishing
+whether population-level risk could be predicted from publicly available data, and designing how a
+prediction reaches the person who owns the animals. Four sources that had not previously
 been applied to the disease were assembled into a country-year panel covering 162 equine-holding
 countries, and six model families were trained and evaluated under three validation schemes,
 together with a three-stage chained pipeline. Around that model, the delivery problem was
@@ -2259,35 +2257,32 @@ decomposed into three components with fixed contracts: the risk engine that prod
 probability, the retrieval-augmented layer that explains it against official guidance, and the
 alert service that turns it into a small number of messages.
 
-The central finding is that prediction is possible, and that the achievable performance is
-moderate. On a strictly forward-looking temporal holdout the strongest model reaches a
+Prediction is possible, and the achievable performance is moderate. On a strictly forward-looking temporal holdout the strongest model reaches a
 precision-recall AUC of 0.554 against a base rate of 5.59\%, an approximately 10-fold
 lift, with an expected calibration error of 0.016. Used as a warning system, it captures half of
 all observed events while alerting six per cent of country-years.
 
-The second finding is that the skill is fragile across geography. Leave-country-out performance is
-approximately forty per cent lower in relative terms, and the decline is concentrated in the
-regions where early warning would be most useful.
+The skill is fragile across geography. Leave-country-out performance is approximately forty per
+cent lower in relative terms, and the decline concentrates in the regions where early warning would
+help most.
 
-The third finding concerns what the model is learning. Three independent analyses
-converge on the same conclusion. The highest-ranked features are population size and reporting
-capacity rather than biological drivers. The label concentrates in countries that operate
+What the model learns is less encouraging than the headline score. Three independent analyses
+converge. The highest-ranked features are population size and reporting capacity rather than
+biological drivers. The label concentrates in countries that operate
 reference laboratories. And the highest-scoring cells are the countries with the strongest
 veterinary publishing record. The model predicts where glanders will be documented, which is
 useful for directing surveillance, and it is not a map of where the organism is present.
 
-The fourth finding is negative. The chained design specified in the project proposal does not
-improve discrimination, because the intermediate quantity is already available as a direct
-feature. This is reported rather than omitted, since it is a reproducible result about chained
-architectures for this problem class.
+The chained design specified in the project proposal does not improve discrimination, because the
+intermediate quantity is already available as a direct feature. That result is kept rather than
+omitted, since it is reproducible for this problem class.
 
-The fifth finding is architectural. Decomposing the system into three components with versioned
+The architecture also earned its keep. Decomposing the system into three components with versioned
 contracts, none of which hardcodes the disease, made each part testable on its own: the risk engine
 could be evaluated before any explanation existed, and the alert rules could be specified and
-checked against a policy before any message was sent. The cost is that the parts must be
-maintained together, and the benefit is that replacing the model, the language model or the
-notification channel is a local change. For a project whose useful life outlasts any single
-model, that trade is the right one.
+checked against a policy before any message was sent. The cost is that the parts must be maintained
+together. The benefit is that replacing the model, the language model or the notification channel
+is a local change.
 
 \section{Future Work}
 
@@ -2326,7 +2321,7 @@ per subscriber per year, and that can only be measured with real subscribers. A 
 district veterinary office would give both that number and the delivery reliability per channel,
 which the current specification states as a protocol rather than a result.
 
-Two smaller extensions are also worth noting. Incorporating WOAH WAHIS official outbreak records \cite{wahis} as a
+Two smaller extensions are also possible. Incorporating WOAH WAHIS official outbreak records \cite{wahis} as a
 second label source would allow the literature-derived label to be validated where the two
 overlap. And a cost-sensitive threshold, in which the relative cost of a missed outbreak and a
 false alert is stated explicitly, would replace the F1-optimal threshold used here with one
