@@ -437,26 +437,30 @@ and the pairing with gradient boosting, which returns four, none of which is a g
 model. The nearest prior work is descriptive cluster detection in Brazil and a risk-factor
 analysis of the Indian serosurvey.
 
-\section{Research Gap}
+\section{Research and Deployment Gap}
 
-The literature reviewed above divides into three disjoint groups. Epidemiological studies describe
-where glanders occurs. Machine learning studies of \textit{B. mallei} classify laboratory spectra.
-Veterinary risk models exist but are built for influenza. No study joins an occurrence corpus, a
-livestock census, development indicators and reanalysis climatology into a single panel for
-glanders, and none evaluates a calibrated predictive model on that panel.
+\textbf{Research gap.} The literature reviewed above divides into three disjoint groups.
+Epidemiological studies describe where glanders occurs. Machine learning studies of
+\textit{B. mallei} classify laboratory spectra. Veterinary risk models exist but are built for
+influenza. No study joins an occurrence corpus, a livestock census, development indicators and
+reanalysis climatology into a single panel for glanders, and none evaluates a calibrated predictive
+model on that panel.
 
-A second gap appears once the question moves from analysis to use. A probability on a dashboard
-does not reach the person who owns the animals, and a risk score without a stated basis is not
-something a field officer will act on. The literature that describes glanders occurrence and the
-literature that builds spectroscopic classifiers both stop short of the delivery problem: how a
-forecast becomes a cited explanation, and how an explanation becomes a message that an owner
-receives and trusts. No work connects a glanders risk model to official control guidance and to a
-notification path with rules that account for alert fatigue.
+\textbf{Deployment gap.} A second gap appears once the question moves from analysis to use. A
+probability on a dashboard does not reach the person who owns the animals, and a risk score without
+a stated basis is not something a field officer will act on. The literature that describes glanders
+occurrence and the literature that builds spectroscopic classifiers both stop short of the delivery
+problem: how a forecast becomes a cited explanation, and how an explanation becomes a message that
+an owner receives and trusts. No work connects a glanders risk model to official control guidance
+and to a notification path with rules that account for alert fatigue.
 
-The contribution of this project therefore has two parts. The first is empirical: a calibrated
+The contribution of this project therefore has three parts. The first is a calibrated
 population-level risk model for glanders, built on data sources not previously applied to the
-disease and evaluated under a forward temporal split and a country-holdout split. The second is
-architectural: a decomposition of the delivery problem into three components with fixed contracts,
-so that the prediction, its explanation and its alert can be built, tested and replaced
-independently, and so that the same structure carries over to another disease.
+disease and evaluated under a forward temporal split and a country-holdout split, and served as a
+versioned artefact rather than a notebook. The second is a retrieval-augmented layer that grounds
+each prediction in official control guidance, cites every claim, and refuses rather than generates
+when the corpus does not support an answer. The third is an alert service whose threshold,
+suppression and deduplication rules turn a calibrated probability into a small number of messages
+that are read. All three exchange fixed versioned contracts and none hardcodes the disease, so
+another disease, language model or channel is a local change.
 """

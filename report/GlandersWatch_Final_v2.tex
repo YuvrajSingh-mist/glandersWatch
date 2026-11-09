@@ -372,9 +372,7 @@ must spread effort across many diseases. It uses only public data, so anyone can
 it. It attaches a cited explanation to each prediction, which matters when the reader is an owner
 rather than a trained analyst. And it delivers to the owner directly, with rules that suppress
 routine noise. NADRES has institutional access this project lacks; this project has a level of local
-explainability that a multi-disease platform does not attempt. The comparison also confirms that the
-architecture chosen here is conventional for this problem class, and that the open question is not
-whether to forecast but how to make a forecast understandable where it is used.
+explainability that a multi-disease platform does not attempt.
 
 \section{Spatial Risk and Machine Learning}
 
@@ -441,23 +439,25 @@ The decisive cells pair glanders with NASA POWER, which returns zero records, an
 boosting, which returns four, none of them a glanders risk model. The nearest prior work is
 descriptive cluster detection in Brazil and a risk-factor analysis of the Indian serosurvey.
 
-\section{Research Gap}
+\section{Research and Deployment Gap}
 
-The literature divides into three disjoint groups. Epidemiological studies describe where glanders
-occurs; machine learning studies of \textit{B. mallei} classify laboratory spectra; veterinary risk
-models exist but are built for influenza. No study joins an occurrence corpus, a livestock census,
-development indicators and reanalysis climatology into a single panel for glanders, and none
-evaluates a calibrated predictive model on that panel.
+\textbf{Research gap.} The literature divides into three disjoint groups. Epidemiological studies
+describe where glanders occurs; machine learning studies of \textit{B. mallei} classify laboratory
+spectra; veterinary risk models exist but are built for influenza. No study joins an occurrence
+corpus, a livestock census, development indicators and reanalysis climatology into a single panel
+for glanders, and none evaluates a calibrated predictive model on that panel.
 
-A second gap appears once the question moves from analysis to use. A probability on a dashboard does
-not reach the person who owns the animals, and a risk score without a stated basis is not something a
-field officer will act on. Both bodies of literature stop short of the delivery problem: how a
-forecast becomes a cited explanation, and how that becomes a message an owner receives and trusts.
+\textbf{Deployment gap.} A probability on a dashboard does not reach the person who owns the
+animals, and a risk score without a stated basis is not something a field officer will act on. The
+literature stops short of the delivery problem: how a forecast becomes a cited explanation, and how
+that becomes a message an owner trusts.
 
-The contribution has two parts: a calibrated population-level risk model for glanders, built on data
-sources not previously applied to the disease and evaluated under forward temporal and country-holdout
-splits; and a decomposition of the delivery problem into three components with fixed contracts, so
-prediction, explanation and alert can be built, tested and replaced independently.
+The contribution has three parts: a calibrated risk model, evaluated under forward temporal and
+country-holdout splits and served as a versioned artefact; a retrieval-augmented layer that grounds
+each prediction in official control guidance, cites every claim and refuses rather than generates;
+and an alert service whose threshold, suppression and deduplication rules turn a probability into a
+small number of messages. All three exchange fixed versioned contracts and none hardcodes the
+disease.
 
 % =====================================================================
 \chapter{System Architecture}
