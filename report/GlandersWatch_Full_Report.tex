@@ -390,6 +390,27 @@ These studies establish where glanders occurs, which districts carry the burden,
 animal-level factors are associated with seropositivity. None constructs a predictive model, and
 none uses population or reanalysis covariates as predictors.
 
+\section{Existing Forecasting Systems in India}
+
+India is not without operational livestock forecasting. The closest system to this work is
+NADRES v2, the National Animal Disease Referral Expert System operated by ICAR-NIVEDI
+\cite{nadres}. It combines outbreak records from a network of AICRP centres with meteorological
+and remote-sensing covariates, and issues district-level forewarnings roughly two months ahead
+using a model family that overlaps with the one used here, including random forests and boosted
+trees.
+
+This project differs from it in four respects, and the differences are complementary rather than
+competitive. It is glanders-specific, where a national system must spread effort across many
+diseases. It is built entirely on public data, so it can be reproduced and audited by anyone. It
+attaches a cited explanation to each prediction, which matters when the output is read by an owner
+rather than a trained analyst. And it delivers to the owner directly, with rules designed to
+suppress routine noise. A national system has institutional access that this project does not, and
+this project has a level of local explainability that a multi-disease platform does not attempt.
+
+The comparison is useful for a second reason. It shows that the architecture chosen here is the
+conventional one for this problem class, and that the open question is not whether to forecast but
+how to make a forecast understandable and actionable at the point of use.
+
 \section{Geographic and Spatiotemporal Risk Analysis}
 
 Descriptive spatial analysis of glanders has been reported. Fonseca-Rodr\'iguez et al. applied
@@ -2359,6 +2380,7 @@ matched to the programme's actual priorities.
 \bibitem{power} NASA Langley Research Center. POWER agroclimatology API. \url{https://power.larc.nasa.gov}
 \bibitem{wdi} World Bank. World Development Indicators. \url{https://databank.worldbank.org}
 \bibitem{europepmc} Europe PMC literature search API. \url{https://europepmc.org}
+\bibitem{nadres} ICAR-National Institute of Veterinary Epidemiology and Disease Informatics. National Animal Disease Referral Expert System (NADRES v2): livestock disease forecasting. \url{https://nivedi.res.in/Nadres_v2/}
 \end{thebibliography}
 \end{multicols}
 

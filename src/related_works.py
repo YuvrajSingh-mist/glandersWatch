@@ -212,6 +212,11 @@ DATA_REFS: dict[str, str] = {
     "europepmc": (
         "Europe PMC literature search API. \\url{https://europepmc.org}"
     ),
+    "nadres": (
+        "ICAR-National Institute of Veterinary Epidemiology and Disease Informatics. "
+        "National Animal Disease Referral Expert System (NADRES v2): livestock disease "
+        "forecasting. \\url{https://nivedi.res.in/Nadres_v2/}"
+    ),
 }
 
 
