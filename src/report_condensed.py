@@ -894,19 +894,36 @@ RESULTS = r"""
 \label{ch:results}
 % =====================================================================
 
-\section{Dataset Characteristics}
+% Everything that concerns the risk engine sits under one heading, so the modelling
+% results are not interleaved with the alert economics that uses them.
+\section{The Risk Model}
+
+\subsection{Dataset Characteristics}
 
 The modelling matrix holds @ROWS@ country-year observations, of which @POSITIVES@ are positive: a
 prevalence of @PREVALENCE@ and an imbalance of @IMBALANCE@ to one. @POSCOUNTRIES@ of @COUNTRIES@
 countries record at least one positive, @REPEATPOS@ of them in two or more years, and the top five
-hold @TOP5SHARE@ of all positives. The imbalance rules out accuracy as a metric and motivates
-precision-recall analysis; the persistence justifies historical features; and the concentration is
-the first indication that the label tracks reporting capacity, since those countries operate
-reference laboratories.
+hold @TOP5SHARE@ of all positives.
 
-\section{Model Comparison}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.84\textwidth]{fig10_label_anatomy.png}
+\caption{Label anatomy. Panel A gives annual positive counts against prevalence on the secondary
+axis. Panel B gives the distribution of positive years per country. Panel C gives prevalence by
+World Bank region.}
+\label{fig:labels}
+\end{figure}
 
-Table~\ref{tab:level1} reports discrimination under all three schemes.
+Three properties shape the design. The imbalance, visible as the gap between the count and
+prevalence axes in panel A, rules out accuracy as a metric. The persistence in panel B, with
+@REPEATPOS@ of @POSCOUNTRIES@ positive countries recurring, justifies historical features. The
+regional concentration in panel C is the first indication that the label tracks reporting capacity,
+since those countries operate reference laboratories.
+
+\subsection{Model Comparison}
+
+Table~\ref{tab:level1} reports discrimination under all three schemes, and
+Figure~\ref{fig:comparison} plots the same comparison.
 
 \begin{table}[htbp]
 \centering
@@ -927,49 +944,40 @@ on the temporal holdout.}
 \end{tabular}}
 \end{table}
 
-Against a base rate of @PREVALENCE@, the strongest temporal result of @BESTPR@ is an approximately
-@LIFT@-fold lift. Every tree-based model beats the logistic baseline, and the single decision tree is
-weakest, which indicates that the relationships are interactive rather than additive. The more
-important pattern is the decline under leave-country-out validation: for Random Forest the score falls
-from @RFPR@ to @RFLOCOR@, and the decline exceeds the bootstrap interval width for every family. That
-is the signature of learning country-specific structure, and the estimate to quote for deployment.
-
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.72\textwidth]{fig03_roc_pr_curves.png}
-\caption{ROC curves (panel A) and precision-recall curves (panel B) on the temporal holdout. At this
-prevalence the ROC panels compress into a narrow band while the precision-recall panels separate the
-families.}
-\label{fig:curves}
+\includegraphics[width=0.70\textwidth]{fig02_model_comparison.png}
+\caption{Discrimination by model and validation scheme. The gap between repeated cross-validation
+and leave-country-out validation is the cost of generalising to an unseen country.}
+\label{fig:comparison}
 \end{figure}
 
-\section{Calibration}
+Against a base rate of @PREVALENCE@, the strongest temporal result of @BESTPR@ is an approximately
+@LIFT@-fold lift. Every tree-based model beats the logistic baseline, and the single decision tree is
+weakest, so the relationships are interactive rather than additive. The more important pattern is the
+decline under leave-country-out validation: for Random Forest the score falls from @RFPR@ to @RFLOCOR@,
+and the decline exceeds the bootstrap interval width for every family. That is the signature of
+learning country-specific structure, and the figure to quote for deployment.
+
+\subsection{Calibration}
 
 Predictions are well calibrated, with an expected calibration error of @ECE@ and a Brier score of
 @BRIER@: a stated risk of twenty-four per cent corresponds to an observed frequency near twenty-four
-per cent. That is what makes a threshold-based alert defensible, since a message quoting a probability
-must be numerically trustworthy.
-
-\section{Alert Economics}
-
-As a warning system, alerting the six per cent of country-years at highest predicted risk captures
-about half of all observed events, and twenty-eight per cent captures eighty per cent
-(Figure~\ref{fig:alerts}). Uniform alerting would need full coverage for the same recall, so the model
-is roughly eight times more efficient than arbitrary selection at the fifty per cent point.
+per cent, which is what makes a threshold-based alert defensible.
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.78\textwidth]{fig07_alert_budget.png}
-\caption{Alert economics. Panel A gives the fraction of events captured as the alert budget grows,
-against random alerting. Panel B gives the alert volume required to reach a target recall.}
-\label{fig:alerts}
+\includegraphics[width=0.64\textwidth]{fig04_calibration.png}
+\caption{Reliability diagram for the selected model on the temporal holdout, with the distribution of
+predicted risk. Points on the diagonal are perfectly calibrated.}
+\label{fig:calib}
 \end{figure}
 
-\section{Subgroup Analysis}
+\subsection{Subgroup Analysis}
 
-Table~\ref{tab:subgroup} reports leave-country-out performance by region. Skill is lowest in
-Sub-Saharan Africa and in low-income countries, where early warning would help most. The cause is
-label sparsity rather than a model defect: few events are recorded in those strata to learn from.
+Table~\ref{tab:subgroup} and Figure~\ref{fig:subgroups} report leave-country-out performance by
+region. Skill is lowest in Sub-Saharan Africa and in low-income countries, where early warning would
+help most; the cause is label sparsity, since few events are recorded in those strata.
 
 \begin{table}[htbp]
 \centering
@@ -985,20 +993,50 @@ label sparsity rather than a model defect: few events are recorded in those stra
 \end{tabular}
 \end{table}
 
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.58\textwidth]{fig08_subgroups.png}
+\caption{Regional performance under leave-country-out validation.}
+\label{fig:subgroups}
+\end{figure}
+
+\section{The Alert Service as a Warning System}
+
+The alert layer turns the calibrated probability into messages, so its economics are reported
+separately from model skill.
+
+Alerting the six per cent of country-years at highest predicted risk captures about half of all
+observed events, and twenty-eight per cent captures eighty per cent (Figure~\ref{fig:alerts}).
+Uniform alerting would need full coverage for the same recall, so the model is roughly eight times
+more efficient than arbitrary selection at the fifty per cent point.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.72\textwidth]{fig07_alert_budget.png}
+\caption{Alert economics. Panel A gives the fraction of events captured as the alert budget grows,
+against random alerting. Panel B gives the alert volume required to reach a target recall.}
+\label{fig:alerts}
+\end{figure}
+
+\section{The Explanation Layer}
+
+No measured results are reported for the retrieval-augmented layer. Its corpus, retrieval parameters,
+guardrails and evaluation protocol are specified in Chapter~\ref{ch:rag}, but it has not been run
+against the corpus, so the five metrics defined there have no values.
+
 \section{Discussion}
 
-The model has predictive skill: a precision-recall AUC of @BESTPR@ against a base rate of
+The risk model has predictive skill: a precision-recall AUC of @BESTPR@ against a base rate of
 @PREVALENCE@ is not explainable by chance, survives a forward-looking split, and is calibrated to
 within two points. It does not transfer intact, though: leave-country-out performance is roughly forty
-per cent lower, and that is the planning figure, so a new country needs local validation first.
+per cent lower, so a new country needs local validation first.
 
-The principal signal is surveillance rather than biology, and three analyses agree: the highest
-features are population and connectivity measures, the label concentrates in countries with reference
+The principal signal is surveillance rather than biology. Three analyses agree: the highest features
+are population and connectivity measures, the label concentrates in countries with reference
 laboratories, and the best-scoring cells are India, the United States and Australia.
 """
 
 
-# =====================================================================
 CONCL = r"""
 % =====================================================================
 \chapter{Conclusion and Future Work}
