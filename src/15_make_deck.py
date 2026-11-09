@@ -2,10 +2,12 @@
 
 Run:  .venv/bin/python src/15_make_deck.py
 
-Structure: a holistic overview (what it is, the problem, why it is needed), then
-one section per component holding only that component's required information.
+Design follows the department's report template: a navy cover panel, a light
+lavender ground (#F3F3F7), periwinkle cards (#E0E0EC), a single orange accent
+(#E25822), Playfair Display for headings and Open Sans for text.
+
 Every number and figure is read from reports/*.json and figures/*.png, so the
-deck cannot drift from the report. 16:9, sixteen slides.
+deck cannot drift from the report.
 """
 from __future__ import annotations
 
@@ -18,6 +20,7 @@ from pptx import Presentation
 from pptx.util import Inches, Pt
 from pptx.dml.color import RGBColor
 from pptx.enum.shapes import MSO_SHAPE
+from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 REP, FIG = ROOT / "reports", ROOT / "figures"
@@ -35,25 +38,35 @@ ROWS = A["labels"]["rows"]
 POS = A["labels"]["positives"]
 NC = A["labels"]["countries"]
 SEL = R["selection"]
-PREV_YEARS = sorted(A["labels"]["prevalence_by_year"])
-YRS = (PREV_YEARS[0], PREV_YEARS[-1])
 LR = L1["Logistic Regression"]
 RF = L1["Random Forest"]
+XG = L1["XGBoost"]
+YA = YT["target_a_year"]
 
-# share of total attribution held by the selected features
 _rank = SEL["ranking"]
-_top = sum(r["mean_abs_shap"] for r in _rank[: SEL["top_k"]])
-_all = sum(r["mean_abs_shap"] for r in _rank) or 1.0
-ATTR_SHARE = _top / _all
+ATTR_SHARE = sum(r["mean_abs_shap"] for r in _rank[: SEL["top_k"]]) / (
+    sum(r["mean_abs_shap"] for r in _rank) or 1.0)
 
-INK = RGBColor(0x1F, 0x29, 0x33)
-BLUE = RGBColor(0x1D, 0x4E, 0xD8)
-GREY = RGBColor(0x6B, 0x72, 0x80)
-PALE = RGBColor(0xF1, 0xF5, 0xF9)
+# ---------------------------------------------------------------- palette
+BG = RGBColor(0xF3, 0xF3, 0xF7)
+CARD = RGBColor(0xE0, 0xE0, 0xEC)
+CARD_DEEP = RGBColor(0xC6, 0xC6, 0xD2)
+INK = RGBColor(0x10, 0x10, 0x14)
+BODY = RGBColor(0x39, 0x39, 0x3C)
+ACCENT = RGBColor(0xE2, 0x58, 0x22)
 WHITE = RGBColor(0xFF, 0xFF, 0xFF)
-MUTE = RGBColor(0x94, 0xA3, 0xB8)
+NAVY = RGBColor(0x06, 0x1E, 0x5E)
+NAVY_LIGHT = RGBColor(0x0E, 0x2C, 0x74)
+MUTED = RGBColor(0x7A, 0x7A, 0x84)
+PALE_TEXT = RGBColor(0xC3, 0xCE, 0xE4)
+
+SERIF = "Playfair Display"
+SANS = "Open Sans"
 
 W, H = Inches(13.333), Inches(7.5)
+MG = Inches(0.62)
+CWD = W - 2 * MG
+FOOT = "GlandersWatch  ·  B.Tech Project  ·  IIIT Bhubaneswar"
 
 
 def alert_econ() -> dict:
@@ -81,654 +94,1012 @@ def alert_econ() -> dict:
 AE = alert_econ()
 
 
-def slide(prs, title: str, kicker: str | None = None):
-    s = prs.slides.add_slide(prs.slide_layouts[6])
-    bar = s.shapes.add_shape(MSO_SHAPE.RECTANGLE, 0, 0, W, Inches(0.09))
-    bar.fill.solid(); bar.fill.fore_color.rgb = BLUE; bar.line.fill.background()
-    bar.shadow.inherit = False
-
-    t = s.shapes.add_textbox(Inches(0.62), Inches(0.32), W - Inches(1.2), Inches(0.7))
-    p = t.text_frame.paragraphs[0]
-    t.text_frame.word_wrap = True
-    p.text = title
-    p.font.size = Pt(29); p.font.bold = True; p.font.color.rgb = INK
-
-    if kicker:
-        k = s.shapes.add_textbox(Inches(0.62), Inches(1.0), W - Inches(1.2), Inches(0.42))
-        k.text_frame.word_wrap = True
-        kp = k.text_frame.paragraphs[0]
-        kp.text = kicker
-        kp.font.size = Pt(14); kp.font.color.rgb = GREY
-    return s
+# ---------------------------------------------------------------- helpers
+def set_spacing(run, hundredths: int):
+    """Letter-spacing, in 1/100 pt, which the API does not expose."""
+    run.font._rPr.set("spc", str(hundredths))
 
 
-def divider(prs, num: str, title: str, answers: str, covered: list[str]):
-    """Dark full-bleed section opener."""
-    s = prs.slides.add_slide(prs.slide_layouts[6])
+def plain(shape):
+    shape.shadow.inherit = False
+    return shape
+
+
+def ground(s):
     bg = s.shapes.add_shape(MSO_SHAPE.RECTANGLE, 0, 0, W, H)
-    bg.fill.solid(); bg.fill.fore_color.rgb = INK; bg.line.fill.background()
-    bg.shadow.inherit = False
+    bg.fill.solid(); bg.fill.fore_color.rgb = BG
+    bg.line.fill.background(); plain(bg)
+    return bg
 
-    n = s.shapes.add_textbox(Inches(0.85), Inches(2.0), Inches(3.0), Inches(1.3))
-    np_ = n.text_frame.paragraphs[0]
-    np_.text = num
-    np_.font.size = Pt(86); np_.font.bold = True
-    np_.font.color.rgb = RGBColor(0x3B, 0x82, 0xF6)
 
-    t = s.shapes.add_textbox(Inches(0.85), Inches(3.25), Inches(8.6), Inches(1.2))
-    t.text_frame.word_wrap = True
+_PAGE = [1]
+
+
+def footer(s, pg: int):
+    f = s.shapes.add_textbox(MG, Inches(7.00), Inches(9.0), Inches(0.30))
+    p = f.text_frame.paragraphs[0]
+    p.text = FOOT
+    p.font.size = Pt(9); p.font.color.rgb = MUTED; p.font.name = SANS
+    set_spacing(p.runs[0], 60)
+
+    nb = s.shapes.add_textbox(W - MG - Inches(1.2), Inches(7.00), Inches(1.2), Inches(0.30))
+    np_ = nb.text_frame.paragraphs[0]
+    np_.text = f"{pg:02d}"
+    np_.alignment = PP_ALIGN.RIGHT
+    np_.font.size = Pt(9); np_.font.color.rgb = MUTED; np_.font.name = SANS
+
+
+def page(prs, title: str, eyebrow: str | None = None, pg: int | None = None,
+         title_size: int = 34, wrap=False):
+    _PAGE[0] += 1
+    s = prs.slides.add_slide(prs.slide_layouts[6])
+    ground(s)
+
+    y = Inches(0.52)
+    if eyebrow:
+        e = s.shapes.add_textbox(MG, Inches(0.42), Inches(7.0), Inches(0.28))
+        ep = e.text_frame.paragraphs[0]
+        ep.text = eyebrow.upper()
+        ep.font.size = Pt(10.5); ep.font.bold = True
+        ep.font.color.rgb = ACCENT; ep.font.name = SANS
+        set_spacing(ep.runs[0], 180)
+        y = Inches(0.76)
+
+    t = s.shapes.add_textbox(MG, y, CWD, Inches(0.85))
+    t.text_frame.word_wrap = wrap
+    t.text_frame.margin_left = 0
     tp = t.text_frame.paragraphs[0]
     tp.text = title
-    tp.font.size = Pt(40); tp.font.bold = True; tp.font.color.rgb = WHITE
+    tp.font.size = Pt(title_size); tp.font.bold = True
+    tp.font.color.rgb = INK; tp.font.name = SERIF
 
-    a = s.shapes.add_textbox(Inches(0.85), Inches(4.35), Inches(9.2), Inches(0.9))
-    a.text_frame.word_wrap = True
-    ap = a.text_frame.paragraphs[0]
-    ap.text = answers
-    ap.font.size = Pt(15); ap.font.color.rgb = MUTE
+    rule = s.shapes.add_shape(MSO_SHAPE.RECTANGLE, MG, Inches(1.32),
+                              Inches(0.95), Inches(0.045))
+    rule.fill.solid(); rule.fill.fore_color.rgb = ACCENT
+    rule.line.fill.background(); plain(rule)
 
-    c = s.shapes.add_textbox(Inches(0.85), Inches(5.45), Inches(9.5), Inches(1.3))
-    ctf = c.text_frame; ctf.word_wrap = True
-    for i, item in enumerate(covered):
-        p = ctf.paragraphs[0] if i == 0 else ctf.add_paragraph()
-        p.text = "—  " + item
-        p.font.size = Pt(12); p.font.color.rgb = RGBColor(0xCB, 0xD5, 0xE1)
-        p.space_after = Pt(3)
-
-    rule = s.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(0.85), Inches(2.95),
-                              Inches(1.5), Inches(0.05))
-    rule.fill.solid(); rule.fill.fore_color.rgb = RGBColor(0x3B, 0x82, 0xF6)
-    rule.line.fill.background(); rule.shadow.inherit = False
+    footer(s, _PAGE[0])
     return s
 
 
-def body(s, x, y, w, h, lines, size=16, space=8, bullet=True):
-    tb = s.shapes.add_textbox(x, y, w, h)
-    tf = tb.text_frame
+def card(s, x, y, w, h, fill=CARD, num: str | None = None, head: str | None = None,
+         text: str | None = None, head_size=16, text_size=11.5,
+         head_color=INK, body_color=BODY, pad=0.20, vcenter=False,
+         num_size=26, formula: str | None = None):
+    box = s.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, x, y, w, h)
+    box.adjustments[0] = 0.045
+    box.fill.solid(); box.fill.fore_color.rgb = fill
+    box.line.fill.background(); plain(box)
+    tf = box.text_frame
     tf.word_wrap = True
+    tf.margin_left = Inches(pad); tf.margin_right = Inches(pad * 0.85)
+    tf.margin_top = Inches(0.14); tf.margin_bottom = Inches(0.10)
+    tf.vertical_anchor = MSO_ANCHOR.MIDDLE if vcenter else MSO_ANCHOR.TOP
+
+    first = True
+    if num:
+        p = tf.paragraphs[0]; first = False
+        p.text = num
+        p.font.size = Pt(num_size); p.font.bold = True
+        p.font.color.rgb = ACCENT; p.font.name = SERIF
+        p.space_after = Pt(1)
+    if head:
+        p = tf.paragraphs[0] if first else tf.add_paragraph()
+        first = False
+        p.text = head
+        p.font.size = Pt(head_size); p.font.bold = True
+        p.font.color.rgb = head_color; p.font.name = SERIF
+        p.space_after = Pt(4)
+    if text:
+        p = tf.paragraphs[0] if first else tf.add_paragraph()
+        p.text = text
+        p.font.size = Pt(text_size); p.font.color.rgb = body_color
+        p.font.name = SANS
+    if formula:
+        p = tf.add_paragraph()
+        p.text = formula
+        p.font.size = Pt(text_size + 1.5); p.font.bold = True
+        p.font.color.rgb = INK; p.font.name = SANS
+        p.space_before = Pt(6); p.space_after = Pt(6)
+    return box
+
+
+def prose(s, x, y, w, h, lines, size=12, space=7, color=BODY, bullet="·   "):
+    tb = s.shapes.add_textbox(x, y, w, h)
+    tf = tb.text_frame; tf.word_wrap = True
+    tf.margin_left = 0; tf.margin_top = 0
     first = True
     for ln in lines:
         p = tf.paragraphs[0] if first else tf.add_paragraph()
         first = False
-        bold = ln.startswith("**")
-        p.text = ln.replace("**", "")
-        p.font.size = Pt(size)
-        p.font.bold = bold
-        p.font.color.rgb = BLUE if bold else INK
+        p.text = (bullet + ln[2:]) if ln.startswith("- ") else ln
+        p.font.size = Pt(size); p.font.color.rgb = color; p.font.name = SANS
         p.space_after = Pt(space)
-        if bullet and not bold:
-            p.text = "•  " + p.text
     return tb
 
 
-def stat_row(s, y, items, w_each=Inches(2.85), gap=Inches(0.22), h=Inches(1.18)):
-    x = Inches(0.62)
-    for label, value in items:
-        box = s.shapes.add_shape(MSO_SHAPE.RECTANGLE, x, y, w_each, h)
-        box.fill.solid(); box.fill.fore_color.rgb = PALE
-        box.line.fill.background(); box.shadow.inherit = False
-        tf = box.text_frame
-        tf.word_wrap = True
-        tf.margin_left = Inches(0.14); tf.margin_top = Inches(0.09)
-        p = tf.paragraphs[0]; p.text = value
-        p.font.size = Pt(23); p.font.bold = True; p.font.color.rgb = BLUE
-        p2 = tf.add_paragraph(); p2.text = label
-        p2.font.size = Pt(11); p2.font.color.rgb = GREY
-        x += w_each + gap
+def stat(s, x, y, w, value, label, h=Inches(1.10), fill=CARD,
+         vsize=25, accent=False):
+    box = s.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, x, y, w, h)
+    box.adjustments[0] = 0.05
+    box.fill.solid(); box.fill.fore_color.rgb = fill
+    box.line.fill.background(); plain(box)
+    tf = box.text_frame; tf.word_wrap = True
+    tf.margin_left = Inches(0.16); tf.margin_top = Inches(0.10)
+    tf.margin_right = Inches(0.12)
+    tf.vertical_anchor = MSO_ANCHOR.MIDDLE
+    p = tf.paragraphs[0]
+    p.text = value
+    p.font.size = Pt(vsize); p.font.bold = True
+    p.font.color.rgb = ACCENT if accent else INK
+    p.font.name = SERIF
+    p2 = tf.add_paragraph(); p2.text = label
+    p2.font.size = Pt(9.5); p2.font.color.rgb = BODY; p2.font.name = SANS
+    p2.space_before = Pt(1)
+    return box
 
 
-def table(s, x, y, w, rows, col_w=None, size=13, header=True):
+def table(s, x, y, w, rows, col_w=None, size=10.5, row_h=0.29, head_fill=BODY,
+          right_cols=()):
     nrows, ncols = len(rows), len(rows[0])
-    shp = s.shapes.add_table(nrows, ncols, x, y, w, Inches(0.34) * nrows)
+    shp = s.shapes.add_table(nrows, ncols, x, y, w, Inches(row_h) * nrows)
     tbl = shp.table
     if col_w:
         for i, cw in enumerate(col_w):
             tbl.columns[i].width = cw
     for r, row in enumerate(rows):
+        tbl.rows[r].height = Inches(row_h)
         for c, val in enumerate(row):
             cell = tbl.cell(r, c)
             cell.text = str(val)
-            cell.margin_left = Inches(0.07)
-            cell.margin_top = Inches(0.02)
-            cell.margin_bottom = Inches(0.02)
+            cell.margin_left = Inches(0.08)
+            cell.margin_right = Inches(0.10)
+            cell.margin_top = Inches(0.01)
+            cell.margin_bottom = Inches(0.01)
+            cell.vertical_anchor = MSO_ANCHOR.MIDDLE
             para = cell.text_frame.paragraphs[0]
-            para.font.size = Pt(size)
-            if header and r == 0:
+            para.font.size = Pt(size); para.font.name = SANS
+            if c in right_cols:
+                para.alignment = PP_ALIGN.RIGHT
+            if r == 0:
                 para.font.bold = True
                 para.font.color.rgb = WHITE
-                cell.fill.solid(); cell.fill.fore_color.rgb = BLUE
+                cell.fill.solid(); cell.fill.fore_color.rgb = head_fill
             else:
                 para.font.color.rgb = INK
                 cell.fill.solid()
-                cell.fill.fore_color.rgb = WHITE if r % 2 else PALE
+                cell.fill.fore_color.rgb = CARD if r % 2 else BG
     return tbl
 
 
-def pic(s, name, x, y, w=None, h=None):
-    p = FIG / name
-    if not p.exists():
+def pic(s, name, x, y, w=None, h=None, plate=False, pad=Inches(0.09)):
+    path = FIG / name
+    if not path.exists():
         return None
-    return s.shapes.add_picture(str(p), x, y, width=w, height=h)
+    if plate:
+        from PIL import Image
+        iw, ih = Image.open(path).size
+        pw = w if w is not None else int(h * iw / ih)
+        ph = int(pw * ih / iw) if w is not None else h
+        bg = s.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, x, y,
+                                pw + 2 * pad, ph + 2 * pad)
+        bg.adjustments[0] = 0.03
+        bg.fill.solid(); bg.fill.fore_color.rgb = WHITE
+        bg.line.fill.background(); plain(bg)
+        return s.shapes.add_picture(str(path), x + pad, y + pad, width=pw, height=ph)
+    return s.shapes.add_picture(str(path), x, y, width=w, height=h)
 
 
-def flow_box(s, x, y, w, h, label, text, accent=False):
-    box = s.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, x, y, w, h)
-    box.fill.solid()
-    box.fill.fore_color.rgb = BLUE if accent else PALE
-    box.line.fill.background()
-    box.shadow.inherit = False
-    tf = box.text_frame
-    tf.word_wrap = True
-    tf.margin_left = Inches(0.16); tf.margin_right = Inches(0.12)
-    tf.margin_top = Inches(0.12)
-    p = tf.paragraphs[0]
-    p.text = label
-    p.font.size = Pt(13); p.font.bold = True
-    p.font.color.rgb = WHITE if accent else BLUE
-    p2 = tf.add_paragraph()
-    p2.text = text
-    p2.font.size = Pt(11)
-    p2.font.color.rgb = RGBColor(0xDD, 0xE7, 0xF5) if accent else GREY
-    p2.space_before = Pt(5)
-    return box
-
-
-def arrow(s, x, y, w=Inches(0.38), h=Inches(0.3)):
-    a = s.shapes.add_shape(MSO_SHAPE.RIGHT_ARROW, x, y, w, h)
-    a.fill.solid(); a.fill.fore_color.rgb = RGBColor(0xB8, 0xC4, 0xD4)
-    a.line.fill.background(); a.shadow.inherit = False
-    return a
-
-
-def band(s, y, text, h=Inches(0.85), accent=False):
-    """Full-width emphasis strip."""
-    box = s.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(0.62), y,
-                             W - Inches(1.24), h)
-    box.fill.solid()
-    box.fill.fore_color.rgb = BLUE if accent else PALE
-    box.line.fill.background(); box.shadow.inherit = False
-    tf = box.text_frame
-    tf.word_wrap = True
-    tf.margin_left = Inches(0.2); tf.margin_right = Inches(0.2)
-    tf.margin_top = Inches(0.1)
-    p = tf.paragraphs[0]
-    p.text = text
-    p.font.size = Pt(13)
-    p.font.color.rgb = WHITE if accent else INK
-    return box
-
-
-def quote(s, y, text, h=Inches(1.05)):
-    """Bordered example block, visually distinct from body text."""
-    box = s.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(0.62), y,
-                             W - Inches(1.24), h)
-    box.fill.solid(); box.fill.fore_color.rgb = WHITE
-    box.line.color.rgb = RGBColor(0xC9, 0xD5, 0xE4)
-    box.line.width = Pt(1)
-    box.shadow.inherit = False
-    tf = box.text_frame
-    tf.word_wrap = True
-    tf.margin_left = Inches(0.2); tf.margin_right = Inches(0.2)
-    tf.margin_top = Inches(0.1)
-    p = tf.paragraphs[0]
-    p.text = text
-    p.font.size = Pt(12); p.font.color.rgb = INK
-    p.font.name = "Georgia"
-    return box
-
-
-def caption(s, y, text, w=None, x=None):
-    c = s.shapes.add_textbox(x or Inches(0.62), y, w or (W - Inches(1.24)), Inches(0.5))
+def chip(s, x, y, w, text, size=9):
+    c = s.shapes.add_textbox(x, y, w, Inches(0.36))
     c.text_frame.word_wrap = True
+    c.text_frame.margin_left = 0
     p = c.text_frame.paragraphs[0]
     p.text = text
-    p.font.size = Pt(10); p.font.color.rgb = GREY
+    p.font.size = Pt(size); p.font.color.rgb = MUTED; p.font.name = SANS
     return c
+
+
+def takeaway(s, y, text, h=Inches(0.62), size=11.5):
+    box = s.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, MG, y, CWD, h)
+    box.adjustments[0] = 0.10
+    box.fill.solid(); box.fill.fore_color.rgb = BODY
+    box.line.fill.background(); plain(box)
+    tf = box.text_frame; tf.word_wrap = True
+    tf.margin_left = Inches(0.22); tf.margin_right = Inches(0.22)
+    tf.vertical_anchor = MSO_ANCHOR.MIDDLE
+    p = tf.paragraphs[0]
+    p.text = text
+    p.font.size = Pt(size); p.font.color.rgb = WHITE; p.font.name = SANS
+
+
+def divider(prs, num: str, title: str, question: str, items: list[str]):
+    _PAGE[0] += 1
+    s = prs.slides.add_slide(prs.slide_layouts[6])
+    bg = s.shapes.add_shape(MSO_SHAPE.RECTANGLE, 0, 0, W, H)
+    bg.fill.solid(); bg.fill.fore_color.rgb = NAVY
+    bg.line.fill.background(); plain(bg)
+
+    band = s.shapes.add_shape(MSO_SHAPE.RECTANGLE, 0, 0, Inches(0.16), H)
+    band.fill.solid(); band.fill.fore_color.rgb = ACCENT
+    band.line.fill.background(); plain(band)
+
+    n = s.shapes.add_textbox(MG, Inches(1.55), Inches(2.6), Inches(1.1))
+    np_ = n.text_frame.paragraphs[0]
+    np_.text = num
+    np_.font.size = Pt(64); np_.font.bold = True
+    np_.font.color.rgb = ACCENT; np_.font.name = SERIF
+
+    t = s.shapes.add_textbox(MG, Inches(2.62), Inches(9.4), Inches(1.0))
+    t.text_frame.word_wrap = True
+    tp = t.text_frame.paragraphs[0]
+    tp.text = title
+    tp.font.size = Pt(38); tp.font.bold = True
+    tp.font.color.rgb = WHITE; tp.font.name = SERIF
+
+    q = s.shapes.add_textbox(MG, Inches(3.72), Inches(9.6), Inches(0.9))
+    q.text_frame.word_wrap = True
+    qp = q.text_frame.paragraphs[0]
+    qp.text = question
+    qp.font.size = Pt(14); qp.font.color.rgb = PALE_TEXT; qp.font.name = SANS
+
+    c = s.shapes.add_textbox(MG, Inches(4.78), Inches(10.2), Inches(1.5))
+    ctf = c.text_frame; ctf.word_wrap = True; ctf.margin_left = 0
+    for i, item in enumerate(items):
+        p = ctf.paragraphs[0] if i == 0 else ctf.add_paragraph()
+        p.text = "—   " + item
+        p.font.size = Pt(11.5); p.font.color.rgb = WHITE; p.font.name = SANS
+        p.space_after = Pt(5)
+
+    rule = s.shapes.add_shape(MSO_SHAPE.RECTANGLE, MG, Inches(6.60),
+                              CWD, Inches(0.012))
+    rule.fill.solid(); rule.fill.fore_color.rgb = NAVY_LIGHT
+    rule.line.fill.background(); plain(rule)
+
+    lbl = s.shapes.add_textbox(MG, Inches(6.72), Inches(8.0), Inches(0.30))
+    lp = lbl.text_frame.paragraphs[0]
+    lp.text = f"GlandersWatch  ·  section {num}"
+    lp.font.size = Pt(9); lp.font.color.rgb = PALE_TEXT; lp.font.name = SANS
+    set_spacing(lp.runs[0], 60)
+    return s
 
 
 def build() -> pathlib.Path:
     prs = Presentation()
     prs.slide_width, prs.slide_height = W, H
 
-    # ---------------------------------------------------------------- 1 title
+    # ------------------------------------------------------------ 1 cover
     s = prs.slides.add_slide(prs.slide_layouts[6])
-    bg = s.shapes.add_shape(MSO_SHAPE.RECTANGLE, 0, 0, W, H)
-    bg.fill.solid(); bg.fill.fore_color.rgb = INK
-    bg.line.fill.background(); bg.shadow.inherit = False
+    panel_w = Inches(8.15)
+    base = s.shapes.add_shape(MSO_SHAPE.RECTANGLE, 0, 0, W, H)
+    base.fill.solid(); base.fill.fore_color.rgb = BG
+    base.line.fill.background(); plain(base)
 
-    t = s.shapes.add_textbox(Inches(0.85), Inches(2.2), W - Inches(1.7), Inches(1.9))
+    panel = s.shapes.add_shape(MSO_SHAPE.RECTANGLE, 0, 0, panel_w, H)
+    panel.fill.solid(); panel.fill.fore_color.rgb = NAVY
+    panel.line.fill.background(); plain(panel)
+
+    edge = s.shapes.add_shape(MSO_SHAPE.RECTANGLE, panel_w, 0, Inches(0.05), H)
+    edge.fill.solid(); edge.fill.fore_color.rgb = ACCENT
+    edge.line.fill.background(); plain(edge)
+
+    s.shapes.add_picture(str(FIG / "iiit_logo.png"), W - Inches(2.42), Inches(0.62),
+                         width=Inches(1.62))
+
+    e = s.shapes.add_textbox(MG, Inches(1.02), Inches(6.6), Inches(0.3))
+    ep = e.text_frame.paragraphs[0]
+    ep.text = "B.TECH PROJECT REPORT"
+    ep.font.size = Pt(10.5); ep.font.bold = True
+    ep.font.color.rgb = ACCENT; ep.font.name = SANS
+    set_spacing(ep.runs[0], 220)
+
+    t = s.shapes.add_textbox(MG, Inches(1.52), Inches(7.1), Inches(1.95))
     tf = t.text_frame; tf.word_wrap = True
     p = tf.paragraphs[0]
     p.text = "GlandersWatch"
-    p.font.size = Pt(54); p.font.bold = True; p.font.color.rgb = WHITE
+    p.font.size = Pt(48); p.font.bold = True
+    p.font.color.rgb = WHITE; p.font.name = SERIF
     p2 = tf.add_paragraph()
-    p2.text = "Risk prediction, cited explanation and owner alerting for a neglected zoonosis"
-    p2.font.size = Pt(19); p2.font.color.rgb = RGBColor(0xCB, 0xD5, 0xE1)
-    p2.space_before = Pt(14)
+    p2.text = "Risk prediction, cited explanation and owner\nalerting for a neglected zoonosis"
+    p2.font.size = Pt(14.5); p2.font.color.rgb = PALE_TEXT; p2.font.name = SANS
+    p2.space_before = Pt(12)
 
-    a = s.shapes.add_textbox(Inches(0.85), Inches(5.5), W - Inches(1.7), Inches(1.2))
-    ap = a.text_frame.paragraphs[0]
-    a.text_frame.word_wrap = True
-    ap.text = ("Pedapatruni Shanmuk Vardhan  ·  Shaktimayee Mohanty  ·  Yuvraj Singh\n"
-               "Supervisor: Dr. Sangita Dhara  ·  IIIT Bhubaneswar")
-    ap.font.size = Pt(13); ap.font.color.rgb = MUTE
-    ap.line_spacing = 1.5
+    ac = s.shapes.add_textbox(MG, Inches(3.44), Inches(6.9), Inches(0.9))
+    ac.text_frame.word_wrap = True
+    ap = ac.text_frame.paragraphs[0]
+    ap.text = ("A report submitted in partial fulfilment of the requirements for the award of "
+               "the Bachelor of Technology in Computer Science and Engineering")
+    ap.font.size = Pt(10); ap.font.color.rgb = PALE_TEXT; ap.font.name = SANS
+    ap.line_spacing = 1.45
 
-    # ---------------------------------------------------------------- 2 overview
-    s = slide(prs, "Overview", "One probability, produced once, consumed in two different ways")
+    sup = s.shapes.add_textbox(MG, Inches(4.52), Inches(6.9), Inches(0.85))
+    sup.text_frame.word_wrap = True
+    sp = sup.text_frame.paragraphs[0]
+    sp.text = "UNDER THE SUPERVISION OF"
+    sp.font.size = Pt(8.5); sp.font.color.rgb = PALE_TEXT; sp.font.name = SANS
+    set_spacing(sp.runs[0], 120)
+    sp2 = sup.text_frame.add_paragraph()
+    sp2.text = "Dr. Sangita Dhara"
+    sp2.font.size = Pt(15); sp2.font.bold = True
+    sp2.font.color.rgb = WHITE; sp2.font.name = SERIF
+    sp2.space_before = Pt(3)
 
-    flow_box(s, Inches(0.62), Inches(1.85), Inches(2.55), Inches(1.55),
-             "1  Public data",
-             "Europe PMC · FAOSTAT\nWorld Bank · NASA POWER")
-    arrow(s, Inches(3.30), Inches(2.45))
-    flow_box(s, Inches(3.80), Inches(1.85), Inches(3.05), Inches(1.55),
-             "2  Risk engine",
-             "8 features → calibrated\nprobability per country-year")
-    arrow(s, Inches(6.98), Inches(2.45))
-    flow_box(s, Inches(7.48), Inches(1.85), Inches(5.2), Inches(1.55),
-             "3  Calibrated probability",
-             "A number that can be quoted: 0.03 means 3 in 100.",
-             accent=True)
+    pv = s.shapes.add_textbox(MG, Inches(5.52), Inches(6.9), Inches(1.15))
+    pv.text_frame.word_wrap = True
+    pp = pv.text_frame.paragraphs[0]
+    pp.text = "PRESENTED BY"
+    pp.font.size = Pt(8.5); pp.font.color.rgb = PALE_TEXT; pp.font.name = SANS
+    set_spacing(pp.runs[0], 120)
+    for nm in ["Pedapatruni Shanmuk Vardhan   ·   B123089",
+               "Shaktimayee Mohanty   ·   B123118",
+               "Yuvraj Singh   ·   B123153"]:
+        q = pv.text_frame.add_paragraph()
+        q.text = nm
+        q.font.size = Pt(11); q.font.color.rgb = WHITE; q.font.name = SANS
+        q.space_before = Pt(4)
 
-    # the two consumers
-    b1 = s.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.62), Inches(3.80),
-                            Inches(5.9), Inches(1.5))
-    b1.fill.solid(); b1.fill.fore_color.rgb = PALE
-    b1.line.fill.background(); b1.shadow.inherit = False
-    tf = b1.text_frame; tf.word_wrap = True
-    tf.margin_left = Inches(0.18); tf.margin_top = Inches(0.14)
-    p = tf.paragraphs[0]; p.text = "Explanation layer"
-    p.font.size = Pt(15); p.font.bold = True; p.font.color.rgb = BLUE
-    p2 = tf.add_paragraph()
-    p2.text = ("Answers “why this country, and what should be done?” with passages\n"
-               "retrieved from official guidance, cited, or refused.")
-    p2.font.size = Pt(11); p2.font.color.rgb = GREY; p2.space_before = Pt(6)
+    # right column furniture
+    rcol_x = W - Inches(4.35)
+    rcol_w = Inches(3.70)
+    comps = [("Risk engine", "a calibrated probability"),
+             ("Explanation layer", "cited, or refused"),
+             ("Alert service", "a message still worth reading")]
+    cy = Inches(4.28)
+    rh = s.shapes.add_shape(MSO_SHAPE.RECTANGLE, rcol_x, cy, rcol_w, Inches(0.012))
+    rh.fill.solid(); rh.fill.fore_color.rgb = CARD_DEEP
+    rh.line.fill.background(); plain(rh)
+    cy += Inches(0.20)
 
-    b2 = s.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(6.78), Inches(3.80),
-                            Inches(5.9), Inches(1.5))
-    b2.fill.solid(); b2.fill.fore_color.rgb = PALE
-    b2.line.fill.background(); b2.shadow.inherit = False
-    tf = b2.text_frame; tf.word_wrap = True
-    tf.margin_left = Inches(0.18); tf.margin_top = Inches(0.14)
-    p = tf.paragraphs[0]; p.text = "Alert service"
-    p.font.size = Pt(15); p.font.bold = True; p.font.color.rgb = BLUE
-    p2 = tf.add_paragraph()
-    p2.text = ("Raises a message only when the probability crosses a level, so a\n"
-               "warning still means something on the day it arrives.")
-    p2.font.size = Pt(11); p2.font.color.rgb = GREY; p2.space_before = Pt(6)
+    for nm, sub in comps:
+        a = s.shapes.add_textbox(rcol_x, cy, rcol_w, Inches(0.34))
+        ap2 = a.text_frame.paragraphs[0]
+        ap2.text = nm
+        ap2.font.size = Pt(14); ap2.font.bold = True
+        ap2.font.color.rgb = INK; ap2.font.name = SERIF
+        b = s.shapes.add_textbox(rcol_x, cy + Inches(0.34), rcol_w, Inches(0.30))
+        bp = b.text_frame.paragraphs[0]
+        bp.text = sub
+        bp.font.size = Pt(9.5); bp.font.color.rgb = BODY; bp.font.name = SANS
+        cy += Inches(0.74)
+    dt = s.shapes.add_textbox(W - Inches(4.35), Inches(6.72), Inches(3.70), Inches(0.32))
+    dp = dt.text_frame.paragraphs[0]
+    dp.text = "Department of Computer Science and Engineering   ·   November 2026"
+    dp.font.size = Pt(8.5); dp.font.color.rgb = MUTED; dp.font.name = SANS
+    dp.alignment = PP_ALIGN.RIGHT
 
-    body(s, Inches(0.62), Inches(5.40), Inches(11.9), Inches(0.6), [
-        "Both consume the same calibrated output, so the message and the explanation can never disagree.",
-    ], size=12, space=4)
+    # ------------------------------------------------------------ 2 context
+    s = page(prs, "A disease that still has no forecast", "Introduction")
+    card(s, MG, Inches(1.62), Inches(5.85), Inches(2.10), num="01", head="The organism",
+         text="Glanders is a bacterial zoonosis of equids caused by Burkholderia mallei. "
+              "Notifiable, frequently fatal, and with no environmental reservoir: it persists "
+              "in animal populations rather than in soil or water.")
+    card(s, MG + Inches(6.05), Inches(1.62), Inches(6.05), Inches(2.10), num="02",
+         head="The gap",
+         text="Surveillance describes what has already happened. The published machine-learning "
+              "work on this disease stops at laboratory identification. No population-level "
+              "risk model has been reported.")
 
-    stat_row(s, Inches(6.0), [
-        (f"country-years, {YRS[0]}–{YRS[1]}", f"{ROWS:,}"),
-        ("countries", f"{NC}"),
-        ("features", f"{SEL['top_k']}"),
-        ("PR-AUC, unseen countries", f"{LR['loco']['pr_auc']:.3f}"),
-    ], w_each=Inches(2.85))
+    prose(s, MG, Inches(3.98), Inches(5.85), Inches(1.5), [
+        "Indian surveillance, 2019 to 2023, found 728 seropositive equids in 138 districts, "
+        "sharply concentrated geographically. Cases cluster, and that is what makes a "
+        "spatial model worth building.",
+    ], size=11.5)
 
-    # ---------------------------------------------------------------- 3 problem
-    s = slide(prs, "Problem statement", "Stated once, precisely, because every section inherits this framing")
+    card(s, MG + Inches(6.05), Inches(3.98), Inches(6.05), Inches(1.55), fill=CARD_DEEP,
+         head="What this project adds",
+         text="A calibrated risk model, an explanation layer grounded in official guidance, "
+              "and an alert service, each independently deployable behind a fixed contract.",
+         head_size=14.5, text_size=11)
 
-    f = s.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(0.62), Inches(1.65),
-                           Inches(11.9), Inches(1.15))
-    f.fill.solid(); f.fill.fore_color.rgb = PALE
-    f.line.fill.background(); f.shadow.inherit = False
-    tf = f.text_frame; tf.word_wrap = True
-    tf.margin_left = Inches(0.22); tf.margin_top = Inches(0.14)
-    p = tf.paragraphs[0]
-    p.text = "Given a country's features in year t, predict whether glanders is documented in that country in year t + 1."
-    p.font.size = Pt(17); p.font.color.rgb = INK
+    takeaway(s, Inches(5.92),
+             "Each component communicates through a versioned schema rather than shared "
+             "internals, so none of the three hardcodes the disease and each degrades "
+             "without failing the others.")
 
-    body(s, Inches(0.62), Inches(3.05), Inches(6.1), Inches(3.1), [
-        "**The label",
-        "One country-year is positive if a glanders occurrence is reported from that country in that year.",
-        "Features come only from the year before, so the model never reads the outcome it is predicting.",
-    ], size=13, space=10)
+    # ------------------------------------------------------------ 3 why
+    s = page(prs, "Population at risk is not the same as damage", "Why it matters")
 
-    body(s, Inches(6.95), Inches(3.05), Inches(5.6), Inches(3.1), [
-        "**The difficulty",
-        f"{POS} positives in {ROWS:,} rows. A model that says “never” is 94% accurate and useless.",
-        "Accuracy and ROC-AUC hide this; precision-recall does not.",
-    ], size=13, space=10)
+    stat(s, MG, Inches(1.62), Inches(3.85), "5.50 lakh", "equids in India, 2019")
+    stat(s, MG + Inches(4.05), Inches(1.62), Inches(3.85), "728", "seropositive, 2019–23")
+    stat(s, MG + Inches(8.10), Inches(1.62), Inches(4.00), "138", "districts affected")
 
-    stat_row(s, Inches(5.95), [
-        (f"country-years, {YRS[0]}–{YRS[1]}", f"{ROWS:,}"),
-        ("countries", f"{NC}"),
-        ("positives", f"{POS}"),
-        ("prevalence", f"{PREV*100:.2f}%"),
-    ], w_each=Inches(2.85))
+    prose(s, MG, Inches(3.02), Inches(6.15), Inches(2.4), [
+        "The two figures are routinely conflated, so they are separated here at the outset.",
+        "- 5.50 lakh is the exposed population: how many animals are susceptible.",
+        "- 728 of 158,798 screened is the documented damage: under one per cent.",
+        "- Each positive is acted on rather than monitored, because the disease is notifiable "
+        "and often fatal once clinical.",
+    ], size=11.5, space=9)
 
-    # ---------------------------------------------------------------- 4 why needed
-    s = slide(prs, "Why it is needed", "Surveillance tells you where the disease was, which is one step too late")
+    pic(s, "fig14_background.png", MG + Inches(6.55), Inches(3.06), w=Inches(5.55), plate=True)
+    chip(s, MG + Inches(6.64), Inches(5.02), Inches(5.4),
+         "Panel A: the exposed population by species.  Panel B: documented events per year, "
+         "which tracks open-access publishing as much as disease.")
 
-    table(s, Inches(0.62), Inches(1.7), Inches(6.55), [
-        ["Who", "What they cannot do today"],
-        ["District veterinary officer", "Know where to pre-position testing and movement checks"],
-        ["Equine owner", "Know whether this is the month to restrict movement"],
-        ["State planner", "Compare risk across districts on one scale"],
-    ], col_w=[Inches(2.35), Inches(4.2)], size=12)
+    takeaway(s, Inches(6.05),
+             "Because documentation follows publishing capacity, the target is a documented "
+             "event rather than raw incidence. That choice is stated once and held throughout.")
 
-    body(s, Inches(7.45), Inches(1.75), Inches(5.1), Inches(2.4), [
-        "**What exists",
-        "Reports that arrive after the fact. A national livestock forewarning system exists, but glanders is not on its disease list.",
-        "**The failure mode to avoid",
-        "A warning system that fires everywhere is ignored everywhere.",
-    ], size=12, space=10)
+    # ------------------------------------------------------------ 4 problem
+    s = page(prs, "Problem statement", "Definition")
 
-    pic(s, "fig14_background.png", Inches(0.62), Inches(3.75), w=Inches(7.6))
-    c = s.shapes.add_textbox(Inches(0.62), Inches(6.35), Inches(11.9), Inches(0.75))
-    cp = c.text_frame.paragraphs[0]; c.text_frame.word_wrap = True
-    cp.text = ("Panel A: how many equids are exposed. Panel B: how many events are documented per year. "
-               "Documentation rises with open-access publishing, which is why the target is a documented event rather than raw incidence.")
-    cp.font.size = Pt(10); cp.font.color.rgb = GREY
+    strip = s.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, MG, Inches(1.60),
+                               CWD, Inches(0.82))
+    strip.adjustments[0] = 0.12
+    strip.fill.solid(); strip.fill.fore_color.rgb = CARD_DEEP
+    strip.line.fill.background(); plain(strip)
+    stf = strip.text_frame; stf.word_wrap = True
+    stf.margin_left = Inches(0.24); stf.vertical_anchor = MSO_ANCHOR.MIDDLE
+    sp = stf.paragraphs[0]
+    sp.text = ("Given a country's features in year t, predict whether glanders is "
+               "documented in that country in year t + 1.")
+    sp.font.size = Pt(15.5); sp.font.bold = True
+    sp.font.color.rgb = INK; sp.font.name = SERIF
 
-    # ---------------------------------------------------------------- 5 division
+    card(s, MG, Inches(2.68), Inches(5.85), Inches(2.20), num="01", head="The label",
+         text="One country-year is positive if a glanders occurrence is reported from that "
+              "country in that year. Features come only from the year before, so the model "
+              "never reads the outcome it is predicting.", head_size=16)
+    card(s, MG + Inches(6.05), Inches(2.68), Inches(6.05), Inches(2.20), num="02",
+         head="The difficulty",
+         text=f"{POS} positives in {ROWS:,} rows. A model that always says “no” is "
+              f"{100 * (1 - PREV):.0f} per cent accurate and worthless, which is why accuracy "
+              "and ROC-AUC are not used to rank models here.", head_size=16)
+
+    prose(s, MG, Inches(5.12), CWD, Inches(0.8), [
+        f"Base rate {PREV * 100:.2f} per cent. Precision-recall AUC is the primary metric "
+        f"because it moves when a model starts finding the {POS} positives; ROC-AUC does not.",
+    ], size=11.5)
+
+    takeaway(s, Inches(6.02),
+             "Every later result is reported on this target and this metric. The "
+             "country-level model in the next section asks an easier question and is "
+             "labelled as such.")
+
+    # ------------------------------------------------------------ 5 objectives
+    s = page(prs, "Project objectives", "Scope", title_size=32)
+    objs = [
+        ("01", "Assemble the panel",
+         "Four public sources, none previously applied to this disease, into a country-year panel."),
+        ("02", "Build the risk engine",
+         "Select features by attribution, compare six model families under two splits, calibrate."),
+        ("03", "Specify the explanation layer",
+         "Retrieval grounded in official guidance, with citations and a refusal protocol."),
+        ("04", "Specify the alert service",
+         "Levels from the calibration curve, hysteresis, deduplication, delivery logging."),
+    ]
+    for i, (num, head, text) in enumerate(objs):
+        col, row = i % 2, i // 2
+        card(s, MG + col * Inches(6.05), Inches(1.58) + row * Inches(2.02),
+             Inches(5.85), Inches(1.84), num=num, head=head, text=text,
+             head_size=16.5, text_size=11.5)
+
+    takeaway(s, Inches(5.92),
+             "Objectives 01 and 02 carry measured results. 03 and 04 are contracts with an "
+             "evaluation protocol, and are never presented as measured.")
+
+    # ------------------------------------------------------------ 6 users
+    s = page(prs, "Who the system is for", "Use", title_size=32)
+    users = [
+        ("01", "District veterinary officer",
+         "Where to pre-position testing and movement checks, before the report arrives."),
+        ("02", "Equine owner",
+         "Whether this is the month to restrict movement, in a language they read."),
+        ("03", "State planner",
+         "A single scale on which districts can be compared for resources."),
+    ]
+    for i, (num, head, text) in enumerate(users):
+        card(s, MG + i * Inches(4.05), Inches(1.62), Inches(3.85), Inches(2.05),
+             num=num, head=head, text=text, head_size=15, text_size=11)
+
+    card(s, MG, Inches(3.94), CWD, Inches(1.20), fill=CARD_DEEP,
+         head="The failure mode to design against",
+         text="A warning system that fires for every area every month is ignored by month "
+              "twelve. Alert budget is therefore a design constraint, not a tuning parameter.",
+         head_size=14.5, text_size=11)
+
+    takeaway(s, Inches(5.52),
+             "None of the three users operates a dashboard. The output has to arrive as a "
+             "message, and the reasoning has to arrive with it.")
+
+    # ------------------------------------------------------------ section 01
     divider(prs, "01", "The risk engine",
-            "Where is glanders likely to be documented next year, and how much should we trust the number?",
-            ["Data: four public sources and the label they produce",
-             "Eight features, chosen by attribution rather than association",
-             "Two validation splits, and why the ranking inverts between them"])
+            "Can a country's next year be forecast from its last?",
+            ["Four public sources assembled into a country-year panel",
+             "Eight features chosen by attribution rather than correlation",
+             "Six model families, two validation splits, and a calibration check"])
 
-    # ---------------------------------------------------------------- 6 data
-    s = slide(prs, "Data", "Four public sources, none previously applied to this disease")
+    # ------------------------------------------------------------ 7 data
+    s = page(prs, "Four public sources, none used for this disease", "Data", title_size=31)
+    srcs = [
+        ("01", "Europe PMC", "Occurrence events extracted from abstracts. This is the label."),
+        ("02", "FAOSTAT", "Horse, ass and mule head counts. This is exposure."),
+        ("03", "World Bank", "Development and connectivity indicators. This is context."),
+        ("04", "NASA POWER", "Temperature, humidity and rainfall. This is environment."),
+    ]
+    for i, (num, head, text) in enumerate(srcs):
+        card(s, MG + i * Inches(3.05), Inches(1.58), Inches(2.85), Inches(1.72),
+             num=num, head=head, text=text, head_size=13.5, text_size=10.5, num_size=22)
 
-    rows = [["Source", "What it contributes", "Role"],
-            ["Europe PMC", "Occurrence events from abstracts", "The label"],
-            ["FAOSTAT", "Horse, ass and mule head counts", "Exposure"],
-            ["World Bank", "Development and connectivity", "Context"],
-            ["NASA POWER", "Temperature, humidity, rainfall", "Environment"]]
-    table(s, Inches(0.62), Inches(1.72), Inches(7.4), rows,
-          col_w=[Inches(1.9), Inches(3.4), Inches(2.1)], size=12)
+    gy = Inches(3.52)
+    stat(s, MG, gy, Inches(2.35), f"{ROWS:,}", "modelling rows", h=Inches(0.98), vsize=21)
+    stat(s, MG + Inches(2.55), gy, Inches(2.35), f"{NC}", "countries", h=Inches(0.98), vsize=21)
+    stat(s, MG, gy + Inches(1.14), Inches(2.35), f"{POS}", "positives", h=Inches(0.98), vsize=21)
+    stat(s, MG + Inches(2.55), gy + Inches(1.14), Inches(2.35), f"{PREV*100:.2f}%",
+         "prevalence", h=Inches(0.98), vsize=21, accent=True)
 
-    body(s, Inches(8.35), Inches(1.75), Inches(4.4), Inches(3.6), [
-        f"6,700 raw country-year rows over 268 reporting entities.",
-        f"Filtered to {ROWS:,} rows across {NC} equine-holding countries.",
-        f"{POS} positives, {PREV*100:.2f}% prevalence.",
-        "Rows without a climate baseline are dropped, not imputed, so no anomaly is manufactured.",
-    ], size=12, space=12)
+    chip(s, MG, Inches(5.82), Inches(4.95),
+         "6,700 raw country-year rows over 268 reporting entities reduce to 2,880 observations. "
+         "Rows with no climate baseline are dropped rather than imputed, so no anomaly is invented.")
 
-    pic(s, "fig01_dataset_coverage.png", Inches(0.62), Inches(3.62), w=Inches(7.45))
-    caption(s, Inches(6.42),
-            "Coverage of the assembled panel: which countries contribute which years, and where the positives sit.",
-            w=Inches(7.45))
+    pic(s, "fig01_dataset_coverage.png", Inches(5.72), Inches(3.54), w=Inches(6.85))
+    chip(s, Inches(5.72), Inches(6.18), Inches(6.85),
+         "Coverage of the assembled panel: which countries contribute which years.")
 
-    # ---------------------------------------------------------------- 7 features
-    s = slide(prs, "Eight features, chosen by attribution",
-              "Ranked by mean absolute SHAP on the training years only")
+    # ------------------------------------------------------------ 8 method
+    s = page(prs, "From raw sources to a calibrated probability", "Method", title_size=31)
+    steps = [
+        ("01", "Sources", "Four APIs, one panel"),
+        ("02", "Panel", "Country-year rows"),
+        ("03", "Attribution", "42 ranked, 8 kept"),
+        ("04", "Training", "Six families, two splits"),
+        ("05", "Output", "Calibrated probability"),
+    ]
+    for i, (num, head, text) in enumerate(steps):
+        x = MG + i * Inches(2.47)
+        card(s, x, Inches(1.66), Inches(2.27), Inches(1.62), num=num, head=head,
+             text=text, head_size=13, text_size=10, num_size=20)
+        if i < 4:
+            a = s.shapes.add_shape(MSO_SHAPE.RIGHT_ARROW, x + Inches(2.29),
+                                   Inches(2.34), Inches(0.16), Inches(0.20))
+            a.fill.solid(); a.fill.fore_color.rgb = ACCENT
+            a.line.fill.background(); plain(a)
 
-    units = {"pop_total": "persons", "years_since_last": "years (99 = none)",
+    prose(s, MG, Inches(3.52), Inches(5.9), Inches(2.3), [
+        "The temporal split trains on 2006–2017 and tests on 2018–2023: forward in time, "
+        "which is the only honest test of a forecast.",
+        "The country split holds out whole countries, so no row from a test country appears "
+        "in training. This is the split that matches deployment.",
+        "Feature ranking uses training years only. Fitting on the full panel would let the "
+        "held-out years choose the features and make the temporal score optimistic.",
+    ], size=11, space=8)
+
+    table(s, Inches(6.95), Inches(3.62), Inches(5.75), [
+        ["Model family", "Character"],
+        ["Logistic Regression", "additive, interpretable"],
+        ["Decision Tree", "single split tree"],
+        ["Random Forest", "bagged trees"],
+        ["Extra Trees", "randomised splits"],
+        ["XGBoost", "gradient boosted"],
+        ["LightGBM", "leaf-wise boosted"],
+    ], col_w=[Inches(2.75), Inches(3.0)], size=10, row_h=0.27)
+
+    takeaway(s, Inches(5.62),
+             "Eight numeric features, no categorical columns, no identifiers. Country codes "
+             "and calendar years are identifiers and never enter the model.", h=Inches(0.72))
+
+    # ------------------------------------------------------------ 9 features
+    s = page(prs, "Eight features, chosen by attribution", "Features", title_size=31)
+    units = {"pop_total": "persons", "years_since_last": "years (99 = never)",
              "temp_mean_anom": "°C from baseline", "internet_pct": "% of population",
-             "humidity_anom": "% RH from baseline", "precip_cv": "ratio, sd/mean",
+             "humidity_anom": "% RH from baseline", "precip_cv": "ratio, sd / mean",
              "log_livestock": "ln(1 + LSU)", "goats": "head"}
-    rows = [["#", "Feature", "Unit", "Mean |SHAP|"]]
+    rows = [["#", "Feature", "Unit as measured", "Mean |SHAP|"]]
     for r in SEL["ranking"][: SEL["top_k"]]:
         rows.append([r["rank"], r["feature"], units.get(r["feature"], ""),
                      f"{r['mean_abs_shap']:.3f}"])
-    table(s, Inches(0.62), Inches(1.78), Inches(7.3), rows,
-          col_w=[Inches(0.5), Inches(2.5), Inches(2.9), Inches(1.4)], size=12)
+    table(s, MG, Inches(1.66), Inches(7.05), rows,
+          col_w=[Inches(0.45), Inches(2.35), Inches(2.85), Inches(1.4)],
+          size=10, row_h=0.315, right_cols=(0, 3))
 
-    body(s, Inches(8.25), Inches(1.85), Inches(4.5), Inches(2.9), [
-        f"{SEL['top_k']} of {SEL['n_candidates']} candidates, carrying {ATTR_SHARE*100:.0f}% of total attribution.",
-        "Selection uses training years only, so held-out years cannot shape the choice.",
-        "Correlation puts longitude first; attribution puts it near the bottom.",
-    ], size=12, space=11)
+    prose(s, MG, Inches(4.72), Inches(7.05), Inches(1.2), [
+        f"{SEL['top_k']} of {SEL['n_candidates']} numeric candidates, carrying "
+        f"{ATTR_SHARE*100:.0f} per cent of total attribution.",
+        "Population and years since the last report rank first: exposure, then history.",
+    ], size=11, space=6)
 
     reasons = [
-        ("Attribute a prediction", "SHAP says how much each feature moved this model's output, so the ranking matches what was actually used."),
-        ("Beyond pairs", "Correlation and mutual information score features pairwise; they cannot see interactions or redundancy between features."),
-        ("Comparable", "Both are unnormalised and undirected. Attribution is additive and sums to the prediction."),
+        ("Attributes a prediction", "SHAP says how far each feature moved this model's "
+                                    "output, so the ranking matches what the model uses."),
+        ("Beyond pairs", "Correlation and mutual information score features pairwise; they "
+                         "cannot see interactions or redundancy."),
+        ("Comparable", "Both are unnormalised and undirected. Attribution is additive and "
+                       "sums to the prediction."),
     ]
-    rx = Inches(0.62)
-    for head, text in reasons:
-        b = s.shapes.add_shape(MSO_SHAPE.RECTANGLE, rx, Inches(4.92), Inches(3.85), Inches(1.9))
-        b.fill.solid(); b.fill.fore_color.rgb = PALE
-        b.line.fill.background(); b.shadow.inherit = False
-        tf = b.text_frame; tf.word_wrap = True
-        tf.margin_left = Inches(0.16); tf.margin_top = Inches(0.12)
-        pp = tf.paragraphs[0]; pp.text = head
-        pp.font.size = Pt(12); pp.font.bold = True; pp.font.color.rgb = BLUE
-        p2 = tf.add_paragraph(); p2.text = text
-        p2.font.size = Pt(10.5); p2.font.color.rgb = GREY
-        p2.space_before = Pt(6)
-        rx += Inches(4.05)
+    for i, (head, text) in enumerate(reasons):
+        card(s, Inches(7.95), Inches(1.66) + i * Inches(1.42), Inches(4.75), Inches(1.28),
+             head=head, text=text, head_size=13, text_size=10)
 
-    # ---------------------------------------------------------------- 8 results
-    s = slide(prs, "Results", "One target, two validation splits, opposite conclusions")
+    takeaway(s, Inches(6.02),
+             "Correlation ranks longitude first and attribution ranks it near the bottom. "
+             "Selecting on association keeps geography proxies instead of drivers.")
 
+    # ------------------------------------------------------------ 10 models
+    s = page(prs, "The three models worth describing", "Models", title_size=31)
+    card(s, MG, Inches(1.62), Inches(3.85), Inches(2.92), num="01",
+         head="Logistic Regression",
+         text="A weighted sum of the eight features passed through a sigmoid. The coefficients "
+              "are readable, which matters when a prediction has to be defended.",
+         formula="p = 1 / (1 + e^(−z))\nz = β0 + β1x1 + … + β8x8",
+         head_size=15, text_size=10.5)
+    card(s, MG + Inches(4.05), Inches(1.62), Inches(3.85), Inches(2.92), num="02",
+         head="Random Forest",
+         text="Five hundred trees, each grown on a bootstrap sample with a random feature "
+              "subset at every split, then averaged. Captures interactions, and cannot "
+              "extrapolate beyond the data it saw.",
+         formula="ŷ = (1/B) Σ Tb(x)\nG = 1 − Σ pk²",
+         head_size=15, text_size=10.5)
+    card(s, MG + Inches(8.10), Inches(1.62), Inches(4.00), Inches(2.92), num="03",
+         head="Gradient Boosting",
+         text="Trees added in sequence, each fitting the residual of the last. XGBoost and "
+              "LightGBM differ mainly in how they grow the trees.",
+         formula="Obj = Σ L(yi, ŷi) + Σ Ω(fk)\nΩ(f) = γT + ½λ||w||²",
+         head_size=15, text_size=10.5)
+
+    prose(s, MG, Inches(4.82), CWD, Inches(1.0), [
+        "Six families are trained in total; Decision Tree and Extra Trees are reported in the "
+        "results table but add nothing to the argument. Logistic Regression and Random Forest "
+        "are the two that carry it: one is additive and stable, the other flexible and unstable "
+        "across countries.",
+    ], size=11)
+
+    takeaway(s, Inches(5.78),
+             "Random Forest wins on unseen years; Logistic Regression wins on unseen "
+             "countries. The next slide is about why that inversion is the finding.")
+
+    # ------------------------------------------------------------ 11 results
+    s = page(prs, "One target, two validation splits", "Results", title_size=31)
     rows = [["Model", "PR-AUC, unseen years", "PR-AUC, unseen countries"]]
     for m, v in L1.items():
         rows.append([m, f"{v['temporal']['pr_auc']:.3f}", f"{v['loco']['pr_auc']:.3f}"])
-    table(s, Inches(0.62), Inches(1.72), Inches(6.5), rows,
-          col_w=[Inches(2.7), Inches(1.9), Inches(1.9)], size=11)
+    table(s, MG, Inches(1.62), Inches(6.55), rows,
+          col_w=[Inches(3.05), Inches(1.75), Inches(1.75)], size=10.5, row_h=0.315)
 
-    body(s, Inches(7.45), Inches(1.75), Inches(5.3), Inches(2.4), [
-        f"Base rate {PREV*100:.2f}%, so PR-AUC is the metric that moves.",
-        f"ROC-AUC stays in 0.80–0.87 for all six models on both splits; it cannot separate them.",
-        "Logistic regression is the champion: it wins on unseen countries, which is what deployment means.",
-    ], size=12, space=11)
+    prose(s, MG + Inches(7.05), Inches(1.66), Inches(5.0), Inches(2.6), [
+        f"Base rate {PREV*100:.2f} per cent, so PR-AUC is the metric that moves.",
+        f"ROC-AUC stays inside 0.80–0.87 for all six families on both splits. It cannot "
+        "separate them, which is why it is not the headline.",
+        "Logistic Regression is the champion because it wins on unseen countries, which is "
+        "what deployment means.",
+    ], size=10.5, space=8)
 
-    stat_row(s, Inches(4.35), [
-        ("random forest, unseen years", f"{RF['temporal']['pr_auc']:.3f}"),
-        ("logistic, unseen countries", f"{LR['loco']['pr_auc']:.3f}"),
-        ("random forest, unseen countries", f"{RF['loco']['pr_auc']:.3f}"),
-    ], w_each=Inches(2.85))
+    stat(s, MG, Inches(4.55), Inches(3.85), f"{RF['temporal']['pr_auc']:.3f}",
+         "random forest, unseen years")
+    stat(s, MG + Inches(4.05), Inches(4.55), Inches(3.85), f"{LR['loco']['pr_auc']:.3f}",
+         "logistic, unseen countries", accent=True)
+    stat(s, MG + Inches(8.10), Inches(4.55), Inches(4.00), f"{RF['loco']['pr_auc']:.3f}",
+         "random forest, unseen countries")
 
-    band(s, Inches(5.95),
-         "The ranking inverts.  Random forest wins on unseen years; logistic regression wins on unseen "
-         "countries — and deployment means an unseen country, so the simpler model is the one shipped.",
-         h=Inches(1.0), accent=True)
+    takeaway(s, Inches(5.92),
+             "The ranking inverts between the two splits. A model that generalises across "
+             "countries has to be simpler than one that generalises across years, because "
+             "country-level structure is what the flexible models memorise.")
 
-    # ---------------------------------------------------------------- 9 calibration
-    s = slide(prs, "The number is trustworthy, and that sets the alert budget",
-              "Calibration is what lets a message quote a probability at all")
+    # ------------------------------------------------------------ 12 curves
+    s = page(prs, "What the two metrics actually measure", "Results", title_size=31)
+    pic(s, "fig03_roc_pr_curves.png", MG, Inches(1.66), w=Inches(6.10))
+    chip(s, MG, Inches(4.34), Inches(6.10),
+         "Left: ROC curves, which stay high because the negatives vastly outnumber the "
+         "positives. Right: precision-recall, which falls as recall rises.")
 
-    stat_row(s, Inches(1.65), [
-        ("expected calibration error", f"{R['calibration']['ece']:.3f}"),
-        ("Brier score", f"{R['calibration']['brier']:.3f}"),
-        ("events caught, alerting 6% of country-years", f"{AE['r6']*100:.0f}%"),
-    ])
+    pic(s, "fig05_ablation.png", Inches(7.30), Inches(1.66), w=Inches(5.20))
+    chip(s, Inches(7.30), Inches(4.34), Inches(5.20),
+         "Attribution-based selection against correlation-based, on the same split.")
 
-    body(s, Inches(0.62), Inches(3.3), Inches(6.0), Inches(2.6), [
-        f"Half of all events are reached by alerting {AE['b50']*100:.0f}% of country-years; 80% by {AE['b80']*100:.0f}%.",
-        "That curve, not a default 0.5 cutoff, is where alert levels come from.",
-        "It is also the argument that the alert service can be quiet without being useless.",
-    ], size=13, space=12)
+    prose(s, MG, Inches(4.98), CWD, Inches(0.9), [
+        "The ROC panel is why the deck does not lead with ROC-AUC. Every family sits near "
+        "0.85 there, including models that find almost none of the positives. The PR panel "
+        "separates them, and the ablation shows what the feature choice is worth.",
+    ], size=11)
 
-    pic(s, "fig07_alert_budget.png", Inches(6.85), Inches(2.75), w=Inches(5.9))
-    band(s, Inches(6.15),
-         "This curve is the link between the two halves of the system: it states how quiet an alert service "
-         "can be while still catching most events.",
-         h=Inches(0.78))
+    takeaway(s, Inches(5.86),
+             "Two metrics, two different questions, and only one of them tells you whether "
+             "the model finds events.")
 
-    # ---------------------------------------------------------------- 10 division
+    # ------------------------------------------------------------ 13 calibration
+    s = page(prs, "The number has to be worth quoting", "Calibration", title_size=31)
+
+    stat(s, MG, Inches(1.62), Inches(3.05), f"{R['calibration']['ece']:.3f}",
+         "expected calibration error", accent=True)
+    stat(s, MG + Inches(3.25), Inches(1.62), Inches(3.05), f"{R['calibration']['brier']:.3f}",
+         "Brier score")
+    stat(s, MG + Inches(6.50), Inches(1.62), Inches(3.05), f"{AE['r6']*100:.0f}%",
+         "events caught at a 6% budget")
+
+    prose(s, MG, Inches(3.02), Inches(5.6), Inches(2.2), [
+        "A ranking can sort countries. A message needs a number somebody can act on, and "
+        "that requires the probabilities to mean what they say.",
+        f"An error of {R['calibration']['ece']:.3f} means a predicted 0.20 corresponds to "
+        "roughly one event in five. The reliability curve below is the evidence.",
+        "The alert levels are read off this curve rather than set to a default 0.5.",
+    ], size=11, space=8)
+
+    pic(s, "fig04_calibration.png", MG + Inches(6.10), Inches(3.02), w=Inches(5.85), plate=True)
+    chip(s, MG + Inches(6.19), Inches(5.62), Inches(5.8),
+         "Predicted probability against observed frequency. A well calibrated model follows "
+         "the diagonal.")
+
+    takeaway(s, Inches(6.22),
+             "Calibration is what lets one number serve two consumers: the alert service "
+             "thresholds it, and the explanation layer quotes it back to a user.", h=Inches(0.56))
+
+    # ------------------------------------------------------------ 13 country level
+    s = page(prs, "An easier question, answered better", "Supplementary", title_size=31)
+
+    rows = [["Model", "ROC-AUC", "PR-AUC"]]
+    for k, v in CL["models"].items():
+        rows.append([k, f"{v['roc_auc']:.3f}", f"{v['pr_auc']:.3f}"])
+    table(s, MG, Inches(1.66), Inches(4.85), rows,
+          col_w=[Inches(2.35), Inches(1.25), Inches(1.25)], size=10.5, row_h=0.315)
+
+    prose(s, MG, Inches(3.02), Inches(4.85), Inches(2.4), [
+        f"{CL['n_countries']} countries, {CL['positives']} ever positive, prevalence "
+        f"{CL['prevalence']*100:.1f} per cent.",
+        "Discrimination rises to about 0.97, and that is not a better model. It is a "
+        "simpler question: whether a country reports the disease at all is a stable "
+        "national property.",
+    ], size=10.5, space=8)
+
+    card(s, MG + Inches(5.55), Inches(1.62), Inches(3.15), Inches(2.05),
+         head="Asking for the year instead",
+         text="Predicting the calendar year of a report scores R² = "
+              f"{YA['Linear regression']['r2']:+.3f} under a linear model.",
+         head_size=13.5, text_size=10.5)
+    card(s, MG + Inches(5.55), Inches(3.85), Inches(3.15), Inches(1.55),
+         head="Why it fails",
+         text="Negative R² means worse than predicting the average. The year tracks when "
+              "reporting began, not biology.",
+         head_size=13.5, text_size=10.5, fill=CARD_DEEP)
+
+    rows2 = [["Target", "Model", "R²"],
+             ["Year of report", "Linear", f"{YA['Linear regression']['r2']:+.3f}"],
+             ["Year of report", "Random forest", f"{YA['Random forest']['r2']:+.3f}"],
+             ["Year of report", "Predict the mean", "0.000"]]
+    table(s, MG + Inches(8.70), Inches(1.66), Inches(3.45), rows2,
+          col_w=[Inches(1.40), Inches(1.25), Inches(0.80)], size=9.5, row_h=0.30,
+          right_cols=(2,))
+
+    pic(s, "fig08_subgroups.png", MG + Inches(8.70), Inches(3.34), w=Inches(3.45))
+
+    takeaway(s, Inches(5.85),
+             "The negative result is kept in the report because deleting it would hide how "
+             "much of the signal is reporting practice rather than disease.")
+
+    # ------------------------------------------------------------ 14 section 02
     divider(prs, "02", "The explanation layer",
-            "Why did the model flag this country, and what should an owner actually do about it?",
+            "Why did the model flag this country, and what should an owner actually do?",
             ["Grounded retrieval with citations, and refusal when nothing supports an answer",
-             "The guardrail that keeps advisory text from inventing guidance",
-             "How this layer will be measured, and what is not yet measured"])
+             "Guardrails that stop advisory text from inventing guidance",
+             "The evaluation protocol, and what has not yet been measured"])
 
-    # ---------------------------------------------------------------- 11 how it works
-    s = slide(prs, "How an answer is built", "Retrieval first, generation second, citation always")
-
+    # ------------------------------------------------------------ 15 rag how
+    s = page(prs, "An answer is retrieved, then written", "Explanation", title_size=31)
     steps = [
-        ("Question", "“Why is this district\nhigh risk?”"),
-        ("Retrieve", "Hybrid dense + lexical\nsearch over guidance"),
-        ("Fuse and rerank", "Reciprocal rank fusion,\nthen cross-encoder"),
-        ("Answer, cited", "Every claim tied to\na passage"),
+        ("01", "Question", "“Why is this district high risk?”"),
+        ("02", "Retrieve", "Dense plus lexical search over the guidance corpus"),
+        ("03", "Fuse", "Reciprocal rank fusion, then a cross-encoder rerank"),
+        ("04", "Answer", "Every claim tied to a retrieved passage, or refused"),
     ]
-    x = Inches(0.62)
-    for i, (lab, txt) in enumerate(steps):
-        flow_box(s, x, Inches(1.75), Inches(2.62), Inches(1.72), lab, txt,
-                 accent=(i == 3))
-        if i < 3:
-            arrow(s, x + Inches(2.70), Inches(2.45))
-        x += Inches(3.05)
+    for i, (num, head, text) in enumerate(steps):
+        card(s, MG + i * Inches(3.05), Inches(1.64), Inches(2.85), Inches(1.72),
+             num=num, head=head, text=text, head_size=13.5, text_size=10.5, num_size=22)
 
-    body(s, Inches(0.62), Inches(3.80), Inches(6.0), Inches(1.9), [
-        "**Guardrails, not suggestions",
-        "Refuses to answer outside the retrieved sources, and refuses to diagnose an individual animal.",
-        "Always shows the passages it used.",
-    ], size=12, space=8)
+    card(s, MG, Inches(3.62), Inches(5.85), Inches(1.85),
+         head="Guardrails, not suggestions",
+         text="Refuses to answer outside the retrieved sources. Refuses to diagnose an "
+              "individual animal. Always shows the passages it used.",
+         head_size=14, text_size=11)
+    card(s, MG + Inches(6.05), Inches(3.62), Inches(6.05), Inches(1.85),
+         head="Why retrieval rather than a fine-tune",
+         text="Guidance changes and weights would have to be retrained to follow it. A "
+              "cited passage can be checked by a veterinarian; a generated sentence cannot.",
+         head_size=14, text_size=11)
 
-    body(s, Inches(6.95), Inches(3.80), Inches(5.6), Inches(1.9), [
-        "**Why retrieval and not a plain model",
-        "Guidance changes; weights would have to be retrained to follow it.",
-        "A cited passage can be checked by a veterinarian. A generated sentence cannot.",
-    ], size=12, space=8)
+    quote = s.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, MG, Inches(5.68), CWD,
+                               Inches(0.92))
+    quote.adjustments[0] = 0.08
+    quote.fill.solid(); quote.fill.fore_color.rgb = WHITE
+    quote.line.color.rgb = CARD_DEEP; quote.line.width = Pt(0.75)
+    plain(quote)
+    qtf = quote.text_frame; qtf.word_wrap = True
+    qtf.margin_left = Inches(0.24); qtf.margin_right = Inches(0.2)
+    qtf.vertical_anchor = MSO_ANCHOR.MIDDLE
+    qp = qtf.paragraphs[0]
+    qp.text = ("“Risk is elevated mainly because of recent reported activity in neighbouring "
+               "districts and high equine density. Restrict equid movement and contact the "
+               "local veterinary authority if an animal is suspected.”")
+    qp.font.size = Pt(10.5); qp.font.italic = True
+    qp.font.color.rgb = BODY; qp.font.name = SERIF
 
-    quote(s, Inches(5.95),
-          "“Risk is elevated mainly because of recent reported activity in neighbouring districts and high "
-          "equine density. Restrict equid movement and contact the local veterinary authority if an animal "
-          "is suspected.”   —  each clause carries its source; where no passage supports the question, "
-          "the layer says so rather than answering.")
-
-    # ---------------------------------------------------------------- 12 rag eval
-    s = slide(prs, "How this layer will be judged",
-              "The metrics are defined now; measuring them is the next phase")
-
-    rows = [["Metric", "What it asks", "How"],
+    # ------------------------------------------------------------ 16 rag eval
+    s = page(prs, "How this layer will be judged", "Explanation", title_size=31)
+    rows = [["Metric", "What it asks", "How it is measured"],
             ["Recall@k", "Is the right passage in the top k?", "Hand-built question set"],
             ["Faithfulness", "Does the answer follow from those passages?", "RAGAS, plus manual review"],
             ["Answer relevance", "Does it answer the question asked?", "RAGAS"],
             ["Citation precision", "Does every claim trace to a passage?", "Automated check"]]
-    table(s, Inches(0.62), Inches(1.75), Inches(9.2), rows,
-          col_w=[Inches(2.3), Inches(4.1), Inches(2.8)], size=13)
+    table(s, MG, Inches(1.66), CWD, rows,
+          col_w=[Inches(2.35), Inches(5.55), Inches(4.2)], size=11, row_h=0.375)
 
-    body(s, Inches(0.62), Inches(3.72), Inches(11.9), Inches(1.4), [
-        "These four cover the ways an explanation fails: retrieving the wrong passage, drifting from the passages it retrieved, or faithfully answering a question nobody asked.",
-    ], size=12, space=8)
+    prose(s, MG, Inches(3.78), Inches(11.6), Inches(1.2), [
+        "These four cover the ways an explanation fails: retrieving the wrong passage, "
+        "drifting from the passages it retrieved, or faithfully answering a question "
+        "nobody asked.",
+    ], size=11)
 
-    band(s, Inches(5.35),
-         "None of these are measured yet. Targets will be fixed before measurement, so the layer cannot be "
-         "scored by choosing a threshold after seeing the results.",
-         h=Inches(0.9))
+    takeaway(s, Inches(4.62),
+             "None of these are measured yet. Targets are fixed before measurement, so the "
+             "layer cannot be scored by choosing a threshold after seeing the results.")
 
-    # ---------------------------------------------------------------- 13 division
+    card(s, MG, Inches(5.52), CWD, Inches(1.05), fill=CARD_DEEP,
+         head="Why this is stated rather than shown",
+         text="The layer is specified to the level of its interface and rules. Reporting a "
+              "metric without a deployment would be a stronger claim than the evidence supports.",
+         head_size=12.5, text_size=10.5)
+
+    # ------------------------------------------------------------ 17 section 03
     divider(prs, "03", "The alert service",
             "How does a probability become a message that is still read in month twelve?",
-            ["Levels taken from the calibration curve, not a default cutoff",
-             "Hysteresis, so an area does not flicker between levels",
-             "Three layers of deduplication, and a stale-data guard",
-             "How delivery will be measured, and what is not yet measured"])
+            ["Levels read from the calibration curve, not a default cutoff",
+             "Hysteresis, deduplication and a stale-data guard",
+             "Delivery measured against alert fatigue, not accuracy"])
 
-    # ---------------------------------------------------------------- 14 alert design
-    s = slide(prs, "How an alert is raised", "Five stages; each one exists to stop a specific failure")
-
+    # ------------------------------------------------------------ 18 alert how
+    s = page(prs, "Five stages, each preventing one failure", "Alerting", title_size=31)
     stages = [
-        ("1  Predict", "Latest calibrated\nscore for the area"),
-        ("2  Assign level", "Thresholds taken from\nthe budget curve"),
-        ("3  Deduplicate", "Three idempotency\nkeys, not one"),
-        ("4  Deliver", "SMS or WhatsApp,\nwith retries"),
-        ("5  Log", "Status per recipient,\nfor the admin"),
+        ("01", "Predict", "Latest calibrated score for the area"),
+        ("02", "Assign level", "Thresholds from the budget curve"),
+        ("03", "Deduplicate", "Three idempotency keys"),
+        ("04", "Deliver", "SMS or WhatsApp, with retries"),
+        ("05", "Log", "Status per recipient"),
     ]
-    x = Inches(0.62)
-    for i, (lab, txt) in enumerate(stages):
-        flow_box(s, x, Inches(1.70), Inches(2.15), Inches(1.55), lab, txt,
-                 accent=(i == 2))
+    for i, (num, head, text) in enumerate(stages):
+        x = MG + i * Inches(2.47)
+        card(s, x, Inches(1.64), Inches(2.27), Inches(1.55), num=num, head=head,
+             text=text, head_size=12.5, text_size=9.5, num_size=20)
         if i < 4:
-            arrow(s, x + Inches(2.17), Inches(2.32), w=Inches(0.28))
-        x += Inches(2.47)
+            a = s.shapes.add_shape(MSO_SHAPE.RIGHT_ARROW, x + Inches(2.29),
+                                   Inches(2.30), Inches(0.16), Inches(0.18))
+            a.fill.solid(); a.fill.fore_color.rgb = ACCENT
+            a.line.fill.background(); plain(a)
 
     guards = [
-        ("Hysteresis", "Enter at a threshold, leave only 0.05 below it. A country sitting on the line does not oscillate."),
-        ("Freshness", "If the data check fails, no alert goes out and the admin is told instead."),
-        ("Quiet hours", "Hold overnight except for escalation, so a real rise still gets through."),
+        ("Hysteresis", "Enter at a threshold, leave only 0.05 below it, so a country on the "
+                       "line does not oscillate."),
+        ("Freshness", "If the data check fails, no alert goes out and the admin is told "
+                      "instead."),
+        ("Quiet hours", "Hold overnight except for escalation, so a real rise still gets "
+                        "through."),
     ]
-    gx = Inches(0.62)
-    for name, text in guards:
-        g = s.shapes.add_shape(MSO_SHAPE.RECTANGLE, gx, Inches(3.75),
-                               Inches(3.85), Inches(1.55))
-        g.fill.solid(); g.fill.fore_color.rgb = PALE
-        g.line.fill.background(); g.shadow.inherit = False
-        tf = g.text_frame; tf.word_wrap = True
-        tf.margin_left = Inches(0.18); tf.margin_top = Inches(0.14)
-        p = tf.paragraphs[0]; p.text = name
-        p.font.size = Pt(14); p.font.bold = True; p.font.color.rgb = BLUE
-        p2 = tf.add_paragraph(); p2.text = text
-        p2.font.size = Pt(11); p2.font.color.rgb = GREY
-        p2.space_before = Pt(6)
-        gx += Inches(4.05)
+    for i, (head, text) in enumerate(guards):
+        card(s, MG + i * Inches(4.05), Inches(3.50), Inches(3.85), Inches(1.32),
+             head=head, text=text, head_size=13.5, text_size=10.5)
 
-    band(s, Inches(5.65),
-         "Levels come from the calibration curve, so “high” has a measured meaning rather than a default "
-         "cutoff of 0.5. Deduplication is what keeps a re-run or a retrain from sending the same warning twice.",
-         h=Inches(0.95))
+    stat(s, MG, Inches(5.05), Inches(2.85), f"{AE['b50']*100:.0f}%",
+         "budget for half the events")
+    stat(s, MG + Inches(3.05), Inches(5.05), Inches(2.85), f"{AE['b80']*100:.0f}%",
+         "budget for 80 per cent")
+    stat(s, MG + Inches(6.10), Inches(5.05), Inches(2.85), f"{AE['r6']*100:.0f}%",
+         "caught at a 6 per cent budget")
 
-    # ---------------------------------------------------------------- 15 architecture
-    s = slide(prs, "The alert pipeline, end to end")
-    pic(s, "proposal_alert_architecture.png", Inches(2.27), Inches(0.92), w=Inches(8.8))
-    caption(s, Inches(6.98),
-            "The deployed view: evaluator, levels, deduplication, delivery and logging, with an admin surface for failures.",
-            w=Inches(8.8), x=Inches(2.27))
+    takeaway(s, Inches(6.28),
+             "Levels carry a measured meaning because they come from the curve, and "
+             "deduplication is what stops a re-run or a retrain from sending the same "
+             "warning twice.", h=Inches(0.58))
 
-    # ---------------------------------------------------------------- 16 alert eval
-    s = slide(prs, "How the alert service will be judged",
-              "Because the cost of a false alarm is measured in attention, not accuracy")
-
+    # ------------------------------------------------------------ 19 alert eval
+    s = page(prs, "What an owner receives, and how it is judged", "Alerting",
+             title_size=30)
     rows = [["Metric", "What it asks"],
             ["Precision", "Of the alerts sent, how many were real events?"],
             ["Recall", "Of the real events, how many did we alert on?"],
-            ["Missed events", "The failures a user actually feels"],
+            ["Missed events", "The failure a user actually feels"],
             ["False alerts per subscriber", "The alert-fatigue budget"]]
-    table(s, Inches(0.62), Inches(1.72), Inches(8.0), rows,
-          col_w=[Inches(2.9), Inches(5.1)], size=12)
+    table(s, MG, Inches(1.66), Inches(6.20), rows,
+          col_w=[Inches(2.65), Inches(3.55)], size=10.5, row_h=0.36)
 
-    body(s, Inches(9.0), Inches(1.75), Inches(3.7), Inches(2.6), [
-        "Defined but not yet measured.",
-        "A pilot with a district office is how they get numbers.",
-    ], size=12, space=10)
+    prose(s, MG, Inches(3.62), Inches(6.20), Inches(1.4), [
+        "Defined but not yet measured. A pilot with a district office is how these acquire "
+        "numbers, and until then the service is not claimed to work.",
+    ], size=10.5)
 
-    quote(s, Inches(5.05),
-          "GLANDERS RISK ALERT — Risk: HIGH.  Elevated glanders risk is predicted for your registered area "
-          "for the next period. Reason: recent reported activity and environmental factors. Action: avoid "
-          "unnecessary movement or mixing of equids; contact the local veterinary authority if an animal is "
-          "suspected. This is a population-level forecast, not a diagnosis.",
-          h=Inches(1.55))
+    msg = s.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, MG + Inches(6.65), Inches(1.66),
+                             Inches(5.45), Inches(3.55))
+    msg.adjustments[0] = 0.05
+    msg.fill.solid(); msg.fill.fore_color.rgb = WHITE
+    msg.line.color.rgb = CARD_DEEP; msg.line.width = Pt(0.75)
+    plain(msg)
+    mtf = msg.text_frame; mtf.word_wrap = True
+    mtf.margin_left = Inches(0.26); mtf.margin_right = Inches(0.22)
+    mtf.margin_top = Inches(0.20)
+    mp = mtf.paragraphs[0]
+    mp.text = "GLANDERS RISK ALERT"
+    mp.font.size = Pt(10); mp.font.bold = True
+    mp.font.color.rgb = ACCENT; mp.font.name = SANS
+    set_spacing(mp.runs[0], 140)
 
-    # ---------------------------------------------------------------- 17 status
-    s = slide(prs, "Where the project stands",
-              "What is built, what is specified, and what a pilot would settle")
-
-    cols = [
-        ("Built and measured",
-         f"Risk engine. Six models on two splits. Champion is logistic regression, "
-         f"PR-AUC {LR['loco']['pr_auc']:.3f} on unseen countries, ECE {R['calibration']['ece']:.3f}."),
-        ("Specified, not deployed",
-         "Explanation layer with citation checks and refusal. Alert service with levels, "
-         "hysteresis and deduplication. Both have metrics defined, neither has numbers yet."),
-        ("What a pilot would settle",
-         "Alert precision and fatigue against a real district office. Explanation faithfulness "
-         "on a hand-built question set. A label audit on a stratified sample."),
+    lines = [
+        ("Risk", "HIGH"),
+        ("Reason", "recent reported activity in neighbouring districts; high equine density"),
+        ("Action", "avoid unnecessary movement or mixing of equids; contact the local "
+                   "veterinary authority if an animal is suspected of illness"),
+        ("Caveat", "a population-level forecast, not a diagnosis"),
     ]
-    bx = Inches(0.62)
-    for i, (head, text) in enumerate(cols):
-        box = s.shapes.add_shape(MSO_SHAPE.RECTANGLE, bx, Inches(1.65),
-                                 Inches(3.85), Inches(3.55))
-        box.fill.solid()
-        box.fill.fore_color.rgb = BLUE if i == 0 else PALE
-        box.line.fill.background(); box.shadow.inherit = False
-        tf = box.text_frame; tf.word_wrap = True
-        tf.margin_left = Inches(0.2); tf.margin_right = Inches(0.18)
-        tf.margin_top = Inches(0.16)
-        p = tf.paragraphs[0]; p.text = head
-        p.font.size = Pt(15); p.font.bold = True
-        p.font.color.rgb = WHITE if i == 0 else BLUE
-        p2 = tf.add_paragraph(); p2.text = text
-        p2.font.size = Pt(11.5)
-        p2.font.color.rgb = RGBColor(0xDD, 0xE7, 0xF5) if i == 0 else GREY
-        p2.space_before = Pt(9)
-        bx += Inches(4.05)
+    for lab, val in lines:
+        q = mtf.add_paragraph()
+        q.text = lab
+        q.font.size = Pt(9); q.font.bold = True
+        q.font.color.rgb = MUTED; q.font.name = SANS
+        q.space_before = Pt(9)
+        v = mtf.add_paragraph()
+        v.text = val
+        v.font.size = Pt(10.5); v.font.color.rgb = BODY; v.font.name = SANS
+        v.space_before = Pt(1)
 
-    band(s, Inches(5.5),
-         "The model is the part that is finished. The evidence that the explanation and alert layers "
-         "behave in use is the part that is not, and a pilot is how it arrives.",
-         h=Inches(0.95), accent=True)
+    takeaway(s, Inches(5.52),
+             "The message names its reason and its action, and says plainly that it is a "
+             "forecast. A warning without those three parts is not actionable, and an "
+             "owner who cannot act on it will stop reading.")
 
-    body(s, Inches(0.62), Inches(6.6), Inches(11.9), Inches(0.8), [
-        f"Known limits throughout: the label is documented activity, not incidence, and with {POS} positives the uncertainty on every headline metric is wide.",
-    ], size=11, space=4)
+    # ------------------------------------------------------------ 20 conclusion
+    s = page(prs, "What is built, and what a pilot would settle", "Conclusion",
+             title_size=30)
+    card(s, MG, Inches(1.62), Inches(5.85), Inches(2.72), head="Conclusion",
+         text="The risk engine is built and measured: six families, two splits, calibrated, "
+              "with every number reproducible from committed scripts. The explanation and "
+              "alert layers are specified to the level of their interfaces and rules.",
+         head_size=16, text_size=11)
+    card(s, MG + Inches(6.05), Inches(1.62), Inches(6.05), Inches(2.72),
+         head="Future scope",
+         text="Model reporting capacity as a quantity rather than a covariate. Measure the "
+              "explanation layer on a hand-built question set. Pilot the alert service with "
+              "a district office and report precision, recall and fatigue.",
+         head_size=16, text_size=11, fill=CARD_DEEP)
+
+    prose(s, MG, Inches(4.58), CWD, Inches(1.2), [
+        f"The dominant limitation is the label: a negative may mean no disease or no report. "
+        f"With {POS} positives the uncertainty on every headline metric is wide, and the "
+        "honest reading is that this is a moderate model on a hard, noisy target.",
+    ], size=11)
+
+    takeaway(s, Inches(5.72),
+             "The model is the part that is finished. Evidence that the explanation and alert "
+             "layers behave in use is the part that is not, and a pilot is how it arrives.",
+             h=Inches(0.72))
+
+    # ------------------------------------------------------------ 21 references
+    s = page(prs, "References", None, title_size=30)
+    refs = [
+        "Lundberg, S. M. and Lee, S.-I. (2017). A unified approach to interpreting model "
+        "predictions. NeurIPS 30.",
+        "Breiman, L. (2001). Random forests. Machine Learning, 45(1), 5–32.",
+        "Chen, T. and Guestrin, C. (2016). XGBoost: a scalable tree boosting system. KDD ’16.",
+        "Ke, G. et al. (2017). LightGBM: a highly efficient gradient boosting decision tree. "
+        "NeurIPS 30.",
+        "Lewis, P. et al. (2020). Retrieval-augmented generation for knowledge-intensive NLP "
+        "tasks. NeurIPS 33.",
+        "Es, S. et al. (2023). RAGAS: automated evaluation of retrieval augmented generation. "
+        "arXiv:2309.15217.",
+        "Robertson, S. and Zaragoza, H. (2009). The probabilistic relevance framework: BM25 "
+        "and beyond. Foundations and Trends in IR, 3(4), 333–389.",
+        "Food and Agriculture Organization (2024). FAOSTAT livestock stocks. Rome.",
+        "World Bank (2024). World Development Indicators. Washington, DC.",
+        "NASA Langley Research Center (2024). POWER project: prediction of worldwide energy "
+        "resources.",
+        "Europe PMC (2024). Literature database, EMBL-EBI.",
+        "Department of Animal Husbandry and Dairying (2025). National Action Plan on Glanders. "
+        "Government of India.",
+        "ICAR-NIVEDI (2023). NADRES v2: national animal disease referential and forewarning "
+        "system.",
+    ]
+    for i, r in enumerate(refs):
+        tb = s.shapes.add_textbox(MG, Inches(1.42) + Inches(0.395) * i, CWD, Inches(0.36))
+        tb.text_frame.word_wrap = True
+        tb.text_frame.margin_left = 0
+        tb.text_frame.margin_top = 0
+        p = tb.text_frame.paragraphs[0]
+        p.text = f"[{i+1}]   {r}"
+        p.font.size = Pt(9.5); p.font.color.rgb = BODY; p.font.name = SANS
 
     prs.save(OUT)
     print(f"wrote {OUT.relative_to(ROOT)}  ({len(prs.slides)} slides)")
