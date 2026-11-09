@@ -148,12 +148,9 @@ the number of rows where both are present.
 
 \textbf{Spearman's rank correlation} (\texttt{scipy.stats.spearmanr}) measures monotone association
 without assuming linearity, which matters here because equid stock spans four orders of magnitude.
-It is the Pearson correlation of the mid-ranks,
-\[
-\rho = \frac{\operatorname{cov}\big(R(x), R(y)\big)}{\sigma_{R(x)}\,\sigma_{R(y)}},
-\]
-where $R(\cdot)$ denotes the mid-rank transform. With no ties this reduces to
-$\rho = 1 - 6\sum_i d_i^2 / \big(n(n^2-1)\big)$, with $d_i$ the rank difference.
+It is the Pearson correlation of the mid-ranks, $\rho = \operatorname{cov}(R(x), R(y)) /
+(\sigma_{R(x)}\sigma_{R(y)})$, which with no ties reduces to
+$\rho = 1 - 6\sum_i d_i^2 / \big(n(n^2-1)\big)$.
 
 \textbf{Mutual information} (\texttt{sklearn.feature\_selection.mutual\_info\_classif}, $k=5$
 nearest neighbours) captures non-monotone dependence that a rank correlation misses, since a feature
@@ -186,17 +183,25 @@ This is the measure behind the collinearity result in Chapter~\ref{ch:results}.
 
 \section{Feature Selection}
 
-Selection proceeded in two stages. First, columns with no measurable association with the label
-were removed. Mutual information and Spearman correlation were computed for every numeric
-feature, and columns with mutual information below 0.002 and absolute correlation below 0.02 were
-discarded. Second, redundancy was addressed. One member of each pair with absolute correlation at
-or above 0.90 was removed, and a column that was exactly the sum of three others was dropped
-because a tree model can construct that sum itself.
+Every numeric candidate was screened before fitting, but the screens were read as evidence rather
+than applied as filters. Mutual information and Spearman correlation were computed per column, one
+member of every pair correlated at or above 0.90 was flagged, and variance inflation was computed
+for the leading columns. Four columns fell below both association thresholds: three climate
+anomalies and camel stock.
 
-No linear projection or principal component analysis was applied. With @FEATURES@ features and
-@ROWS@ rows the binding constraint proved to be signal rather than dimensionality. This is
-supported by the ablation in Section~\ref{sec:ablation}, which shows that reduced feature sets
-generalise better across countries than the full set.
+Only one column was actually removed, on structural grounds: \texttt{equids} is exactly the sum of
+horses, asses and mules, which a tree can rebuild from its parts. All flagged columns were retained,
+so the model uses @FEATURES@ features.
+
+The reason is visible in Chapter~\ref{ch:results}. Those screens measure marginal association, which
+is a poor guide to what a fitted model uses: \texttt{temp\_mean\_anom}, flagged as no signal, is third
+by conditional attribution, ahead of every population variable except total population. A univariate
+pruning rule would have deleted one of the model's strongest predictors, which is the same
+marginal-versus-conditional disagreement the results chapter examines across the full feature set.
+
+No projection or principal component analysis was applied either. With @FEATURES@ features and
+@ROWS@ rows the binding constraint proved to be signal rather than dimensionality, which the
+ablation in Section~\ref{sec:ablation} supports.
 
 The selection criterion is itself examined in Section~\ref{sec:selection}, where marginal and
 conditional importance are compared.

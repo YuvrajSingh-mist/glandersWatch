@@ -89,11 +89,14 @@ quantities: equid share of all farm animals, equine density, and growth over one
 years. Climate columns pair each measure with an anomaly, its deviation from that country's
 own expanding mean. Section~\ref{sec:features} lists all four groups.
 
-\paragraph{Feature selection.} Four columns were dropped for having no measurable
-relationship with the answer, one because it was exactly the sum of three others, and one
-from each of three near-duplicate pairs. No principal component analysis was used: the limit
-here is signal rather than dimensionality. The selection criterion is covered in
-Section~\ref{sec:analysis}, where it turned out to matter more than expected.
+\paragraph{Feature selection.} Every input was screened for association with the answer and
+for duplication of another input, but the screens were read rather than obeyed. Only one column
+was dropped outright: total equids, because it is exactly the sum of horses, asses and mules and a
+tree can rebuild it. Four columns scored below both association thresholds and three near-duplicate
+pairs were flagged, yet all were kept, for the reason covered in Section~\ref{sec:analysis}: the
+univariate screen disagrees with what the fitted model actually uses, and one flagged column turns
+out to be among the three most important. No principal component analysis was used either; the
+limit here is signal rather than dimensionality.
 
 % =====================================================================
 \section{Dataset Analysis}

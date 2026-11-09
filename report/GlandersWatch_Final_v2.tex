@@ -613,11 +613,18 @@ Three derived features need definition. Equid share is horses, asses and mules o
 Livestock units weight cattle and camels at 0.8 and small ruminants at 0.1, so one number expresses
 grazing pressure across species. Years since the last event uses 99 for no event in the window.
 
-Selection ran in two stages. Columns with mutual information below 0.002 and absolute Spearman
-correlation below 0.02 were removed, then one member of each pair correlated at or above 0.90, plus a
-column that was exactly the sum of three others, which a tree can construct itself. No projection was
-applied: with 44 features and 3,078 rows the binding constraint is signal rather than
-dimensionality.
+Every numeric candidate was screened, but the screens were read rather than obeyed. Four columns
+fell below both association thresholds, with mutual information under 0.002 and absolute Spearman
+correlation under 0.02, and three near-duplicate pairs were flagged. Only one column was actually
+removed, on structural grounds: \texttt{equids} is exactly the sum of horses, asses and mules, which
+a tree can rebuild from its parts. The flagged columns were retained, so the model uses 44
+features.
+
+The reason is visible in Chapter~\ref{ch:results}. Those screens measure marginal
+association, which is a poor guide to what a fitted model uses: \texttt{temp\_mean\_anom}, flagged as
+no signal, is third by conditional attribution, ahead of every population variable except total
+population. A univariate pruning rule would have deleted one of the strongest predictors. No projection was applied either; with 44 features and 3,078 rows the binding
+constraint is signal rather than dimensionality.
 
 \section{Statistical Association Measures}
 \label{sec:assoc}

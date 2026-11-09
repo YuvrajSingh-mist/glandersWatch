@@ -177,11 +177,14 @@ quantities: equid share of all farm animals, equine density, and growth over one
 years. Climate columns pair each measure with an anomaly, its deviation from that country's
 own expanding mean. Section~\ref{sec:features} lists all four groups.
 
-\paragraph{Feature selection.} Four columns were dropped for having no measurable
-relationship with the answer, one because it was exactly the sum of three others, and one
-from each of three near-duplicate pairs. No principal component analysis was used: the limit
-here is signal rather than dimensionality. The selection criterion is covered in
-Section~\ref{sec:analysis}, where it turned out to matter more than expected.
+\paragraph{Feature selection.} Every input was screened for association with the answer and
+for duplication of another input, but the screens were read rather than obeyed. Only one column
+was dropped outright: total equids, because it is exactly the sum of horses, asses and mules and a
+tree can rebuild it. Four columns scored below both association thresholds and three near-duplicate
+pairs were flagged, yet all were kept, for the reason covered in Section~\ref{sec:analysis}: the
+univariate screen disagrees with what the fitted model actually uses, and one flagged column turns
+out to be among the three most important. No principal component analysis was used either; the
+limit here is signal rather than dimensionality.
 
 % =====================================================================
 \section{Dataset Analysis}
@@ -690,12 +693,19 @@ relationships involve combinations of factors rather than one at a time.
 \bibitem{roberts2017} Roberts DR, Bahn V, Ciuti S, et al. Cross-validation strategies for data with temporal, spatial, hierarchical, or phylogenetic structure. \emph{Ecography}. 2017. doi:10.1111/ecog.02881
 \bibitem{niculescu2005} Niculescu-Mizil A, Caruana R. Predicting good probabilities with supervised learning. In: \emph{Proceedings of the 22nd International Conference on Machine Learning}. 2005:625--632. doi:10.1145/1102351.1102430
 \bibitem{huang2020} Huang Y, Li W, Macheret F, et al. A tutorial on calibration measurements and calibration models for clinical prediction models. \emph{Journal of the American Medical Informatics Association}. 2020;27(4):621--633. doi:10.1093/jamia/ocz228
+\bibitem{lewis2020} Lewis P, Perez E, Piktus A, et al. Retrieval-augmented generation for knowledge-intensive NLP tasks. In: \emph{Advances in Neural Information Processing Systems 33 (NeurIPS)}. 2020:9459--9474. arXiv:2005.11401
+\bibitem{reimers2019} Reimers N, Gurevych I. Sentence-BERT: sentence embeddings using Siamese BERT-networks. In: \emph{Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing (EMNLP-IJCNLP)}. 2019:3982--3992. doi:10.18653/v1/D19-1410
+\bibitem{malkov2020} Malkov YA, Yashunin DA. Efficient and robust approximate nearest neighbor search using hierarchical navigable small world graphs. \emph{IEEE Transactions on Pattern Analysis and Machine Intelligence}. 2020;42(4):824--836. doi:10.1109/TPAMI.2018.2889473
+\bibitem{robertson2009} Robertson S, Zaragoza H. The probabilistic relevance framework: BM25 and beyond. \emph{Foundations and Trends in Information Retrieval}. 2009;3(4):333--389. doi:10.1561/1500000019
+\bibitem{cormack2009} Cormack GV, Clarke CLA, Buettcher S. Reciprocal rank fusion outperforms Condorcet and individual rank learning methods. In: \emph{Proceedings of the 32nd International ACM SIGIR Conference}. 2009:758--759. doi:10.1145/1571941.1572114
+\bibitem{pedregosa2011} Pedregosa F, Varoquaux G, Gramfort A, et al. Scikit-learn: machine learning in Python. \emph{Journal of Machine Learning Research}. 2011;12:2825--2830.
 \bibitem{wahis} WOAH. World Animal Health Information System (WAHIS). \url{https://wahis.woah.org}
 \bibitem{dahd2025} Department of Animal Husbandry and Dairying, Government of India. \emph{National Action Plan for Control and Eradication of Glanders in India} (Revised 2025). New Delhi: DAHD; 2025.
 \bibitem{faostat} FAO. FAOSTAT: crops and livestock products. \url{https://www.fao.org/faostat}
 \bibitem{power} NASA Langley Research Center. POWER agroclimatology API. \url{https://power.larc.nasa.gov}
 \bibitem{wdi} World Bank. World Development Indicators. \url{https://databank.worldbank.org}
 \bibitem{europepmc} Europe PMC literature search API. \url{https://europepmc.org}
+\bibitem{nadres} ICAR-National Institute of Veterinary Epidemiology and Disease Informatics. National Animal Disease Referral Expert System (NADRES v2): livestock disease forecasting. \url{https://nivedi.res.in/Nadres_v2/}
 \end{thebibliography}
 \end{multicols}
 
