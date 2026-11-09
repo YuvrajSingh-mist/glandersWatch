@@ -570,11 +570,12 @@ Three restrictions produce the modelling matrix: only equine-holding countries, 
 equid stock of at least one thousand; only 2005 to 2023; and only rows with an observable next-year
 label. The result has 3,078 rows, 44 features and 172 positives.
 
-The assembled panel is the project dataset, committed as \texttt{country\_year\_panel.csv} under
-\texttt{data/}\allowbreak\texttt{processed/}, with the extracted events in
-\texttt{literature\_events.csv} and the audit counts in \texttt{audit.json}. The 3,078-row matrix is not stored separately; it is derived from
-that panel at run time by the filters above, so the panel is the one artefact every number can be
-rebuilt from.
+This yields the modelling matrix, 3,078 rows by 44 features with 172 positives,
+which is the dataset every model was trained and evaluated on. It is committed as
+\texttt{model\_matrix.csv} under \texttt{data/}\allowbreak\texttt{processed/}, one row per
+country-year, with the feature columns in pipeline order and the binary next-year label. The file is
+written by \texttt{src/11\_export\_model\_matrix.py} from the same loader and feature definitions the
+training script uses, so it cannot drift from what the models saw.
 
 Events are de-duplicated on country, year and source record identifier, so one paper reporting
 several cases cannot contribute multiple counts. Missing values are median-imputed inside the training

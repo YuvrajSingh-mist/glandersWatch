@@ -1,0 +1,58 @@
+"""Export the exact matrix that is fed to the models.
+
+Run:  .venv/bin/python src/11_export_model_matrix.py
+
+Writes data/processed/model_matrix.csv: one row per country-year, the 44 feature
+columns in the order the pipeline receives them, and the binary next-year label.
+
+The rows and columns come from the same loader and the same feature-group
+constants that the training script uses, so this file cannot drift from what the
+models actually saw.
+"""
+from __future__ import annotations
+
+import importlib.util
+import pathlib
+import sys
+
+import pandas as pd
+
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "src"))
+
+import ml_core as C  # noqa: E402
+
+_spec = importlib.util.spec_from_file_location(
+    "train_evaluate", ROOT / "src" / "03_train_evaluate.py")
+TE = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(TE)
+
+OUT = ROOT / "data" / "processed" / "model_matrix.csv"
+
+IDENTIFIERS = ["iso3", "year"]
+FEATURES = C.FULL + C.CATEGORICAL
+TARGET = "y_occ_next"
+
+
+def main() -> None:
+    df = TE.load_level1()
+
+    missing = [c for c in FEATURES if c not in df.columns]
+    if missing:
+        raise SystemExit(f"features missing from panel: {missing}")
+
+    out = df[IDENTIFIERS + FEATURES + [TARGET]].copy()
+    out.to_csv(OUT, index=False)
+
+    print(f"wrote {OUT.relative_to(ROOT)}")
+    print(f"  rows      : {len(out):,}")
+    print(f"  features  : {len(FEATURES)} ({len(C.FULL)} numeric + {len(C.CATEGORICAL)} categorical)")
+    print(f"  positives : {int(out[TARGET].sum())}")
+    print(f"  prevalence: {out[TARGET].mean() * 100:.2f}%")
+    print(f"  countries : {out.iso3.nunique()}")
+    print(f"  years     : {out.year.min()} to {out.year.max()}")
+    print(f"  size      : {OUT.stat().st_size / 1024:.0f} KB")
+
+
+if __name__ == "__main__":
+    main()

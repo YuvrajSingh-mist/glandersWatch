@@ -842,8 +842,15 @@ countries.
 The full grid contains 6,700 country-year rows across 268 countries for 2000
 to 2024. For modelling, three restrictions are applied: only equine-holding countries are
 retained, defined as a maximum equid stock of at least one thousand animals; only the years 2005
-to 2023 are used; and only rows with an observable next-year label are kept. The resulting matrix
-has 3,078 rows, 44 features and 172 positive labels.
+to 2023 are used; and only rows with an observable next-year label are kept.
+
+This yields the modelling matrix, 3,078 rows by 44 features with 172 positive
+labels, which is the dataset every model in this report was trained and evaluated on. It is
+committed as \texttt{model\_matrix.csv} under \texttt{data/processed/}, with one row per
+country-year, the 44 feature columns in the order the pipeline receives them, and the
+binary next-year label. The file is written by \texttt{src/11\_export\_model\_matrix.py} from
+the same loader and feature definitions the training script uses, so it cannot drift from what the
+models saw.
 
 \section{Preprocessing}
 
@@ -1053,17 +1060,11 @@ scores \cite{roberts2017}.
 
 \section{Leakage Controls}
 
-Six controls are applied.
-
-\begin{enumerate}
-  \item All features are built from year $t$ or earlier, and only the target columns use $t+1$.
-  \item The split is chronological, so no future observation can enter training.
-  \item Hyperparameters are tuned inside training folds using grouped cross-validation.
-  \item Probability calibration is fitted on training folds only.
-  \item The alert threshold is fixed on the training period and applied unchanged to test.
-  \item Missing-indicator features and imputation values are generated inside the pipeline, so the
-        test period cannot influence them.
-\end{enumerate}
+Six controls are applied: features use year $t$ or earlier and only target columns use $t+1$; the
+split is chronological, so no future observation enters training; hyperparameters are tuned inside
+training folds with grouped cross-validation; probability calibration is fitted on training folds
+only; the alert threshold is fixed on the training period and applied unchanged to test; and
+imputation values and missing indicators are generated inside the pipeline.
 
 % =====================================================================
 \chapter{MLOps and Model Serving}
