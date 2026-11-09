@@ -37,12 +37,40 @@ BODY = (
     + C.MLOPS + C.RAG + C.ALERT + C.RESULTS + C.CONCL
 )
 
+# The condensed report drops the ablation and chained-pipeline results, so the shared
+# Abstract must not advertise them. Applied here only, so the full report keeps its own
+# abstract. Each entry is (old, new) and must match exactly once.
+ABSTRACT_EDITS = [
+    (
+        "Six model families are trained under three validation schemes, and a\n"
+        "three-stage chained pipeline is evaluated in which animal population is forecast before occurrence\n"
+        "is predicted.",
+        "Six model families are trained and compared under three validation schemes.",
+    ),
+    (
+        "Chaining produces no measurable gain in discrimination. An ablation shows climate\n"
+        "covariates transfer poorly across countries, and the model performs least well in low-income\n"
+        "regions.",
+        "The model performs least well in low-income regions, where label sparsity limits what\n"
+        "can be learned.",
+    ),
+]
+
+
+def condensed_front_matter() -> str:
+    fm = RF.FRONT_MATTER
+    for old, new in ABSTRACT_EDITS:
+        if old not in fm:
+            raise SystemExit(f"abstract edit not found: {old[:60]!r}")
+        fm = fm.replace(old, new, 1)
+    return fm
+
 
 def build() -> pathlib.Path:
     # FB.PREAMBLE / FB.MIDDLE / FB.BACK are reused unchanged so that margins,
     # spacing, caption skips, contents depth and bibliography all match the full
     # report exactly.
-    doc = FB.PREAMBLE + RF.FRONT_MATTER + FB.MIDDLE + BODY + FB.BACK
+    doc = FB.PREAMBLE + condensed_front_matter() + FB.MIDDLE + BODY + FB.BACK
     doc = doc.replace(r"\begin{document}",
                       "\\input{diagstyles.tex}\n\\begin{document}", 1)
 

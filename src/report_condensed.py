@@ -398,7 +398,7 @@ Selection ran in two stages. Columns with mutual information below 0.002 and abs
 correlation below 0.02 were removed, then one member of each pair correlated at or above 0.90, plus a
 column that was exactly the sum of three others, which a tree can construct itself. No projection was
 applied: with @FEATURES@ features and @ROWS@ rows the binding constraint is signal rather than
-dimensionality, and Section~\ref{sec:ablation} shows reduced sets transfer better.
+dimensionality.
 
 \section{Models}
 
@@ -922,7 +922,7 @@ is the signature of learning country-specific structure, and the estimate to quo
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=\textwidth]{fig03_roc_pr_curves.png}
+\includegraphics[width=0.72\textwidth]{fig03_roc_pr_curves.png}
 \caption{ROC curves (panel A) and precision-recall curves (panel B) on the temporal holdout. At this
 prevalence the ROC panels compress into a narrow band while the precision-recall panels separate the
 families.}
@@ -935,62 +935,6 @@ Predictions are well calibrated, with an expected calibration error of @ECE@ and
 @BRIER@: a stated risk of twenty-four per cent corresponds to an observed frequency near twenty-four
 per cent. That is what makes a threshold-based alert defensible, since a message quoting a probability
 must be numerically trustworthy.
-
-\section{Ablation}
-\label{sec:ablation}
-
-Feature groups were removed and each configuration retrained (Table~\ref{tab:ablation}).
-
-\begin{table}[htbp]
-\centering
-\caption{Ablation settings, using XGBoost with fixed hyperparameters.}
-\label{tab:ablation}
-\small
-\begin{tabular}{@{}lccc@{}}
-\toprule
-\textbf{Feature set} & \textbf{Columns} & \textbf{PR-AUC (time)} & \textbf{PR-AUC (country)} \\
-\midrule
-@ABLATIONROWS@
-\bottomrule
-\end{tabular}
-\end{table}
-
-Two results matter more than the headline. The reduced set of @AS5K@ columns reaches @AS5LOCO@ under
-leave-country-out validation, against @AS6LOCO@ for the full @AS6K@: added covariates improve
-in-distribution fit and reduce transfer by letting the model fit country peculiarities. Climate alone
-reaches @AS3LOCO@, marginally above the @PREVALENCE@ floor, so annual country climatology largely
-encodes latitude and therefore country identity. Adding research-output proxies moves the
-leave-country-out score by @AS7DELTA@, weak evidence against pure publication tracking but not
-proof.
-
-\section{Chained Pipeline}
-
-Table~\ref{tab:chain} reports the effect of appending the stage-one population forecast.
-
-\begin{table}[htbp]
-\centering
-\caption{Effect of chaining the population forecast into the occurrence model.}
-\label{tab:chain}
-\small
-\begin{tabular}{@{}lccc@{}}
-\toprule
-\textbf{Variant} & \textbf{PR-AUC (time)} & \textbf{ROC-AUC (time)} & \textbf{PR-AUC (country)} \\
-\midrule
-@CHAINROWS@
-\bottomrule
-\end{tabular}
-\end{table}
-
-The population forecast performs well as a forecast, with a mean absolute error of @S1MAE@ on the log
-scale and a Spearman correlation of @S1RHO@. The intensity stage is weaker but usable, at a mean
-absolute error of @S3MAE@ and a rank correlation of @S3RHO@ among positive observations. The hurdle
-product ranks expected annual burden with a Spearman correlation of @HZRHO@, and its highest decile
-captures @HZEVENTS@ of @HZTOTAL@ observed events.
-
-Appending the forecast changes temporal PR-AUC by @CHAINDELTA@, inside the noise band. The cause is
-structural: population magnitude is already a direct feature, so forecasting it supplies a less
-accurate copy of what the model holds. Chaining should help where that quantity cannot be observed
-directly, which is not the case here.
 
 \section{Alert Economics}
 
@@ -1036,9 +980,7 @@ per cent lower, and that is the planning figure, so a new country needs local va
 
 The principal signal is surveillance rather than biology, and three analyses agree: the highest
 features are population and connectivity measures, the label concentrates in countries with reference
-laboratories, and the best-scoring cells are India, the United States and Australia. Climate,
-treated as a primary input in the proposal, transfers poorly here. Simpler models transfer better too,
-which argues for parsimony when positives are few.
+laboratories, and the best-scoring cells are India, the United States and Australia.
 """
 
 
@@ -1052,48 +994,48 @@ CONCL = r"""
 \section{Conclusion}
 
 This project set out to build a usable warning system for glanders: to establish whether
-population-level risk could be predicted from public data, and to design how a prediction reaches the
-person who owns the animals. Four sources not previously applied to the disease formed a country-year
-panel across 162 equine-holding countries, six model families were trained under three validation
-schemes, and a three-stage chained pipeline was tested. Around the model, delivery was decomposed into
-three components with fixed contracts: a risk engine, a retrieval-augmented explanation layer and an
-alert service.
+population-level risk could be predicted from public data, and how a prediction reaches the person who
+owns the animals. Four sources new to the disease formed a country-year panel across 162
+equine-holding countries, and six model families were trained under three validation schemes. Around the model, delivery was decomposed into three components with fixed contracts: a risk
+engine, an explanation layer and an alert service.
 
-Prediction is possible, and the performance is moderate. On a forward-looking temporal holdout the
+Prediction is possible, and the performance is moderate: on a forward-looking temporal holdout the
 strongest model reaches a precision-recall AUC of @BESTPR@ against a base rate of @PREVALENCE@, an
-approximately @LIFT@-fold lift, with a calibration error of @ECE@, capturing half of all observed
-events while alerting six per cent of country-years. The skill is fragile across geography, though:
+approximately @LIFT@-fold lift with a calibration error of @ECE@, capturing half of all events while
+alerting six per cent of country-years. The skill is fragile across geography, though:
 leave-country-out performance is about forty per cent lower, and the decline concentrates where early
 warning would help most.
 
 What the model learns is less encouraging. Three analyses converge: the highest-ranked features are
 population size and reporting capacity rather than biological drivers, the label concentrates in
 countries operating reference laboratories, and the best-scoring cells have the strongest publishing
-record. It predicts where glanders will be documented, not where the organism is present. The chained
-design does not improve discrimination because the intermediate quantity is already a direct feature.
-
-The decomposition also proved useful: three components with versioned contracts, none hardcoding the
-disease, were each testable alone, so the risk engine could be evaluated before any explanation
-existed and the alert rules checked against a policy before any message was sent.
+record. It predicts where glanders will be documented, not where it is.
 
 \section{Future Work}
 
 \textbf{Reported activity.} The most important extension is to model surveillance capacity as a
-quantity, as an offset on publication volume or through a two-part model estimating detection and
-occurrence jointly; otherwise gains in score reflect reporting rather than disease.
+quantity, as an offset on publication volume or a joint detection-and-occurrence model; otherwise gains in score reflect reporting, not disease.
 
-\textbf{The label extractor.} The 263 extracted events have not been checked against a hand-annotated
-set; annotating a stratified sample would give the extractor's own precision and recall, bounding
-label noise that propagates downstream.
+\textbf{The label extractor.} The 263 extracted events have never been checked against a
+hand-annotated set; annotating a stratified sample would give the extractor's own precision and
+recall.
 
-\textbf{Resolution.} The proposal envisaged district-month resolution for India; public district
-covariates would need assembling, but that resolution matches the scale at which control is applied.
+\textbf{Resolution and drift.} District-month resolution for India matches the scale at which
+control is applied, but public district covariates would need assembling. The calibration here is one
+point estimate, so production also needs drift monitoring and a retraining trigger.
 
-\textbf{The unmeasured components.} The calibration here is one point estimate; production needs
-drift monitoring and a retraining trigger. The RAG layer's retrieval, guardrail and protocol targets
-are specified but unmeasured, and running it against the corpus would give recall@5, faithfulness,
-citation precision and the false refusal rate. \textbf{The field.} Messages per subscriber per year
-decides whether the service survives a second year; a district pilot would supply it. A WOAH WAHIS
-record set \cite{wahis} would validate the literature-derived label where the two overlap, and a
-cost-sensitive threshold would match the operating point to the programme's priorities.
+\textbf{Measuring the explanation layer.} Its retrieval, guardrail and protocol targets are
+specified but unmeasured. Running it against the corpus would give recall@5 and mean reciprocal rank
+for retrieval, faithfulness and citation precision for grounding, and the out-of-scope refusal rate
+against the false refusal rate in scope. Two metrics belong on top: answer usefulness, rated by
+district officers on real predictions rather than a hand-built set, and citation age, which shows
+whether answers lean on guidance since revised.
+
+\textbf{Measuring the alert service in the field.} Four quantities decide whether it survives a
+second year: messages per subscriber per year for maintainability, delivery reliability per channel
+for coverage, the fraction of HIGH alerts followed by a documented event for trust, and the time from
+alert to owner contact for outcome. None can be measured without subscribers.
+
+A WOAH WAHIS record set \cite{wahis} would validate the literature-derived label where the two
+overlap, and a cost-sensitive threshold would match the operating point to programme priorities.
 """
