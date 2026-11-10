@@ -399,7 +399,7 @@ dimensionality.
 \label{sec:assoc}
 
 Four measures screen the features, each from a standard library routine rather than a handwritten
-implementation, with versions recorded in Section~\ref{ch:mlops}. Let $y\in\{0,1\}$ be the next-year
+implementation, with package versions recorded in the committed environment. Let $y\in\{0,1\}$ be the next-year
 label and $n$ the number of complete pairs.
 
 \textbf{Spearman's rank correlation} (\texttt{scipy.stats.spearmanr}) measures monotone association

@@ -34,21 +34,25 @@ OUT.mkdir(exist_ok=True)
 
 BODY = (
     C.INTRO + C.LIT + C.ARCH + C.METHOD
-    + C.MLOPS + C.RAG + C.ALERT + C.RESULTS + C.CONCL
+    + C.RAG + C.ALERT + C.RESULTS + C.CONCL
 )
 
-# The condensed report drops the ablation and chained-pipeline results, so the shared
-# Abstract must not advertise them. Applied here only, so the full report keeps its own
-# abstract. Each entry is (old, new) and must match exactly once.
-ABSTRACT_EDITS: list[tuple[str, str]] = []  # the abstract no longer names the
-# ablation or the chained pipeline, so the condensed report needs no override.
+# Front-matter edits applied only to the condensed report. The full report keeps its
+# own abstract, keywords and organisation paragraph (including the MLOps chapter).
+# Each entry is (old, new) and must match exactly once.
+FRONT_EDITS: list[tuple[str, str]] = [
+    (
+        "Modular System Design, MLOps, Animal Health Surveillance.",
+        "Modular System Design, Animal Health Surveillance.",
+    ),
+]
 
 
 def condensed_front_matter() -> str:
     fm = RF.FRONT_MATTER
-    for old, new in ABSTRACT_EDITS:
+    for old, new in FRONT_EDITS:
         if old not in fm:
-            raise SystemExit(f"abstract edit not found: {old[:60]!r}")
+            raise SystemExit(f"front-matter edit not found: {old[:60]!r}")
         fm = fm.replace(old, new, 1)
     return fm
 
