@@ -371,7 +371,7 @@ PREAMBLE = r"""\documentclass[10pt,openany]{report}
   citecolor=black,
   urlcolor=blue!45!black,
   pdftitle={GlandersWatch: A Modular Platform for Glanders Risk Prediction, Retrieval-Augmented Explanation and Owner Alerting},
-  pdfauthor={Pedapatruni Shanmuk Vardhan, Shaktimayee Mohanty, Yuvraj Singh},
+  pdfauthor={Pedapatruni Shanmukh Vardhan, Shaktimayee Mohanty, Yuvraj Singh},
   pdfsubject={B.Tech Project Report, International Institute of Information Technology, Bhubaneswar}
 }
 

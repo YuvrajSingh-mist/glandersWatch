@@ -430,7 +430,7 @@ def build() -> pathlib.Path:
     pp.text = "PRESENTED BY"
     pp.font.size = Pt(8.5); pp.font.color.rgb = PALE_TEXT; pp.font.name = SANS
     set_spacing(pp.runs[0], 120)
-    for nm in ["Pedapatruni Shanmuk Vardhan   ·   B123089",
+    for nm in ["Pedapatruni Shanmukh Vardhan   ·   B123089",
                "Shaktimayee Mohanty   ·   B123118",
                "Yuvraj Singh   ·   B123153"]:
         q = pv.text_frame.add_paragraph()

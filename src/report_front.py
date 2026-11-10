@@ -41,7 +41,7 @@ Explanation and Owner Alerting\par}
 \vspace{0.40em}
 {\fontsize{10.9}{13.2}\selectfont
 \begin{tabular}{@{}r@{\hspace{1.1em}}l@{}}
-\bfseries Pedapatruni Shanmuk Vardhan & B123089 \\[1pt]
+\bfseries Pedapatruni Shanmukh Vardhan & B123089 \\[1pt]
 \bfseries Shaktimayee Mohanty & B123118 \\[1pt]
 \bfseries Yuvraj Singh & B123153 \\
 \end{tabular}\par}
@@ -76,7 +76,7 @@ Explanation and Owner Alerting\par}
 \noindent
 {\sloppy
 This is to certify that the report entitled ``GlandersWatch: A Modular Platform for Glanders Risk
-Prediction, Retrieval-Augmented Explanation and Owner Alerting'' submitted by \mbox{Pedapatruni Shanmuk Vardhan (@ROLLPSV@)}, \mbox{Shaktimayee Mohanty (@ROLLSM@)} and \mbox{Yuvraj Singh (@ROLLME@)} to
+Prediction, Retrieval-Augmented Explanation and Owner Alerting'' submitted by \mbox{Pedapatruni Shanmukh Vardhan (@ROLLPSV@)}, \mbox{Shaktimayee Mohanty (@ROLLSM@)} and \mbox{Yuvraj Singh (@ROLLME@)} to
 International Institute of Information Technology, Bhubaneswar is a record of bonafide project work
 under my supervision, and the report is submitted for the evaluation of the BTech
 Degree Final-Semester Project.\par}
@@ -114,7 +114,7 @@ We certify that
 \noindent
 \noindent
 \begin{tabular}{@{}p{5.75cm}p{4.35cm}p{4.35cm}@{}}
-\textbf{Pedapatruni Shanmuk Vardhan} & \textbf{Shaktimayee Mohanty} & \textbf{Yuvraj Singh} \\[0.12em]
+\textbf{Pedapatruni Shanmukh Vardhan} & \textbf{Shaktimayee Mohanty} & \textbf{Yuvraj Singh} \\[0.12em]
 B123089 & B123118 & B123153 \\
 \end{tabular}
 
@@ -137,7 +137,7 @@ unwavering support and understanding during the course of this project.
 \noindent
 \noindent
 \begin{tabular}{@{}p{5.75cm}p{4.35cm}p{4.35cm}@{}}
-\textbf{Pedapatruni Shanmuk Vardhan} & \textbf{Shaktimayee Mohanty} & \textbf{Yuvraj Singh} \\[0.12em]
+\textbf{Pedapatruni Shanmukh Vardhan} & \textbf{Shaktimayee Mohanty} & \textbf{Yuvraj Singh} \\[0.12em]
 B123089 & B123118 & B123153 \\
 \end{tabular}
 

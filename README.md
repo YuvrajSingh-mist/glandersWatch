@@ -2,7 +2,7 @@
 
 Predicts, for a country and year, whether glanders will be reported there the following year.
 
-B.Tech project, IIIT Bhubaneswar. Authors: Pedapatruni Shanmuk Vardhan (B123089), Shaktimayee Mohanty (B123118), Yuvraj Singh (B123153). Supervisor: Dr. Sangita Dhara.
+B.Tech project, IIIT Bhubaneswar. Authors: Pedapatruni Shanmukh Vardhan (B123089), Shaktimayee Mohanty (B123118), Yuvraj Singh (B123153). Supervisor: Dr. Sangita Dhara.
 
 This repository holds the code, the generated reports and the assembled data. A code-only
 copy lives at [glandersWatch-demo](https://github.com/YuvrajSingh-mist/glandersWatch-demo).
