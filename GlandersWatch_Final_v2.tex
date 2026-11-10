@@ -793,10 +793,9 @@ Chapter~\ref{ch:results} reports what that costs in transfer.
 
 \subsection{What the ranking looks like}
 
-Panel B of Figure~\ref{fig:importance} plots the mean absolute SHAP value against the marginal rank
-for the full candidate set, and the absence of any downward trend is the disagreement described
-above made visible. The eight retained features occupy the top of the conditional ordering; features
-that lead the marginal ordering sit far below it.
+The eight retained features occupy the top of the conditional ordering; features that lead the
+marginal ordering sit far below it. The disagreement between the two rankings is the reason the
+selection uses attribution rather than association, as argued above.
 
 \section{Models}
 
@@ -1229,9 +1228,9 @@ prevalence of 5.87\% and an imbalance of 16.0 to one. 55 of 160
 countries record at least one positive, 30 of them in two or more years, and the top five
 hold 35.5\% of all positives.
 
-\begin{figure}[htbp]
+\begin{figure}[p]
 \centering
-\includegraphics[width=0.95\textwidth]{fig10_label_anatomy.png}
+\includegraphics[width=\textwidth]{fig10_label_anatomy.png}
 \caption{Label anatomy. Panel A gives annual positive counts against prevalence on the secondary
 axis. Panel B gives the distribution of positive years per country. Panel C gives prevalence by
 World Bank region.}
@@ -1246,14 +1245,12 @@ since those countries operate reference laboratories.
 
 \subsection{Model Comparison}
 
-Table~\ref{tab:level1} reports discrimination under all three schemes, and
-Figure~\ref{fig:comparison} plots the same comparison.
+Table~\ref{tab:level1} reports discrimination under all three schemes.
 
 \begin{table}[htbp]
 \centering
 \caption{Discrimination at the country-year level. Brackets give 95 per cent bootstrap intervals
-on the temporal holdout; Brier score and expected calibration error are reported in
-Section~8.1.3.}
+on the temporal holdout. Expected calibration error for the champion is 0.025 (Brier 0.0555).}
 \label{tab:level1}
 \small
 \begin{tabular}{@{}lcccc@{}}
@@ -1271,14 +1268,6 @@ LightGBM & 0.471 & [0.36, 0.58] & 0.846 & 0.280 \\
 \end{tabular}
 \end{table}
 
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=0.82\textwidth]{fig02_model_comparison.png}
-\caption{Discrimination by model and validation scheme. The gap between repeated cross-validation
-and leave-country-out validation is the cost of generalising to an unseen country.}
-\label{fig:comparison}
-\end{figure}
-
 Two results need separating. On the forward temporal holdout the best discrimination comes from
 Random forest at 0.495 against a base rate of 5.87\%, roughly a 8-fold lift. Under
 leave-country-out validation the ranking inverts: Random forest falls to 0.322, while logistic
@@ -1291,60 +1280,6 @@ With 8 retained features the relationships are close enough to additive that a r
 model transfers best, and the flexible ensembles pay for their extra capacity in exactly the setting
 the project cares about. The single decision tree is weakest on both schemes, which confirms that the
 signal is not concentrated in one or two splits.
-
-\subsection{Marginal and Conditional Importance}
-
-Figure~\ref{fig:importance} sets the two views of feature importance against each other. Panel A
-plots mutual information against conditional rank, and the absence of a downward slope is the
-disagreement the selection section relies on; panel B gives the conditional ordering with the
-marginal sign annotated.
-
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=0.95\textwidth]{fig12_importance_views.png}
-\caption{Marginal and conditional importance for the same candidate set. Panel A: mutual information
-against conditional rank, where a downward trend would mean the two orderings agree. Panel B:
-conditional rank with the marginal association sign annotated. The eight retained features are the
-top of the conditional ordering.}
-\label{fig:importance}
-\end{figure}
-
-\subsection{Calibration}
-
-Predictions are well calibrated, with an expected calibration error of 0.025 and a Brier score of
-0.0555: a stated risk of twenty-four per cent corresponds to an observed frequency near twenty-four
-per cent, which is what makes a threshold-based alert defensible.
-
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=0.72\textwidth]{fig04_calibration.png}
-\caption{Reliability diagram for the selected model on the temporal holdout, with the distribution of
-predicted risk. Points on the diagonal are perfectly calibrated.}
-\label{fig:calib}
-\end{figure}
-
-\subsection{Subgroup Analysis}
-
-Table~\ref{tab:subgroup} reports leave-country-out performance by region. Skill is lowest in Sub-Saharan Africa and in low-income countries, where early warning would
-help most; the cause is label sparsity, since few events are recorded in those strata.
-
-\begin{table}[htbp]
-\centering
-\caption{Leave-country-out performance by World Bank region.}
-\label{tab:subgroup}
-\small
-\begin{tabular}{@{}lcccc@{}}
-\toprule
-\textbf{Region} & \textbf{Observations} & \textbf{Events} & \textbf{ROC-AUC} & \textbf{PR-AUC} \\
-\midrule
-East Asia \& Pacific & 432 & 48 & 0.875 & 0.459 \\
-Europe \& Central Asia & 864 & 31 & 0.824 & 0.161 \\
-Latin America \& Caribbean & 522 & 12 & 0.921 & 0.351 \\
-MENA, Afghanistan and Pakistan & 360 & 23 & 0.825 & 0.422 \\
-Sub-Saharan Africa & 612 & 25 & 0.738 & 0.112 \\
-\bottomrule
-\end{tabular}
-\end{table}
 
 \section{The Alert Service as a Warning System}
 
