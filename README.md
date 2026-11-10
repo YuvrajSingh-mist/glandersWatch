@@ -5,20 +5,24 @@ This branch (`final-report`) holds the submitted project report and the figures 
 ## Contents
 
 ```
-GlandersWatch_Final_v2.pdf      the report, 30 pages
+GlandersWatch_Final_v2.pdf      the report, 34 pages
+GlandersWatch_Final_v2.tex      LaTeX source for the PDF above
 figures/
   fig10_label_anatomy.png       dataset characteristics chart
   fig02_model_comparison.png    discrimination by validation scheme
   fig04_calibration.png         reliability diagram
   fig08_subgroups.png           regional performance
   fig07_alert_budget.png        alert economics
+  fig12_importance_views.png    attribution versus association
+  fig14_background.png          background context chart
+  proposal_alert_architecture.png   alert-service diagram
   iiit_logo.png                 institute logo on the title page
   fig_architecture.tex          TikZ platform diagram
   fig_rag.tex                   TikZ retrieval pipeline diagram
   diagstyles.tex                TikZ styles used by the two diagrams above
 ```
 
-The two `.tex` files are figures, not source code. They are vector drawings compiled into the PDF.
+`GlandersWatch_Final_v2.tex` is the report source. Rebuild with `tectonic GlandersWatch_Final_v2.tex` from this branch root. The TikZ files under `figures/` are drawings included by that source, not the report itself.
 
 ## Before you change anything
 
