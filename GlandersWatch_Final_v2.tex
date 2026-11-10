@@ -15,7 +15,6 @@
 \usepackage{setspace}
 \usepackage{caption}
 \usepackage{hyperref}
-\usepackage{standalone}
 \usepackage{enumitem}
 \usetikzlibrary{shapes.geometric,arrows.meta,positioning,fit,backgrounds,calc,decorations.pathreplacing}
 
@@ -30,6 +29,7 @@
 }
 
 \graphicspath{{figures/}}
+\def\GlandersWatchReport{}
 \captionsetup{font=small,labelfont=bf,skip=6pt}
 \setlength{\parskip}{0.35em}
 \setlength{\parindent}{0pt}
@@ -1186,7 +1186,7 @@ Audit&Varies by system.&Reason-coded sent/skipped decisions and per-recipient de
 Figure~\ref{fig:alerts-pipeline} shows the supplied end-to-end architecture. The flow begins with user registration and prediction generation, then proceeds through evaluation, rules, alert creation, fan-out and notification. The data layer stores predictions, subscriptions, period-specific alert state, alerts and delivery logs. The approval gate is optional and may hold selected HIGH alerts for veterinary review; its use requires agreement with project and veterinary stakeholders.
 
 \begin{figure}[htbp]\centering
-\includestandalone[mode=buildnew,width=1.06\textwidth]{figures/alerts_pipeline}
+\input{figures/alerts_pipeline.tex}
 \caption{End-to-end GlandersWatch alert pipeline. The period field supports monthly or yearly predictions.}\label{fig:alerts-pipeline}
 \end{figure}
 
@@ -1285,7 +1285,7 @@ The first two protections should use database unique constraints, not only appli
 \section{Modular Architecture: Core, Ports and Adapters}
 Figure~\ref{fig:alerting-modular} shows the internal modular structure. The alert engine core contains domain rules and does not directly depend on a database, web framework or messaging SDK. Four ports define what the core needs; adapters implement them for a demo or production stack.
 \begin{figure}[htbp]\centering
-\includestandalone[mode=buildnew,width=\textwidth]{figures/alerting_modular_arch}
+\input{figures/alerting_modular_arch.tex}
 \caption{Modular alerting engine: rules core, four ports and replaceable adapters.}\label{fig:alerting-modular}\end{figure}
 
 \begin{description}

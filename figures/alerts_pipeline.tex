@@ -1,9 +1,12 @@
+\ifdefined\GlandersWatchReport
+\else
 \documentclass[tikz,border=10pt]{standalone}
 \usepackage[T1]{fontenc}
 \usepackage[scaled=0.95]{helvet}
 \renewcommand{\familydefault}{\sfdefault}
 \usepackage{xcolor}
 \usetikzlibrary{arrows.meta,shapes.geometric,calc}
+\fi
 
 % ---------- palette ----------
 \definecolor{gwnavy}{HTML}{1F3A5F}
@@ -40,8 +43,10 @@
 \newcommand{\cont}[6]{%
   \draw[draw=#1!70!black, fill=#1!4, rounded corners=5pt, line width=1pt] (#2,#3) rectangle (#4,#5);
   \node[anchor=north west, font=\small\bfseries, text=#1!60!black] at (#2+0.2,#5-0.12) {#6};}
-
+\ifdefined\GlandersWatchReport
+\else
 \begin{document}
+\fi
 \begin{tikzpicture}[x=1cm,y=1cm]
 
 % ================= TITLE =================
@@ -170,7 +175,10 @@ mute / override $\cdot$ approvals}
 \node[anchor=west, font=\scriptsize] at (19.0,-0.5) {$^{*}$ Telegram used for the free demo; SMS / WhatsApp for production (DLT / template approval needed in India)};
 
 \end{tikzpicture}
+\ifdefined\GlandersWatchReport
+\else
 \end{document}
+\fi
 
 % \documentclass[tikz,border=10pt]{standalone}
 % \usepackage[T1]{fontenc}
