@@ -255,7 +255,7 @@ would supply.
 \noindent
 \textbf{Keywords:} Glanders, \textit{Burkholderia mallei}, Risk Prediction, Gradient Boosting,
 Probability Calibration, SHAP, Retrieval-Augmented Generation, Citation Grounding, Alert Fatigue,
-Modular System Design, MLOps, Animal Health Surveillance.
+Modular System Design, Animal Health Surveillance.
 
 % ============================== CONTENTS ==============================
 \newpage
@@ -663,7 +663,7 @@ dimensionality.
 \label{sec:assoc}
 
 Four measures screen the features, each from a standard library routine rather than a handwritten
-implementation, with versions recorded in Section~\ref{ch:mlops}. Let $y\in\{0,1\}$ be the next-year
+implementation, with package versions recorded in the committed environment. Let $y\in\{0,1\}$ be the next-year
 label and $n$ the number of complete pairs.
 
 \textbf{Spearman's rank correlation} (\texttt{scipy.stats.spearmanr}) measures monotone association
@@ -828,120 +828,6 @@ Six controls apply: features use year $t$ or earlier and only the target uses $t
 chronological; hyperparameters are tuned inside training folds; calibration is fitted on training
 folds only; the alert threshold is fixed on training; and imputation values and missing indicators
 are generated inside the pipeline.
-
-% =====================================================================
-\chapter{MLOps and Model Serving}
-\label{ch:mlops}
-% =====================================================================
-
-\section{From a Notebook to a Service}
-
-A trained model is not a component until it can be called, versioned, monitored and replaced. Three
-things must be true first. The model must be a portable artefact, so the object scored in evaluation
-is the object served, with nothing re-fitted in between. Every prediction must name the version that
-produced it. And the service must degrade predictably, so a bad release or a missing feature does not
-produce confident nonsense. The project is a sequence of numbered scripts, each producing artefacts
-consumed by the next, with every intermediate output cached so any stage can be re-run alone. That is
-also what makes the pipeline inspectable: a reader can run one stage and check it before trusting the
-next.
-
-\section{The Model Bundle}
-
-The unit of deployment is a directory, not a pickled object, because a pickle alone cannot say what
-its inputs mean.
-
-\begin{verbatim}
-gw-xgb-2026.11.1/
-  model.joblib        # fitted pipeline, predict_proba
-  manifest.json       # feature order, dtypes, calibration, metrics
-  thresholds.json     # level boundaries and hysteresis margin
-  SHA256SUMS
-\end{verbatim}
-
-The manifest is what makes the bundle reusable. It records the ordered feature list with dtypes, so
-serving rejects a request with the wrong columns before any inference happens. It records the
-calibration method and achieved error, so a consumer knows whether to read the output as a probability
-or only as a rank. It records the evaluation metrics, so the number in the report and the number in
-the registry are the same. Because the bundle is a directory with a manifest, the API, a batch job and
-a notebook load it with identical behaviour.
-
-Every training run also writes a record with the git commit, data version, feature list and hash,
-hyperparameters and the full metric set for all three schemes. Promotion is decided on
-leave-country-out precision-recall AUC rather than on the more flattering temporal holdout. A
-candidate becomes champion only if it beats the incumbent by more than the bootstrap interval width,
-its expected calibration error is below the deployment ceiling of 0.05, its feature schema matches
-what serving can supply when checked by name and order, and it has scored a shadow period without a
-prediction outside the plausible range. The previous champion is retained, so promotion is reversible,
-and a bundle failing its checksum or schema check is replaced by the previous champion rather than
-served.
-
-\section{Serving Design}
-
-The interface is deliberately coarse: a caller asks for a prediction for an area and period and
-receives the full record, rather than assembling one from several calls.
-
-\begin{table}[htbp]
-\centering
-\caption{HTTP interface of the risk engine.}
-\label{tab:api}
-\small
-\begin{tabular}{@{}>{\raggedright\arraybackslash}p{3.4cm}>{\raggedright\arraybackslash}p{1.4cm}>{\raggedright\arraybackslash}p{9.2cm}@{}}
-\toprule
-\textbf{Endpoint} & \textbf{Method} & \textbf{Purpose and contract} \\
-\midrule
-\texttt{/v1/predict} & POST & Score one area and period from a supplied or stored feature vector. Returns one \texttt{PredictionRecord}. \\
-\texttt{/v1/predict/batch} & POST & Score up to 500 area-period pairs, with per-item errors rather than failing the request. \\
-\texttt{/v1/risk-map} & GET & GeoJSON of the latest predictions for a period, filtered by risk level. Serves the dashboard directly. \\
-\texttt{/v1/models} & GET & Registry listing: model id, promotion date, metrics, feature-schema hash. \\
-\texttt{/v1/models/\{id\}} & GET & The manifest of one version, for inspection by a consumer. \\
-\texttt{/v1/health} & GET & Liveness and readiness, where readiness checks that a champion bundle is loaded and its schema resolves. \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-Every response carries the \texttt{model\_id} that produced it and a \texttt{data\_freshness} block.
-The alert service reads that block before sending anything, so a prediction computed on stale
-upstream data cannot produce a message.
-
-
-The order of operations is a reliability choice. Validation runs first, so a malformed request costs a
-schema check rather than a model load. The cache is consulted before
-inference because risk maps are read far more often than recomputed. Inference is deterministic for a
-fixed bundle, so a cache key of model id, area and period is safe, and the model id is part of the key
-rather than a version counter so promotion invalidates the cache. Responses are written back to the
-predictions table as well as cached, so the map does not depend on a warm cache.
-
-The endpoint is specified against a budget rather than measured, since the service is not deployed:
-40\,ms on a cache miss and 4\,ms on a hit, of which feature retrieval takes 25\,ms and inference 8\,ms.
-The explanation endpoint has a separate budget of two seconds because it includes generation, which is
-why the alert service never calls it inline. A message must not wait on an LLM.
-
-\section{Monitoring and Retraining}
-
-Three signals are monitored. Service health covers request rate, error rate and latency percentiles
-per endpoint on Prometheus and Grafana, catching the least interesting failure. Data drift compares
-each feature's current distribution with the training one using a population stability index and a
-Kolmogorov-Smirnov statistic, since a tree extrapolating outside its training range returns a
-confident answer with no basis. Calibration decay tracks the mean predicted probability against the
-observed event rate: a model that keeps saying 0.2 while the observed rate falls to 0.05 has lost
-calibration even with its ranking intact.
-
-Retraining follows from the third signal. Recalibrate when the observed-to-predicted ratio leaves a
-band for two consecutive periods, and retrain when a new year of labels is available and the champion's
-leave-country-out score has degraded beyond the bootstrap interval.
-
-The pipeline runs linting, unit tests and a smoke test on every push. Unit tests cover what can be
-checked without data: schema validation, the level-threshold function including hysteresis at the
-boundary, idempotency key derivation, and the citation parser. A further test loads the committed
-bundle, scores a fixed fixture and asserts the output to four decimals, which catches the most common
-silent failure here, where a dependency upgrade changes numerical behaviour and every downstream number
-moves unnoticed.
-
-The full computation runs in about 4.2 minutes on an Apple M4 processor with 10 cores and 16 GB of unified memory without a graphics accelerator.
-Per-family fitting time at the country-year level ranges from 1.3 seconds for the decision tree
-to 64.2 seconds for LightGBM. One module-level seed governs fitting, cross-validation, bootstrap
-resampling and SHAP sampling, with software versions Python 3.12.13, scikit-learn 1.9.1, XGBoost 3.4.1, LightGBM 4.7.0, SHAP 0.54.1, NumPy 2.5.4, pandas 3.1.1, SciPy 1.18.1, and the bundle smoke test runs
-single-threaded because tree ensembles are not bitwise reproducible across thread counts.
 
 % =====================================================================
 \chapter{The RAG Explanation Layer}
