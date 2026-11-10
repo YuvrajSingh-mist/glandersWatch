@@ -5,7 +5,7 @@ This branch (`final-report`) holds the submitted project report and the figures 
 ## Contents
 
 ```
-GlandersWatch_Final_v2.pdf      the report, 34 pages
+GlandersWatch_Final_v2.pdf      the report, 38 pages
 GlandersWatch_Final_v2.tex      LaTeX source for the PDF above
 figures/
   fig10_label_anatomy.png       dataset characteristics chart
