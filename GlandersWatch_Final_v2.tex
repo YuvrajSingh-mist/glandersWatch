@@ -196,18 +196,23 @@ B123089 & B123118 & B123153 \\
 Glanders is a bacterial zoonosis of equids caused by \textit{Burkholderia mallei}. It is
 notifiable, frequently fatal, and remains endemic in parts of Africa, Asia and South America.
 Indian surveillance between 2019 and 2023 identified 728 seropositive equids across 138 districts,
-with strong geographic concentration. The published machine learning literature on this disease is
-confined to laboratory identification of the organism by spectroscopic methods, and no
-population-level geographic risk model has been reported.
+with strong geographic concentration. A district officer and an equine owner both need more than a
+retrospective case count: they need a usable answer to whether the disease is likely in the next
+period, why that answer is given, and what to do, without being flooded by messages they learn to
+ignore. The published machine learning literature on this disease is confined to laboratory
+identification of the organism; no population-level geographic risk model, and no owner-facing
+warning path, has been reported.
 
 \vspace{0.5em}
 \noindent
-This report presents GlandersWatch, a platform built from three independently deployable components:
-a calibrated machine learning risk engine, a retrieval-augmented layer that explains each
-prediction with citations to official guidance, and an alert service that delivers the result to
-equine owners. The decomposition is the contribution as much as the model is. Each component
-communicates through a versioned schema rather than shared internals, none hardcodes the disease,
-and each degrades without failing the others.
+This report presents GlandersWatch, built for that end-to-end need as three independently deployable
+components. A calibrated risk engine forecasts whether glanders is documented in a country in year
+$t{+}1$ from features observed in year $t$. A retrieval-augmented explanation layer turns that
+probability into cited guidance an officer or owner can check, and refuses when the corpus does not
+support an answer. An alert service decides whether a message should be sent at all---thresholding,
+hysteresis, suppression and deduplication---so volume stays low enough that messages are still read.
+Each component communicates through a versioned schema rather than shared internals, none hardcodes
+the disease, and each degrades without failing the others.
 
 \vspace{0.5em}
 \noindent
@@ -215,43 +220,22 @@ The risk engine combines four public datasets not previously applied to glanders
 panel: a text-mined occurrence corpus from Europe PMC, FAOSTAT livestock stocks, World Bank
 development indicators and NASA POWER reanalysis climatology. 6,700 country-year rows reduce to
 2,880 modelling observations across 160 equine-holding countries from 2005 to 2023, with
-169 positive labels. Candidate features are screened by attribution rather than association:
-the top 8 of 42 numeric candidates, ranked by mean absolute SHAP on the training years
-alone, are kept, with no categorical columns, and six model families are trained under three
-validation schemes.
+169 positive labels. Eight of 42 numeric candidates are retained by mean absolute SHAP on the
+training years alone, and six model families are compared under temporal and leave-country-out
+validation. On unseen years the strongest precision-recall AUC is 0.495 against a 5.87\% base rate;
+on unseen countries the ranking inverts and Logistic Regression leads at 0.381 with calibration
+error 0.025, so it is the champion for deployment. Asking instead whether a country reports glanders
+at all raises discrimination to about 0.95, which reflects stable reporting status rather than finer
+predictive skill.
 
 \vspace{0.5em}
 \noindent
-Two tests were run, because they answer different questions. The first asks how well the model predicts
-years it has never seen: the best model reaches a precision-recall AUC of 0.495 against a base
-rate of 5.87\%, roughly eight times better than chance, which is useful but not accurate enough
-to act on without a person in the loop. The second asks how well it predicts countries it has never
-seen, which is what deployment actually requires. That test changes the ranking. Logistic Regression leads at
-0.381 and its probabilities are well calibrated, with an error of 0.025, so a predicted 0.20
-means roughly one chance in five. It is therefore the champion and the estimate to quote for an
-unseen country.
-
-\vspace{0.4em}
-\noindent
-An easier question was tested alongside. Instead of asking whether glanders appears in one particular
-year, ask whether a country reports glanders at all. Discrimination there rises to about 0.95. That is
-not a better model but a simpler question: whether a country reports the disease is a stable national
-characteristic, while the timing is the part that is genuinely hard.
-
-\vspace{0.4em}
-\noindent
-The main limitation follows from the label. A positive means glanders was documented, not that it
-occurred, and a negative may mean no disease or simply no report. The model therefore learns where
-glanders is reported, and reporting effort is the principal confounder: a country with a reference
-laboratory and an open-access publishing record looks riskier than a country with the same disease
-burden and weaker surveillance. Estimating and correcting for that capacity is the main item of future
-work.
-
-\vspace{0.4em}
-\noindent
-The explanation and alert components are described through their interfaces, rules and evaluation
-plan. They carry no measured results because they are not deployed, and measuring them is what a pilot
-would supply.
+The explanation layer is specified as hybrid retrieval over official guidance with citation grounding
+and refusal rules; the alert service is specified as a period-aware rules engine with replaceable
+delivery adapters. Neither is reported with measured field performance because neither is deployed;
+their interfaces, rules and evaluation protocol are fixed so a pilot can score them later. The main
+limitation of the model is the label itself: a positive means documentation, not incidence, so
+reporting effort is the principal confounder and the main target for future work.
 
 \vspace{0.7em}
 \noindent
@@ -313,8 +297,11 @@ as documented activity throughout.}
 \section{Problem Definition}
 
 A district veterinary officer faces a narrow question: is glanders likely to appear in this area
-in the coming year? Answering it means combining the history of the disease nearby, the size of
-the susceptible population, and the conditions that permit transmission.
+in the coming year? That is a one-step-ahead forecasting problem framed as supervised classification
+on a country-year panel---features from year $t$ predict a binary label for year $t{+}1$---not a
+classical univariate time-series model that extrapolates a single series. Answering it means combining
+the history of the disease nearby, the size of the susceptible population, and the conditions that
+permit transmission.
 
 Surveillance reports what has already happened, and forecasting systems exist for several livestock
 diseases but not for glanders. A prediction alone would still not be usable: an owner cannot act on a
@@ -341,21 +328,18 @@ into something a person can act on.
 
 \section{Objectives}
 
-The project has four objectives.
+The project has three objectives.
 
 \begin{enumerate}
-  \item \textbf{The prediction study.} Assemble a country-year panel from public sources not previously applied
-        to the disease, compare six model families under three validation schemes, and report the
-        achievable skill including negative results.
-  \item \textbf{Prediction as a service.} Package the trained model as a versioned artefact behind a
-        REST interface, so any consumer can call it without knowing how it works.
+  \item \textbf{Prediction as a service.} Package a calibrated next-year risk model as a versioned
+        artefact behind a REST interface, so any consumer can call it without knowing how it works.
   \item \textbf{Cited explanation.} Build a retrieval-augmented layer that explains a prediction from
         official guidance, cites every claim, and refuses rather than guesses.
   \item \textbf{Owner alerts.} Convert a calibrated probability into few enough messages that they
         are read, using threshold, suppression and deduplication rules.
 \end{enumerate}
 
-All four share one requirement: each component must be independently testable and replaceable, and
+All three share one requirement: each component must be independently testable and replaceable, and
 free of any hardcoded reference to glanders.
 
 \section{Scope and Limitations}
@@ -432,6 +416,60 @@ structured occurrence data has precedent in epidemic intelligence \cite{collier2
 here event extraction is the primary source of the label rather than a supplementary signal, because
 official outbreak records are incomplete for many countries. The label therefore inherits the
 reporting biases of the literature, which is analysed rather than assumed away.
+
+Table~\ref{tab:ml-compare} compares the machine-learning and predictive-modelling studies that shape
+the risk-engine design. Alerting systems are compared separately in Chapter~\ref{ch:alerts}; the
+explanation layer is specified from retrieval-augmented generation practice rather than from a
+glanders-specific prior.
+
+\begin{table}[htbp]
+\centering
+\caption{Comparative summary of machine-learning and predictive studies relevant to the risk engine.
+Columns state the approach, the problem addressed, and the limitation that motivates this work.}
+\label{tab:ml-compare}
+\small
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.6cm}
+                >{\raggedright\arraybackslash}p{3.4cm}
+                >{\raggedright\arraybackslash}p{3.2cm}
+                >{\raggedright\arraybackslash}p{3.6cm}@{}}
+\toprule
+\textbf{Study} & \textbf{Approach / features} & \textbf{Problem addressed} & \textbf{Limitation} \\
+\midrule
+Fonseca-Rodr\'iguez et al.\ (2019) &
+Spatiotemporal cluster detection on Brazilian glanders records &
+Where cases have already concentrated &
+Describes past clusters; does not forecast the next period \\
+Hollings et al.\ (2017) &
+Comparison of species-distribution / statistical models for livestock disease &
+Which modelling family fits epidemic spatial data &
+Method survey; not a glanders risk model \\
+Kane et al.\ (2014) &
+ARIMA versus random forest on H5N1 time series &
+Outbreak prediction for avian influenza &
+Influenza, not glanders; classical time-series setup \\
+Walsh et al.\ (2019) &
+Machine learning to prioritise active avian-influenza surveillance &
+Where to sample next &
+Surveillance targeting, not owner-facing risk scores \\
+Yoo et al.\ (2021); Alshatti et al.\ (2026) &
+Tree-based / ML farm-level risk models with meteorological and farm covariates &
+Farm-level HPAI risk &
+Template applies; disease and unit are not glanders country-years \\
+Moawad et al.\ (2019); St\"ockel et al.\ (2015) &
+Raman / spectroscopic classifiers for \textit{B.\ mallei} &
+Laboratory identification of the organism &
+Diagnostic, not geographic or temporal risk \\
+NADRES v2 \cite{nadres} &
+Multi-disease livestock forewarning with meteo and remote-sensing covariates &
+District-level early warning across many diseases &
+Not glanders-specific; public reproducibility and owner delivery are out of scope \\
+Singha et al.\ (2020, 2026) &
+Serological surveillance and risk analysis for Indian equids &
+Prevalence and animal-level risk factors &
+Describes where disease was found; no forward predictive model \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \section{Prior Art Audit}
 
