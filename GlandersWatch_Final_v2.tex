@@ -342,18 +342,14 @@ The project has three objectives.
 All three share one requirement: each component must be independently testable and replaceable, and
 free of any hardcoded reference to glanders.
 
-\section{Scope and Limitations}
+\section{Scope}
 
 The study is scoped to country-year resolution. District-level modelling for India was envisaged but
 is not attempted, because the covariates could not be assembled from public sources within the project
 period. The explanation and alert layers are resolution-agnostic and apply unchanged once a
 district-level model exists. The model is a population-level tool: it does not diagnose an individual
-animal and does not replace laboratory confirmation.
-
-Three limitations shape every result. The label comes from published reports, so a negative may mean
-no disease or no reporting. Occurrence is reconstructed by an extractor not validated against a
-hand-annotated set. And with 169 positives the uncertainty on every headline metric is substantial,
-which is quantified rather than hidden.
+animal and does not replace laboratory confirmation. Limitations that shape the results are collected
+in Section~\ref{sec:limitations}.
 
 % =====================================================================
 \chapter{Literature Review and Gap Analysis}
@@ -470,44 +466,6 @@ Describes where disease was found; no forward predictive model \\
 \bottomrule
 \end{tabular}
 \end{table}
-
-\section{Prior Art Audit}
-
-To test the novelty claim rather than assert it, a reproducible set of queries was run against Europe
-PMC. Each row of Table~\ref{tab:novelty} is a query count; the query strings and retrieved titles are
-retained with the project code.
-
-\begin{table}[htbp]
-\centering
-\caption{Europe PMC hit counts for combinations of glanders with each data source and method used
-in this study.}
-\label{tab:novelty}
-\small
-\begin{tabular}{@{}lc@{}}
-\toprule
-\textbf{Query} & \textbf{Hits} \\
-\midrule
-glanders (baseline corpus) & 6674 \\
-glanders + machine learning & 75 \\
-glanders + tree ensembles & 40 \\
-glanders + forecasting & 139 \\
-glanders + FAOSTAT & 7 \\
-glanders + NASA POWER & 0 \\
-glanders + World Bank indicators & 22 \\
-glanders + equine population denominator & 54 \\
-glanders + Europe PMC text mining & 378 \\
-glanders + chained/stacked models & 36 \\
-glanders + random forest (risk context) & 8 \\
-glanders + niche / distribution model & 62 \\
-glanders + remote sensing / reanalysis & 10 \\
-glanders + spatio-temporal clustering & 463 \\
-glanders + gradient boosting & 4 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-The decisive cells pair glanders with NASA POWER, which returns zero records, and with gradient
-boosting, which returns four, none a glanders risk model.
 
 \section{What the Existing Work Leaves Open}
 
@@ -1399,9 +1357,10 @@ best-scoring cells are India, the United States and Australia.
 
 This project set out to build a usable warning system for glanders: to establish whether
 population-level risk could be predicted from public data, and how a prediction reaches the person who
-owns the animals. Four sources new to the disease formed a country-year panel across 162
-equine-holding countries, and six model families were trained under three validation schemes. Around the model, delivery was decomposed into three components with fixed contracts: a risk
-engine, an explanation layer and an alert service.
+owns the animals. Four sources new to the disease formed a country-year panel across 160
+equine-holding countries, and six model families were trained under three validation schemes. Around
+the model, delivery was decomposed into three components with fixed contracts: a risk engine, an
+explanation layer and an alert service.
 
 Prediction is possible, and the performance is moderate: Logistic Regression reaches a precision-recall AUC of
 0.461 against a base rate of 5.87\% on a forward split, about a 8-fold lift with a
@@ -1413,6 +1372,35 @@ What the model learns is less encouraging. Three analyses converge: the highest-
 population size and reporting capacity rather than biological drivers, the label concentrates in
 countries operating reference laboratories, and the best-scoring cells have the strongest publishing
 record. It predicts where glanders will be documented, not where it is.
+
+\section{Limitations}
+\label{sec:limitations}
+
+The following limits apply to every headline number in this report.
+
+\begin{enumerate}
+  \item \textbf{The label is documentation, not incidence.} A positive means glanders was reported in
+        the literature for that country-year; a negative may mean no disease or simply no report.
+        Reporting effort is therefore the principal confounder: countries with reference laboratories
+        and open-access publishing look riskier than countries with similar burden and weaker
+        surveillance.
+  \item \textbf{The extractor is unvalidated.} Occurrence events are reconstructed by an automated
+        pipeline that has not been checked against a hand-annotated reference set, so extractor error
+        is not separately quantified.
+  \item \textbf{Few positives.} With 169 positive country-years the uncertainty on every metric is
+        wide; bootstrap intervals are reported rather than hidden.
+  \item \textbf{Country-year resolution only.} District-level modelling for India was not attempted,
+        because public district covariates could not be assembled in time. Control is applied at a
+        finer scale than the model predicts.
+  \item \textbf{Not a clinical tool.} The model is population-level. It does not diagnose an
+        individual animal and does not replace laboratory confirmation.
+  \item \textbf{Geographic fragility.} Leave-country-out skill is weaker than temporal skill, and the
+        drop is largest in regions where early warning would help most.
+  \item \textbf{Explanation and alerts are specified, not measured.} The RAG layer and alert service
+        have interfaces, rules and evaluation protocols, but no deployed pilot scores. Monthly
+        prediction, real SMS/WhatsApp delivery, and proof that recipients read or acted on a message
+        remain future work (see also the alert-specific limits in Chapter~\ref{ch:alerts}).
+\end{enumerate}
 
 \section{Future Work}
 
