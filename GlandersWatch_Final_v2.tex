@@ -1132,6 +1132,103 @@ Deployment targets, so the claim is falsifiable: recall@5 above 0.85, faithfulne
 relevance above 0.90 and 0.85, citation precision above 0.95, a false refusal rate below 10 per cent,
 and p95 latency under two seconds.
 
+\subsection{Proposed Counterfactual Attribution Audit}
+
+This proposed GlandersWatch-specific audit checks whether generated
+explanations keep forecast evidence, veterinary guidance and safety
+language attached to the right claims. It does not claim that
+counterfactual evaluation is a new general RAG technique. The test
+changes one controlled forecast input while keeping the user question,
+area, period, guidance corpus and retrieval settings fixed.
+
+\textbf{Paired test design.}
+Create matched cases A and B from a synthetic or controlled test record.
+Change exactly one forecast field in B, such as risk probability, risk
+tier or one SHAP contributor. Before generation, reviewers label which
+forecast propositions should change and which claims must remain
+invariant. Production forecasts must not be altered, and fabricated
+cases must not be presented as real.
+
+\begin{table}[htbp]
+\centering
+\caption{Claim attribution and consistency checks in the
+counterfactual audit.}
+\label{tab:counterfactual-audit}
+\small
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{|p{0.15\textwidth}|p{0.35\textwidth}|p{0.37\textwidth}|}
+\hline
+\textbf{Claim Label} &
+\textbf{Evidence Source} &
+\textbf{Pair Check} \\
+\hline
+
+F -- Forecast &
+Versioned prediction record and SHAP output for the same area
+and period. &
+Forecast wording tracks the changed input; unchanged fields
+remain correct. \\
+\hline
+
+G -- Guidance &
+Specific retrieved official passage and document version. &
+Guidance claims remain supported by the fixed citation; advice
+is not presented as the model's cause. \\
+\hline
+
+S -- Safety &
+Required population-level disclaimer, non-diagnosis boundary
+and abstention policy. &
+Required safety language remains present; no critical unsafe
+advice appears. \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{Scoring.}
+For each pair $i$, score forecast consistency $F_i$, guidance
+attribution $G_i$ and safety consistency $S_i$ as 1 (pass) or
+0 (fail). Report the aggregate score and all three subscores:
+
+\begin{equation}
+\mathrm{CACS}
+=
+100 \times
+\frac{\sum_{i=1}^{N}(F_i+G_i+S_i)}
+{3N}
+\end{equation}
+
+Each dimension score is calculated independently:
+
+\begin{equation}
+\mathrm{Dimension\ Score}
+=
+100 \times
+\frac{\text{Passes for that dimension}}{N}
+\end{equation}
+
+Failure labels include stale or wrong-area forecast facts,
+unsupported or false-causal wording, citation mismatch, unsafe
+advice and missing disclaimers. A critical safety failure is
+reported as a safety blocker regardless of the aggregate score.
+Results should be reported by query type and model/corpus version.
+A universal pass threshold should not be established until pilot
+data and reviewer agreement are available.
+
+\textbf{Workflow and status.}
+Freeze the corpus, model, prompt and prediction versions.
+Prepare paired fixtures and expected changes, execute both cases
+through the same RAG pipeline, label the generated claims and
+calculate CACS alongside the existing RAG metrics. Safety-critical
+cases should undergo reviewer adjudication. Classify failures and
+rerun the locked test cases after fixes.
+
+CACS complements Recall@k, faithfulness, answer relevance,
+citation precision and refusal behaviour; it does not replace
+risk-model validation. This audit is proposed, not implemented
+or measured in the supplied report.
+
+
 % =====================================================================
 % GlandersWatch Technical Writing Report: Alerting System chapter
 %
