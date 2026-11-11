@@ -380,13 +380,14 @@ def build() -> pathlib.Path:
         ["#", "Segment", "Presenter", "Owns Q&A on"],
         ["1", "Problem, objectives, platform", "Yuvraj Singh", "Scope, label, contracts"],
         ["2", "Data, features, models, results", "Yuvraj Singh", "Splits, metrics, champion"],
-        ["3", "RAG question answering", "Shaktimayee Mohanty", "Retrieval, citations, refusal"],
+        ["3", "RAG explanation layer", "Shaktimayee Mohanty",
+         "Evidence separation, citations, PFPT/CAIS"],
         ["4", "Alerting system", "P. Shanmukh Vardhan", "Rules, delivery, audit"],
         ["5", "Limits, future work, close", "All three", "Open questions together"],
-    ], col_w=[Inches(0.55), Inches(4.6), Inches(3.3), Inches(3.65)],
+    ], col_w=[Inches(0.55), Inches(4.4), Inches(3.2), Inches(4.0)],
        size=13, row_h=0.42)
     takeaway(s, Inches(5.55),
-             "Aligned to Final_v2 (~35 pages). Charts on later slides are taken from the "
+             "Aligned to Final_v2 (~42 pages). Charts on later slides are taken from the "
              "report PDF itself. Measured results are only for next-year (t+1) prediction.")
 
     # ------------------------------------------------------------ 3 intro
@@ -402,7 +403,7 @@ def build() -> pathlib.Path:
         "Indian surveillance, 2019–2023, found 728 seropositive equids in 138 districts.",
         "This project adds three independently deployable pieces behind fixed contracts:",
         "- a calibrated next-year risk model,",
-        "- a RAG layer that answers from official guidance (or refuses),",
+        "- a RAG explanation layer that answers from official guidance (or refuses),",
         "- an alert service that sends few enough messages to stay readable.",
     ], size=14, space=6)
     takeaway(s, Inches(5.85),
@@ -452,7 +453,8 @@ def build() -> pathlib.Path:
         ("01", "Prediction as a service",
          "Package a calibrated next-year risk model as a versioned artefact behind a REST interface."),
         ("02", "Grounded Q&A",
-         "Build a retrieval-augmented layer that answers from official guidance, cites every claim, and refuses rather than guesses."),
+         "Build a retrieval-augmented explanation layer that answers from official guidance, "
+         "cites every claim, refuses when unsupported, and keeps forecast facts separate from guidance."),
         ("03", "Owner alerts",
          "Convert a calibrated probability into few enough messages that they are read."),
     ]
@@ -461,7 +463,7 @@ def build() -> pathlib.Path:
                 num, head, text, head_size=16, text_size=13)
     takeaway(s, Inches(5.70),
              "Objective 01 has measured results. 02 and 03 are specified contracts with "
-             "evaluation protocols — not presented as measured field performance.")
+             "evaluation protocols, not presented as measured field performance.")
 
     # ------------------------------------------------------------ 7 users
     s = page(prs, "Who the system is for", "Use")
@@ -492,7 +494,7 @@ def build() -> pathlib.Path:
              title_size=26)
     pic(s, "fig_architecture.png", MG + Inches(1.8), Inches(1.35), w=Inches(8.6))
     caption(s, MG, Inches(5.45), CWD,
-            "Report Figure 2: ML risk engine, RAG Q&A layer, and alert service; "
+            "Report Figure 2: ML risk engine, RAG explanation layer, and alert service; "
             "each independently deployable.")
     takeaway(s, Inches(5.95),
              "Coupling alert delivery to LLM latency would make the risk model hard to "
@@ -607,14 +609,35 @@ def build() -> pathlib.Path:
              "deployment means unseen countries.")
 
     # ------------------------------------------------------------ section 02
-    divider(prs, "02", "The RAG question-answering layer",
+    divider(prs, "02", "The RAG explanation layer",
             "How do officers and owners get answers that cite official guidance?",
-            ["Grounded retrieval with citations, refusal when unsupported",
-             "Guardrails against invented control instructions",
-             "Evaluation protocol fixed before measurement"])
+            ["Evidence separation: forecast facts vs official guidance",
+             "Hybrid retrieval, citations and refusal when unsupported",
+             "Baseline RAG metrics plus PFPT/CAIS attribution audit"])
+
+    # ------------------------------------------------------------ evidence separation
+    s = page(prs, "Forecast facts and guidance stay on separate paths", "RAG explanation",
+             title_size=24)
+    labeled(s, MG, Inches(1.40), Inches(5.95), Inches(2.35), "01", "Forecast facts",
+            "Probability, risk tier and SHAP contributors explain what the model output "
+            "says. They are injected as structured data and never rewritten as causes.")
+    labeled(s, MG + Inches(6.15), Inches(1.40), Inches(5.95), Inches(2.35), "02",
+            "Official guidance",
+            "Retrieved passages from DAHD, WOAH/WHO and lab guidance explain controls. "
+            "Tier 1 never loses to open-access literature on a control instruction.")
+    prose(s, MG, Inches(4.05), CWD, Inches(1.35), [
+        "Design rule: use the forecast to explain the forecast; use official guidance to "
+        "explain the recommended action; keep the evidence paths visible.",
+        "The layer does not calculate the risk score, diagnose an animal, or issue a "
+        "statutory decision. District language in diagrams is a query example, not the "
+        "evaluated resolution (country-year).",
+    ], size=13, space=7)
+    takeaway(s, Inches(5.65),
+             "An answer must not imply that a retrieved recommendation caused the forecast, "
+             "or that a forecast proves an individual animal is infected.")
 
     # ------------------------------------------------------------ rag fig
-    s = page(prs, "A question is answered from retrieved passages", "RAG Q&A",
+    s = page(prs, "A question is answered from retrieved passages", "RAG explanation",
              title_size=26)
     pic(s, "fig_rag.png", MG + Inches(2.6), Inches(1.25), w=Inches(8.0), h=Inches(4.6))
     caption(s, MG, Inches(5.95), CWD,
@@ -623,18 +646,50 @@ def build() -> pathlib.Path:
              "If fewer than two passages clear the relevance floor, the layer refuses "
              "rather than inventing an answer.", h=Inches(0.48))
 
+    # ------------------------------------------------------------ pfpt / cais
+    s = page(prs, "Attribution audit: PFPT and CAIS", "RAG explanation", title_size=26)
+    table(s, MG, Inches(1.35), CWD, [
+        ["Component", "What it does", "Status"],
+        ["PFPT",
+         "Matched A/B cases: freeze question, area, corpus and retrieval; "
+         "change one forecast field; pre-label expected deltas.",
+         "Proposed offline"],
+        ["CAIS",
+         "Split answers into F/G/S claims; score forecast consistency, "
+         "guidance attribution and safety separately.",
+         "Proposed diagnostic"],
+        ["CACS",
+         "100 × (F+G+S passes) / (3N). Report with all subscores; "
+         "never use the composite alone.",
+         "No threshold yet"],
+    ], col_w=[Inches(1.5), Inches(8.4), Inches(2.2)], size=12, row_h=0.48)
+    prose(s, MG, Inches(4.15), CWD, Inches(1.2), [
+        "Surfaces wrong-area/time, stale-SHAP, false-causal, unsupported-citation, "
+        "unsafe-advice and missing-disclaimer failures.",
+        "Counterfactual evaluation is prior research. The project-specific value is this "
+        "attribution audit for GlandersWatch, not inventing the method.",
+    ], size=13, space=6)
+    takeaway(s, Inches(5.55),
+             "Run PFPT/CAIS offline beside baseline RAG metrics. Never insert the audit "
+             "into live alert dispatch.")
+
     # ------------------------------------------------------------ rag eval
-    s = page(prs, "How this layer will be judged", "RAG Q&A")
-    table(s, MG, Inches(1.40), CWD, [
+    s = page(prs, "How this layer will be judged", "RAG explanation")
+    table(s, MG, Inches(1.35), CWD, [
         ["Metric", "What it asks", "How it is measured"],
-        ["Recall@k", "Is the right passage in the top k?", "Hand-built question set"],
-        ["Faithfulness", "Does the answer follow those passages?", "RAGAS + manual review"],
-        ["Answer relevance", "Does it answer the question asked?", "RAGAS"],
-        ["Citation precision", "Does every claim trace to a passage?", "Automated check"],
-    ], col_w=[Inches(2.4), Inches(5.4), Inches(4.3)], size=13, row_h=0.40)
-    takeaway(s, Inches(4.20),
-             "None of these are measured yet. Targets are fixed before measurement so "
-             "the layer cannot be scored by choosing a threshold after the fact.")
+        ["Recall@k / MRR", "Is the right passage near the top?", "Hand-built question set"],
+        ["Faithfulness", "Does the answer follow those passages?", "RAGAS / ARES + review"],
+        ["Answer relevance", "Does it answer the question asked?", "RAGAS / RAGChecker"],
+        ["Citation precision", "Does every claim trace to a supporting passage?",
+         "ALCE-style check"],
+        ["Refusal behaviour", "Out-of-scope refuse; in-scope false-refuse rate?",
+         "Fixed protocol"],
+        ["CACS (F/G/S)", "Do attributions hold under forecast perturbation?",
+         "PFPT + CAIS pairs"],
+    ], col_w=[Inches(2.5), Inches(5.3), Inches(4.3)], size=12, row_h=0.36)
+    takeaway(s, Inches(5.15),
+             "None measured yet. Targets are fixed before measurement so the layer cannot "
+             "be scored by choosing a threshold after the fact.")
 
     # ------------------------------------------------------------ section 03
     divider(prs, "03", "The alert service",
@@ -672,18 +727,20 @@ def build() -> pathlib.Path:
     labeled(s, MG, Inches(1.40), Inches(5.95), Inches(2.5), "", "Conclusion",
             "The risk engine is built and measured: six families, two splits, calibrated, "
             "reproducible from committed scripts. RAG and alert layers are specified to "
-            "their interfaces and rules.", head_size=16)
+            "their interfaces, rules and evaluation protocols (including PFPT/CAIS).",
+            head_size=16)
     labeled(s, MG + Inches(6.15), Inches(1.40), Inches(5.95), Inches(2.5), "",
             "Future scope",
-            "Model reporting capacity explicitly. Measure RAG on a hand-built question "
-            "set. Pilot alerts with a district office and report precision, recall and fatigue.",
+            "Model reporting capacity explicitly. Score baseline RAG metrics and the "
+            "PFPT/CAIS attribution audit on locked fixtures. Pilot alerts with a district "
+            "office and report precision, recall and fatigue.",
             head_size=16)
     prose(s, MG, Inches(4.20), CWD, Inches(1.2), [
         f"Dominant limitation: a negative may mean no disease or no report. With {POS} "
         "positives, uncertainty on every headline metric is wide.",
     ], size=14)
     takeaway(s, Inches(5.55),
-             "The model is finished. Evidence that RAG and alerts behave in use is not — "
+             "The model is finished. Evidence that RAG and alerts behave in use is not; "
              "a pilot is how it arrives.")
 
     # ------------------------------------------------------------ Q&A
@@ -691,7 +748,7 @@ def build() -> pathlib.Path:
     table(s, MG, Inches(1.55), CWD, [
         ["Topic", "Who answers"],
         ["Data panel, features, splits, ML results", "Yuvraj Singh"],
-        ["RAG retrieval, citations, refusal", "Shaktimayee Mohanty"],
+        ["RAG explanation, citations, PFPT/CAIS", "Shaktimayee Mohanty"],
         ["Alert rules, delivery, audit trail", "P. Shanmukh Vardhan"],
         ["Scope, limits, future work", "Any of us"],
     ], col_w=[Inches(7.5), Inches(4.6)], size=15, row_h=0.50)
@@ -705,7 +762,10 @@ def build() -> pathlib.Path:
         "Chen & Guestrin (2016). XGBoost. KDD ’16.",
         "Ke et al. (2017). LightGBM. NeurIPS.",
         "Lewis et al. (2020). Retrieval-augmented generation. NeurIPS.",
-        "Es et al. (2023). RAGAS. arXiv:2309.15217.",
+        "Es et al. (2024). RAGAS. EACL System Demonstrations. arXiv:2309.15217.",
+        "Saad-Falcon et al. (2024). ARES. NAACL. arXiv:2311.09476.",
+        "Ru et al. (2024). RAGChecker. arXiv:2408.08067.",
+        "Gao et al. (2023). ALCE: text with citations. EMNLP. arXiv:2305.14627.",
         "Robertson & Zaragoza (2009). BM25 and beyond. FnT IR.",
         "FAO (2024). FAOSTAT livestock stocks.",
         "World Bank (2024). World Development Indicators.",
@@ -715,11 +775,11 @@ def build() -> pathlib.Path:
         "ICAR-NIVEDI (2023). NADRES v2.",
     ]
     for i, r in enumerate(refs):
-        tb = s.shapes.add_textbox(MG, Inches(1.30) + Inches(0.38) * i, CWD, Inches(0.35))
+        tb = s.shapes.add_textbox(MG, Inches(1.22) + Inches(0.33) * i, CWD, Inches(0.32))
         tb.text_frame.word_wrap = True
         p = tb.text_frame.paragraphs[0]
         p.text = f"[{i+1}]  {r}"
-        p.font.size = Pt(11); p.font.color.rgb = BODY; p.font.name = SANS
+        p.font.size = Pt(10); p.font.color.rgb = BODY; p.font.name = SANS
 
     prs.save(OUT)
     desk = pathlib.Path.home() / "Desktop" / "GlandersWatch_Deck.pptx"
