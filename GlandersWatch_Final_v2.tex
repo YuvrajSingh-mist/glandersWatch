@@ -41,11 +41,13 @@
 \renewcommand{\thesection}{\arabic{section}.}
 \renewcommand{\thesubsection}{\arabic{section}.\arabic{subsection}}
 
-% chapter-based numbering for floats and equations
-\counterwithin{figure}{chapter}
-\counterwithin{table}{chapter}
-\renewcommand{\thefigure}{\thechapter.\arabic{figure}}
-\renewcommand{\thetable}{\thechapter.\arabic{table}}
+% Continuous float numbering across chapters. The report class resets figure/table
+% with each \\chapter by default; \\counterwithout removes that reset so numbers
+% run 1,2,3... with no gaps (no missing Figure 2.1 between 1.1 and 3.1).
+\counterwithout{figure}{chapter}
+\counterwithout{table}{chapter}
+\renewcommand{\thefigure}{\arabic{figure}}
+\renewcommand{\thetable}{\arabic{table}}
 
 % \input{figures/diagstyles.tex}
 \begin{document}

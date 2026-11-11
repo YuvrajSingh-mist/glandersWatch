@@ -517,14 +517,14 @@ def build() -> pathlib.Path:
     stat(s, MG + Inches(9.3), Inches(3.20), Inches(2.85), f"{PREV*100:.2f}%", "prevalence")
     takeaway(s, Inches(4.50),
              "The next slide shows the three label charts from the report "
-             "(Figures 5.1 to 5.3), stacked for readability.")
+             "(Figures 8 to 10), stacked for readability.")
 
-    # ------------------------------------------------------------ label figs 5.1-5.3
+    # ------------------------------------------------------------ label figs 8-10
     s = page(prs, "How the label looks", "Data", title_size=26)
     panels = [
-        ("fig10a_label_volume.png", "Fig 5.1  Annual positives and prevalence"),
-        ("fig10b_label_concentration.png", "Fig 5.2  Positive years per country"),
-        ("fig10c_label_region.png", "Fig 5.3  Prevalence by World Bank region"),
+        ("fig10a_label_volume.png", "Fig 8  Annual positives and prevalence"),
+        ("fig10b_label_concentration.png", "Fig 9  Positive years per country"),
+        ("fig10c_label_region.png", "Fig 10  Prevalence by World Bank region"),
     ]
     y = Inches(1.30)
     for name, cap in panels:
