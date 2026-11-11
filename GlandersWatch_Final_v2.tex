@@ -518,7 +518,7 @@ an action, early-warning evaluation work stresses receipt and usefulness rather 
 alone, software alert managers contribute grouping, silencing and routing, and standard public-warning
 formats support interchange. None of these is a complete substitute for the service designed here;
 Tables~\ref{tab:alert-related-work} and~\ref{tab:alert-comparison} summarise the lessons carried
-forward, with implementation detail left to Chapter~\ref{ch:alerts}.
+forward, with implementation detail later in Chapter~\ref{ch:method} (Alerting System).
 
 \begin{table}[htbp]\centering\small
 \caption{Previous systems and the lessons applied in GlandersWatch.}\label{tab:alert-related-work}
@@ -568,7 +568,7 @@ deduplication to consented owner messages with an audit trail.
 This project specifies a three-part platform behind fixed contracts: a risk engine that compares
 model families under temporal and leave-country-out validation, a RAG layer for grounded question
 answering, and an alert service that sends few enough messages to remain readable.
-Chapters~\ref{ch:method}--\ref{ch:alerts} develop each part, while Chapter~\ref{ch:results} reports
+Chapter~\ref{ch:method} develops each part, while Chapter~\ref{ch:results} reports
 measured results only for the risk engine.
 
 % =====================================================================
@@ -659,13 +659,12 @@ serving, the RAG layer and the alert service are specified but not deployed, so 
 performance is reported for them.
 
 % =====================================================================
-\chapter{Machine Learning Risk Model}
+\chapter{Methodology}
 \label{ch:method}
 % =====================================================================
 
-This chapter covers the predictive model only: the data, the feature set, the six model families and
-the way they are trained and tested. The RAG and alert chapters that follow specify how a prediction
-is answered against and delivered; they do not change the numbers here.
+This chapter covers the three methods that make up the platform: the machine-learning risk model,
+the retrieval-augmented question-answering layer, and the alerting service.
 
 \section{Dataset Used}
 
@@ -824,7 +823,7 @@ pairs and columns with no measurable label relationship are discarded. No princi
 analysis is used: with eight retained features and 2,880 rows the binding constraint is signal
 rather than dimensionality.
 
-\section{What We Gave The Model (Features)}
+\section{Features}
 \label{sec:features}
 
 A feature is an input column, and every candidate uses information available in the current year or
@@ -851,7 +850,7 @@ farm animals. Livestock units weight cattle and camels at 0.8 and small ruminant
 number expresses grazing pressure across species. Years since last event uses 99 to mean never
 recorded in the window.
 
-\section{Models We Tried}
+\section{Models}
 
 Six families are compared, including a deliberately simple baseline.
 
@@ -894,7 +893,7 @@ On leave-country-out precision-recall AUC, because deployment means an unseen co
 unseen year. Chapter~\ref{ch:results} reports that ranking: logistic regression leads under that
 criterion even when a tree ensemble leads on the easier temporal holdout.
 
-\section{How We Trained And Tested It}
+\section{Training and Evaluation}
 
 Several measures keep anything from the test period out of training.
 
@@ -928,11 +927,11 @@ prediction, which is why the same numbers support both global feature ranking an
 factor list the risk engine returns.
 
 % =====================================================================
-\chapter{The RAG Question-Answering Layer}
+\section{Retrieval-Augmented Question Answering}
 \label{ch:rag}
 % =====================================================================
 
-\section{The Problem This Layer Solves}
+\subsection{The Problem This Layer Solves}
 
 A calibrated probability of 0.24 is useful to a veterinary officer and opaque to most equine owners,
 yet both still have questions that the risk score does not answer: what the National Action Plan
@@ -952,7 +951,7 @@ model's priors, and knowledge frozen at training time, whereas retrieval keeps k
 that a re-ingestion can update, makes every answer auditable, and allows a refusal path, at the cost
 of latency and possible retrieval failure.
 
-\section{Knowledge Base}
+\subsection{Knowledge Base}
 
 The corpus is restricted to authoritative sources so that answers can be checked against them, and
 each document carries an authority tier used as a tie-breaker during retrieval.
@@ -978,7 +977,7 @@ Tier 3 may inform an answer but never overrides tier 1 on a control instruction.
 resolve to the higher tier and are logged, because a silent contradiction between sources is the
 failure this layer exists to prevent.
 
-\section{Ingestion, Embedding and Retrieval}
+\subsection{Ingestion, Embedding and Retrieval}
 
 Ingestion runs offline as a job and stores each chunk with enough metadata to be cited and filtered.
 Chunking is section-aware rather than fixed-width, because a fixed window cuts control instructions in
@@ -1033,7 +1032,7 @@ The relevance floor drives the refusal path: if fewer than two passages clear it
 refusal with the SHAP factors, because marginal passages produce a confident answer built on
 nothing.
 
-\section{Context, Generation and Guardrails}
+\subsection{Context, Generation and Guardrails}
 
 The prompt has three parts in fixed order: a system instruction, the retrieved passages with
 identifiers, and (when supplied) structured prediction facts for the area under discussion. The
@@ -1072,7 +1071,7 @@ retrieved set, and one that does not resolve means the model cited a document it
 is a hallucination whether or not the sentence is true. Asking a model to be accurate is not a
 control; checking its output is.
 
-\section{Evaluation}
+\subsection{Evaluation}
 
 Five quantities are defined below, following the project proposal. None is reported as a measurement,
 because the layer has not been run against the corpus; measuring them is future work
@@ -1110,19 +1109,19 @@ and p95 latency under two seconds.
 %   figures/alerting_modular_arch.tex
 % =====================================================================
 
-\chapter{Alerting System}
+\section{Alerting System}
 \label{ch:alerts}
 
-\section{Purpose and Scope}
+\subsection{Purpose and Scope}
 The GlandersWatch alerting system converts a machine-learning risk prediction into a controlled notification for registered recipients. The risk engine estimates the probability of documented Glanders occurrence for an area and period; the alert service decides whether to notify, who should receive the message and how delivery is managed. A prediction is not itself an alert: every new prediction is evaluated, but a notification is generated only when the configured policy requires it.
 
 The design is period-aware and uses one workflow for monthly and yearly predictions. Monthly prediction is future work for the ML component; the currently evaluated model is country-year based. The alert service is designed to accept monthly records once a monthly model, target and data pipeline have been developed and validated. Its output is a population-level warning, not an individual-animal diagnosis or a replacement for veterinary examination and laboratory testing.
 
 Related warning systems, design lessons and the comparison with this service are reviewed in
 Chapter~\ref{ch:lit} (Tables~\ref{tab:alert-related-work} and~\ref{tab:alert-comparison}). This
-chapter specifies the architecture and rules that implement that design.
+section specifies the architecture and rules that implement that design.
 
-\section{Proposed End-to-End Architecture}
+\subsection{Proposed End-to-End Architecture}
 Figure~\ref{fig:alerts-pipeline} shows the supplied end-to-end architecture. The flow begins with user registration and prediction generation, then proceeds through evaluation, rules, alert creation, fan-out and notification. The data layer stores predictions, subscriptions, period-specific alert state, alerts and delivery logs. The approval gate is optional and may hold selected HIGH alerts for veterinary review; its use requires agreement with project and veterinary stakeholders.
 
 \begin{figure}[htbp]\centering
@@ -1130,20 +1129,20 @@ Figure~\ref{fig:alerts-pipeline} shows the supplied end-to-end architecture. The
 \caption{End-to-end GlandersWatch alert pipeline. The period field supports monthly or yearly predictions.}\label{fig:alerts-pipeline}
 \end{figure}
 
-\subsection{Prediction Trigger and Alert Evaluator}
+\subsubsection{Prediction Trigger and Alert Evaluator}
 After the risk engine stores a prediction, it publishes \texttt{predictions\_ready}, which tells the evaluator that a prediction batch is available without implying that a message must be sent. The evaluator loads the new prediction, previous state for the same area and frequency, active subscriptions and applicable configuration, then passes these inputs to the rules core; it does not train the model or calculate the probability.
 
-\subsection{Rules, Alert Record and Fan-Out}
+\subsubsection{Rules, Alert Record and Fan-Out}
 The rules engine classifies the probability, checks suppression conditions and protects alert creation against duplicates. If the decision is SEND, one logical alert record is created with its area, period, level, source prediction, reason and status. This record is separate from delivery jobs: one alert for Area A may generate 41 jobs for 40 owners and one veterinary officer.
 
 Fan-out obtains eligible subscriptions and creates one job per subscription. Redis with Celery is a proposed production option: Redis brokers background work and Celery workers execute it. The queue is not the permanent alert-history store; PostgreSQL is proposed for durable predictions, states, alerts and delivery logs.
 
-\subsection{Notification Service, Data and Administration}
+\subsubsection{Notification Service, Data and Administration}
 For each job, the notification service checks recipient preferences and delivery restrictions, renders an approved template in the recipient's language and submits it through a channel adapter. The design allows SMS, WhatsApp and Telegram, with email or webhook adapters as extensions. Messages should state the area, period and risk level, provide approved action guidance and veterinary contact information where available, and clarify that the result is a population-level forecast, not a diagnosis.
 
 Temporary provider failures may be retried with backoff, while permanent failures such as invalid destinations are recorded without endless retries. PostgreSQL stores predictions, users/subscriptions, alert state, alert records and delivery logs, with PostGIS available if geographic queries are needed, and the admin dashboard exposes alert history, delivery status, mute controls and any approval workflow under permission-controlled, logged administrative actions.
 
-\subsection{Notification Content and Recipient Action}
+\subsubsection{Notification Content and Recipient Action}
 A useful warning should be short enough to read on a phone but contain enough context for the recipient to understand why it was sent. Each message should identify the affected area, prediction period, risk category, issue date and recommended next step. It should avoid technical model terminology and should not present the probability as the chance that a particular animal is infected. The message should also identify the responsible veterinary contact or official information source, where one is available. The language and channel must follow the recipient's saved preferences and consent.
 
 An illustrative message for a HIGH-risk transition is:
@@ -1156,7 +1155,7 @@ The model indicates an elevated area-level risk of documented Glanders occurrenc
 \end{quote}
 The exact action wording should be approved by veterinary authorities before deployment and adapted to local language and operating procedures. A message should not disclose another user's contact details or unnecessary personal information. If no verified local contact is configured, the system should direct recipients to an approved general veterinary service rather than inventing a phone number. Message templates should be versioned so the content used for each alert can be reconstructed during an audit.
 
-\section{Period-Aware Prediction Contract}
+\subsection{Period-Aware Prediction Contract}
 The prediction must identify its frequency and exact period. A conceptual monthly record is shown below; field names are illustrative and can be aligned with the final API schema.
 \begin{verbatim}
 {
@@ -1186,8 +1185,8 @@ Deduplication&Area + month + level&Area + year + level\\
 Policy&Monthly thresholds/cooldown as validated&Yearly thresholds/cooldown as validated\\\bottomrule
 \end{tabular}\end{table}
 
-\section{Rules Engine: Thresholding, Suppression and Deduplication}\label{sec:alert-rules}
-\subsection{Thresholding and Hysteresis}
+\subsection{Rules Engine: Thresholding, Suppression and Deduplication}\label{sec:alert-rules}
+\subsubsection{Thresholding and Hysteresis}
 The calibrated probability is mapped to LOW, MEDIUM or HIGH. Numerical boundaries must be selected from model validation and the trade-off between false alerts and missed events; 0.5 must not be assumed to be the correct HIGH threshold.
 \begin{table}[htbp]\centering\small
 \caption{Meaning of the proposed alert levels.}\label{tab:alert-levels}
@@ -1200,7 +1199,7 @@ HIGH&At or above configured HIGH boundary.&Follow approved precautions, avoid un
 
 Hysteresis reduces frequent switching near a boundary. An area enters HIGH when $p\geq T_H$ and leaves HIGH only when $p<T_H-\delta$, where $T_H$ is the HIGH entry threshold and $\delta$ is a configurable margin. For illustration, if $T_H=0.30$ and $\delta=0.05$, a probability of 0.32 enters HIGH; a later value of 0.29 remains HIGH; the area leaves only below 0.25. The margin must be validated for the relevant prediction frequency.
 
-\subsection{Suppression}
+\subsubsection{Suppression}
 Suppression decides whether a notification is necessary; it does not delete or ignore the prediction. The evaluator still processes each new prediction. The rules are:
 \begin{enumerate}
 \item \textbf{Unchanged level:} normally notify on a risk-level transition, not every period. MEDIUM in consecutive months does not automatically create repeated messages.
@@ -1213,7 +1212,7 @@ Suppression decides whether a notification is necessary; it does not delete or i
 \end{enumerate}
 Quiet hours and daily caps are checked by the dispatcher at delivery time because they depend on local time and other messages sent to that recipient. Stale data, area mute and risk-state transition are checked earlier. An optional all-clear/de-escalation message may be sent when risk falls, but it must not imply that an individual animal is disease-free.
 
-\subsection{Deduplication}
+\subsubsection{Deduplication}
 Deduplication protects against replayed events, worker restarts and concurrent processing. It is distinct from suppression: suppression decides whether a message is warranted; deduplication prevents the same logical operation from being created or processed twice.
 \begin{enumerate}
 \item \textbf{Alert level:} unique key \texttt{(area, period\_type, period\_id, level)} prevents duplicate logical alert records.
@@ -1222,7 +1221,7 @@ Deduplication protects against replayed events, worker restarts and concurrent p
 \end{enumerate}
 The first two protections should use database unique constraints, not only application checks. A local database cannot guarantee exactly-once delivery to an external provider; callbacks, status queries and reconciliation are needed where supported.
 
-\section{Modular Architecture: Core, Ports and Adapters}
+\subsection{Modular Architecture: Core, Ports and Adapters}
 Figure~\ref{fig:alerting-modular} shows the internal modular structure. The alert engine core contains domain rules and does not directly depend on a database, web framework or messaging SDK. Four ports define what the core needs; adapters implement them for a demo or production stack.
 \begin{figure}[htbp]\centering
 \resizebox{\textwidth}{!}{\input{figures/alerting_modular_arch.tex}}
@@ -1237,7 +1236,7 @@ Figure~\ref{fig:alerting-modular} shows the internal modular structure. The aler
 
 This Ports-and-Adapters (Hexagonal) structure separates business rules from technology choices. Replacing SQLite with PostgreSQL or Telegram with an approved SMS provider changes an adapter, not the threshold and suppression logic. The core can initially run as a Python library and later be hosted behind an API; this design does not require every component to be a separate microservice.
 
-\section{Example Flow: Monthly and Yearly Predictions}
+\subsection{Example Flow: Monthly and Yearly Predictions}
 The following monthly example uses fictional values only. Assume MEDIUM begins at 0.15, HIGH entry is 0.30, hysteresis is 0.05, and Area A has 40 owner subscriptions plus one veterinary officer.
 \begin{table}[htbp]\centering\small
 \caption{Illustrative monthly state sequence for Area A.}\label{tab:monthly-example}
@@ -1256,14 +1255,14 @@ For March, the evaluator consumes the event, loads the prediction, previous mont
 
 In April, 0.29 does not cause the area to leave HIGH because the exit boundary is below 0.25. In July, 0.20 is below that boundary and the state can de-escalate to MEDIUM. The same rules apply to yearly predictions: if the 2027 yearly state is MEDIUM and the 2028 yearly state is HIGH, the engine evaluates the transition using the yearly state and a key such as \texttt{(Area A, year, 2028, HIGH)}. Monthly and yearly states remain separate.
 
-\section{Reliability, Audit and Evaluation}
+\subsection{Reliability, Audit and Evaluation}
 Every decision, including a skipped alert, should be logged with a reason code such as \texttt{UNCHANGED\_LEVEL}, \texttt{STALE\_DATA}, \texttt{AREA\_MUTED}, \texttt{COOLDOWN}, \texttt{DUPLICATE\_ALERT} or \texttt{QUIET\_HOURS}. The alert record explains why a logical alert was created; delivery logs record the outcome for each recipient.
 
 Transient failures, such as temporary timeouts, may be retried with exponential backoff and jitter. Permanent failures, such as invalid contact details, should not be retried indefinitely. If a provider may have accepted a message but the application timed out, check the delivery log and provider status before retrying. Provider acceptance and confirmed recipient delivery should be treated as different statuses when delivery receipts are available.
 
 Evaluation should include: (i) alert precision/false-alert rate; (ii) event coverage/missed-event rate; (iii) notification noise per recipient per month and year; (iv) delivery success by channel; (v) time from \texttt{predictions\_ready} to decision and provider acceptance; and (vi) idempotency tests using event replay, worker restart, concurrent evaluation and provider-timeout simulation. These are proposed measures, not measured production results.
 
-\section{Limitations and Summary}
+\subsection{Limitations and Summary}
 The current evaluated model is country-year based; district-level alerts require validated district-level predictions. Monthly prediction is not yet an evaluated model output: the monthly target, input pipeline, temporal validation and calibration remain ML future work. Thresholds and hysteresis require model validation and veterinary input. Real SMS/WhatsApp delivery requires provider integration and compliance. Delivery does not prove that a recipient read or acted on a message. Finally, local database constraints prevent duplicate internal records but cannot alone guarantee exactly-once external delivery.
 
 In summary, GlandersWatch proposes a period-aware, event-driven alert service connecting calibrated risk predictions to registered recipients. The same rules core supports monthly and yearly records through explicit period identities and separate state. Thresholding and hysteresis classify and stabilise risk; suppression controls unnecessary messages; deduplication protects alert creation, fan-out and retries; and modular ports allow storage and channel adapters to be replaced. The design adapts complementary lessons from surveillance, public warning, early-warning evaluation, alert management and standardised exchange. Monthly ML prediction, production delivery and field evaluation remain to be completed.
@@ -1356,7 +1355,7 @@ against random alerting. Panel B gives the alert volume required to reach a targ
 \end{figure}
 
 For the retrieval-augmented layer no measured results are reported: it is specified in
-Chapter~\ref{ch:rag} but has not been run against the corpus, so its five metrics have no values.
+Section~\ref{ch:rag} but has not been run against the corpus, so its five metrics have no values.
 
 \section{The Country-Level View}
 
@@ -1458,7 +1457,7 @@ The following limits apply to every headline number in this report.
   \item \textbf{RAG and alerts are specified, not measured.} The RAG layer and alert service have
         interfaces, rules and evaluation protocols, but no deployed pilot scores. Monthly
         prediction, real SMS/WhatsApp delivery, and proof that recipients read or acted on a message
-        remain future work (see also the alert-specific limits in Chapter~\ref{ch:alerts}).
+        remain future work (see also the alert-specific limits in Section~\ref{ch:alerts}).
 \end{enumerate}
 
 \section{Future Work}
