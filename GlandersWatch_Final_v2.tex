@@ -595,9 +595,8 @@ layer answers questions from the guidance corpus (optionally with the current pr
 and the alert service decides whether a prediction becomes a delivered message, with no component
 recalculating another's output.
 
-Components exchange versioned schemas rather than shared tables or in-process calls, so each side can
-be built and tested against a fixture, which is how the RAG layer could be designed while the alert
-service was still unfinished.
+Components exchange versioned schemas rather than shared tables or in-process calls, so each side is
+built and tested against a fixture and can be developed without waiting on the others.
 
 The core stays disease-agnostic: a disease is a configuration record naming the label extractor,
 knowledge collection, templates and thresholds to use, so adding a second disease means new
@@ -660,195 +659,147 @@ serving, the RAG layer and the alert service are specified but not deployed, so 
 performance is reported for them.
 
 % =====================================================================
-\chapter{Methodology}
+\chapter{Machine Learning Risk Model}
 \label{ch:method}
 % =====================================================================
 
-\section{Data Sources}
+This chapter covers the predictive model only: the data, the feature set, the six model families and
+the way they are trained and tested. The RAG and alert chapters that follow specify how a prediction
+is answered against and delivered; they do not change the numbers here.
 
-Four public sources are used: a literature index, a livestock census, a development indicator set and
-a reanalysis climate archive \cite{europepmc,faostat,wdi,power}. None had previously been applied to
-glanders risk modelling.
+\section{Dataset Used}
 
-Europe PMC supplies the animal history: 6,674 records yielding 263 occurrence
-events. FAOSTAT supplies animal population, 68,449 records covering seven stock series from 1961 to
-2023. The World Bank supplies socio-economic context, ten development indicators and country
-centroids for 217 countries from 2000 to 2024. NASA POWER supplies environment, six measures of
-temperature, precipitation, humidity and wind at 211 centroids from 2005 to 2024.
-
-Extracted events rise in volume after 2015, which reflects growth in open access veterinary
-publishing as much as any change in incidence. This is one reason the label is treated as
-documented activity throughout.
-
-\section{Panel Construction}
-
-All four sources are keyed on ISO 3166 alpha-3 code and calendar year, so they join once names are
-reconciled. FAOSTAT is streamed from its 32\,MB archive and filtered to the seven stock series rather
-than loaded whole. Names are matched through \texttt{pycountry} with overrides for forms such as
-``T\"urkiye'', and World Bank aggregates are excluded by requiring a three-character ISO code, so
-``World'' never enters the panel as a country.
-
-Combining the four sources produces a grid of 6,700 country-year rows across
-268 countries for 2000 to 2024, in 60 columns: 44 engineered candidate features, three
-identifiers, five label fields and eight intermediate quantities.
-
-Preprocessing reduces that grid to 2,880 rows, and selection keeps 8 of the 44 candidates, which
-is the matrix every model was trained and evaluated on. The row loss comes from the equine-holding
-filter, which keeps 162 of the 268 countries on a maximum equid stock of at least one
-thousand, and from the 2005 to 2023 year window; the observable-label restriction then removes nothing
-further. Imputation and scaling happen inside the training pipeline, so the test period cannot
-influence them.
-
-The matrix is committed as \texttt{model\_matrix.csv} under \texttt{data/}\allowbreak\texttt{processed/}:
-2,880 rows by 8 feature columns plus the target, written by
-\texttt{src/11\_export\_model\_matrix.py} from the same loader and selection the training script uses.
-
-Events are de-duplicated on country, year and source record identifier, so one paper reporting
-several cases cannot contribute multiple counts. Missing values are median-imputed inside the training
-pipeline, with a missing-indicator feature per affected column. Missingness is low: 0.00\% for
-FAOSTAT, 1.01\% for the World Bank, 0.00\% for climate, and 0.25\% overall, no column above
-3.8\%.
-
-\section{Label Definition}
-
-The target is binary: whether a glanders occurrence was documented in country $i$ during year $t+1$.
-Occurrence is extracted from Europe PMC by matching, within one sentence, a country name from a
-gazetteer and a term from an occurrence lexicon (\emph{outbreak}, \emph{case}, \emph{detected},
-\emph{seropositive}, \emph{surveillance}), recorded for the year in the sentence or the publication
-year. Because the label depends on publication it is termed \emph{documented activity}: a negative may
-mean no disease or no report, so the model predicts observable activity, not biological presence.
-
-\section{Feature Engineering}
-
-Four groups are built from information at year $t$ or earlier. Seven disease-history features cover
-prior-year occurrence, a five-year total, years since the last event and activity shares. Fourteen
-population features cover log stocks, equid share, density, growth and species counts. Ten climate
-features cover temperature, precipitation, humidity and wind, each with an anomaly against the
-country's own expanding mean, separating unusual conditions from latitude. Eleven socio-geographic
-features cover income, agriculture, GDP, rural share and connectivity, and largely proxy surveillance
-capacity.
-
-Three derived features need definition. Equid share is horses, asses and mules over total farm animals.
-Livestock units weight cattle and camels at 0.8 and small ruminants at 0.1, so one number expresses
-grazing pressure across species. Years since the last event uses 99 for no event in the window.
-
-The association measures above are diagnostics: they say how each candidate relates to the label on
-its own, and they are not used to choose the feature set, because a marginal measure and a fitted
-model disagree about what matters, as Chapter~\ref{ch:results} shows. Selection is driven by
-attribution instead (Section~\ref{sec:shapselect}).
-
-One column is removed structurally: \texttt{equids} is exactly the sum of horses, asses and mules,
-which a tree can rebuild from its parts. No projection or principal component analysis is applied;
-with 8 retained features and 2,880 rows the binding constraint is signal rather than
-dimensionality.
-
-\section{Statistical Association Measures}
-\label{sec:assoc}
-
-Four measures screen the features, each from a standard library routine rather than a handwritten
-implementation, with package versions recorded in the committed environment. Let $y\in\{0,1\}$ be the next-year
-label and $n$ the number of complete pairs.
-
-\textbf{Spearman's rank correlation} (\texttt{scipy.stats.spearmanr}) measures monotone association
-without assuming linearity, which matters because equid stock spans four orders of magnitude:
-\[
-\rho = \frac{\operatorname{cov}\big(R(x), R(y)\big)}{\sigma_{R(x)}\,\sigma_{R(y)}} .
-\]
-
-\textbf{Mutual information} (\texttt{sklearn.feature\_selection.mutual\_info\_classif}, $k=5$)
-captures non-monotone dependence that a rank correlation misses, estimated by the
-Kraskov--St\"ugbauer--Grassberger $k$-nearest-neighbour form:
-\[
-I(X;Y)=\iint p(x,y)\log\frac{p(x,y)}{p(x)\,p(y)}\,\mathrm{d}x\,\mathrm{d}y,
-\qquad
-\hat{I}=\psi(n)-\big\langle\psi(n_x{+}1)+\psi(n_y{+}1)\big\rangle+\psi(k),
-\]
-with $\psi$ the digamma function and $n_x$, $n_y$ per-point neighbour counts.
-
-\textbf{Cram\'er's $V$} (\texttt{scipy.stats.chi2\_contingency}) measures association between a
-categorical feature and the binary label, placing income band and region on one scale:
-\[
-V=\sqrt{\frac{\chi^2}{n\,\min(r-1,\,c-1)}} .
-\]
-
-\textbf{Variance inflation} (\texttt{numpy.linalg.lstsq}) quantifies how far one feature can be
-reconstructed from the others, and so how unstable its coefficient would be:
-\[
-\mathrm{VIF}_j=\frac{1}{1-R_j^2},
-\]
-where $R_j^2$ comes from regressing $x_j$ on the remaining features. This is the measure behind the
-collinearity result in Chapter~\ref{ch:results}.
-
-\section{Feature Selection by SHAP}
-\label{sec:shapselect}
-
-\subsection{What SHAP is and why the average is over orderings}
-
-SHAP assigns each input a share of one prediction, borrowed from Shapley values in cooperative game
-theory. The inputs are players, the prediction is the payout, and a player's fair share is what the
-payout changes by, on average, across every order in which the players could have joined.
-
-The average over orderings is the whole point. A single ordering would credit a feature with
-everything it adds once the features before it are already present, which depends arbitrarily on that
-ordering. A feature that duplicates another would look worthless if its twin entered first and
-essential if it entered second. Averaging over all $|F|!$ orderings removes that arbitrariness, and
-the weight in the formula below is simply the fraction of orderings in which the set $S$ precedes
-feature $j$.
-
-For feature $j$, with $F$ the full set and $f$ the model,
-\[
-\phi_j = \sum_{S \subseteq F \setminus \{j\}}
-\underbrace{\frac{|S|!\,\big(|F|-|S|-1\big)!}{|F|!}}_{\text{share of orderings with }S\text{ first}}
-\Big[ \underbrace{f\big(S \cup \{j\}\big) - f(S)}_{\text{added by }j\text{ given }S} \Big],
-\]
-where $f(S)$ is the model output using only the features in $S$, the rest marginalised. Each term is
-the marginal contribution of $j$ given one coalition, and the sum weights those contributions by how
-often that coalition occurs.
-
-Three properties make the result usable rather than merely plausible. Local accuracy: the values sum
-to the prediction minus the base rate, so they decompose that prediction exactly and nothing is left
-unexplained. Missingness: a feature absent from the model receives zero, so the accounting does not
-invent contributions. Consistency: if a feature's marginal effect rises in every subset, its value
-cannot fall, which is the property that makes the ranking trustworthy for selection.
-
-The implementation is \texttt{shap.TreeExplainer}, which evaluates the sum exactly for tree ensembles
-in polynomial rather than exponential time, so the attribution is not sampled. Global importance is
-the mean absolute value over the $n$ explained rows,
-$\bar{\phi}_j = \frac{1}{n}\sum_i |\phi_{ij}|$, which is what ranks features for selection.
-
-\subsection{Why attribution rather than association}
-
-The four measures in Section~\ref{sec:assoc} ask how a feature relates to the label on its own.
-Selection needs a different question: how much a feature adds to a model that already has the others.
-The two answers diverge sharply here. Mutual information and Spearman correlation rank
-\texttt{longitude} first and \texttt{temp\_mean\_anom} near the bottom, while attribution reverses
-them, because longitude is a stand-in for which continent a country sits in and the model can recover
-that from region, population and reporting variables. Selecting on association would therefore keep
-proxy columns and drop the conditional signal.
-
-SHAP was the only attribution method used, for three reasons. It is additive and signed, so the same
-values supply both the global ranking that selection needs and the per-prediction top-factor list the
-risk engine returns, which keeps one attribution path in the platform rather than two.
-\texttt{TreeExplainer} is exact for the tree families in use and therefore cheap enough to recompute
-on every training run. And it carries the consistency guarantee above, which permutation importance
-and impurity-based gain do not: impurity gain is biased toward high-cardinality columns, and
-permutation importance is unstable with correlated inputs, of which this panel has many.
-
-\subsection{Procedure and the retained set}
-
-The ranking is computed on the training years only, 2005 to 2017. Fitting on the full panel
-would let the held-out years influence which features were chosen, and the temporal-holdout score
-reported in Chapter~\ref{ch:results} would then be optimistic. The 42 numeric candidates are
-ranked by mean absolute SHAP on that training window and the first 8 are kept.
-
-8 is the whole set. No further columns are retained, and the exported dataset contains exactly
-those 8 columns so the artefact on disk and the model behind the results are the same object.
+Four public data sources are used, and none had previously been applied to glanders risk modelling
+\cite{europepmc,faostat,wdi,power}.
 
 \begin{table}[htbp]
 \centering
-\caption{The 8 features the reported models use, in rank order by mean absolute SHAP on the
-training years, with the unit each variable is measured in. The retained set carries 49\% of the
-total attribution across all 42 candidates.}
+\caption{The four data sources. Glanders events in Europe PMC were extracted by matching a country
+name and an event term within the same sentence, which yielded 263 events across 2000 to 2024.}
+\label{tab:sources}
+\small
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{5.4cm}
+                >{\raggedright\arraybackslash}p{3.8cm}
+                >{\raggedright\arraybackslash}p{4.6cm}@{}}
+\toprule
+\textbf{Source} & \textbf{What it gives us} & \textbf{Size} \\
+\midrule
+Europe PMC (research papers) & Where and when glanders was reported & 6,674 papers $\rightarrow$ 263 events \\
+FAOSTAT & How many horses, donkeys, mules, cattle, goats and sheep each country has & 68,449 records, 1961--2023 \\
+World Bank & Money, farming, population, internet access & 10 indicators, 217 countries \\
+NASA POWER & Temperature, rainfall, humidity, wind & 6 measures, 211 locations \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Why these four sources.}
+They cover what decides whether a disease can appear at all: whether it has been there before, how
+many animals could catch it, and whether the climate suits it. World Bank data adds a rough measure
+of how well a country detects and reports disease. Pulling several kinds of data together is what
+makes this stronger than an analysis of one source. Extracted events rise after 2015, which reflects
+open-access publishing growth as much as incidence, so the label is treated as documented activity
+throughout.
+
+\paragraph{The assembled panel.}
+All four sources are keyed on ISO-3 country code and calendar year, so they join once names are
+reconciled. The full panel has 6,700 country-year rows covering 268 countries from 2000 to 2024. For
+modelling we keep only equine-holding countries (maximum equid stock of at least 1{,}000), the years
+2005 to 2023, and rows where next year's answer is observable. That leaves
+\textbf{2,880 rows, 8 retained input columns and 169 positive labels}, written as
+\texttt{model\_matrix.csv} under \texttt{data/processed/} by the same loader the training script uses.
+
+\paragraph{Preprocessing.}
+Five steps, in this order.
+
+\begin{enumerate}
+\setlength{\itemsep}{0.1em}
+\item \textbf{Name reconciliation.} Country names are matched across sources through
+      \texttt{pycountry} with overrides for forms such as ``T\"urkiye'', so joins do not silently
+      drop rows.
+\item \textbf{Aggregate removal.} World Bank regional and global totals are dropped by requiring a
+      three-character ISO code, so rows such as ``World'' never enter as countries.
+\item \textbf{De-duplication.} Literature events are de-duplicated on
+      \texttt{(iso3, year, record\_id)}, so one paper cannot inflate a cell.
+\item \textbf{Missing values.} Filled with the column median inside the training pipeline, with a
+      missing-indicator flag per affected column. Missingness is low: 0.25\% overall and at most
+      3.8\% in any column.
+\item \textbf{Absence handling.} A country-year is coded 0 only after the equine-stock filter, so a
+      blank is never read as proof that disease was absent.
+\end{enumerate}
+
+\paragraph{Feature engineering.}
+Four groups of columns are built from information available in year $t$ or earlier: disease history
+(lags, five-year totals, years since last event), animal population (stocks, equid share, density,
+growth), climate (levels and country-specific anomalies), and country context (income, agriculture,
+connectivity). Section~\ref{sec:features} lists the groups. Selection keeps eight of the numeric
+candidates by mean absolute SHAP on the training years alone
+(Section~\ref{sec:analysis}), because marginal association and model attribution disagree about what
+matters.
+
+\section{Dataset Analysis}
+\label{sec:analysis}
+
+We start with the label, then ask how each input relates to it and how much the inputs duplicate each
+other.
+
+\paragraph{The answer key.}
+For every country and year the answer is yes or no: was glanders documented the following year?
+Occurrence is extracted from Europe PMC by matching, within one sentence, a country name and an
+occurrence term (\emph{outbreak}, \emph{case}, \emph{detected}, \emph{seropositive},
+\emph{surveillance}). Because the label depends on publication it is termed \emph{documented
+activity}: a negative may mean no disease or no report.
+
+\begin{table}[htbp]
+\centering
+\caption{Numbers describing the answer key on the modelling matrix.}
+\label{tab:answer-key}
+\small
+\begin{tabular}{@{}lr@{}}
+\toprule
+\textbf{Measure} & \textbf{Value} \\
+\midrule
+Total rows & 2,880 \\
+``Yes'' rows (event next year) & 169 \\
+``No'' rows & 2,711 \\
+Percentage ``yes'' & 5.87\% \\
+Ratio of no to yes & about 16 to 1 \\
+Countries with at least one ``yes'' & 55 of 160 \\
+Countries with ``yes'' in two or more years & 30 \\
+Share of all ``yes'' in the top 5 countries & 35.5\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{What the distribution tells us.}
+Three things follow from that table. First, yes is rare enough that always answering no would be
+right about 94\% of the time, so accuracy is useless and we need scores built for rare events.
+Second, the disease comes back: 30 of the 55 positive countries were positive in two or more years,
+so past activity is a fair input. Third, the yes answers cluster, with five countries holding 35.5\%
+of them, and those five largely run publishing laboratories, which is why the target is documented
+activity rather than biological presence.
+
+\paragraph{Statistical association.}
+Before training, each numeric column is screened with Spearman's $\rho$ (monotone association),
+mutual information (non-monotone dependence) and, for categories, Cram\'er's $V$. Variance inflation
+flags near-duplicates. The strongest epidemiological monotone signal is
+\texttt{years\_since\_last}: more years since the last report means lower next-year risk. Columns
+such as longitude can rank high on marginal association while ranking low under model attribution,
+because they stand in for which region publishes rather than for transmission itself.
+
+\paragraph{Where the two importance measures disagree.}
+\label{sec:shapselect}
+Selection therefore uses SHAP attribution on the training years (2005--2017) rather than marginal
+correlation: mutual information and Spearman can favour reporting proxies, while mean absolute SHAP
+asks how much a feature adds once the others are already in the model
+\cite{lundberg2017}. The 42 numeric candidates are ranked on that training window and the first eight
+are kept; the exported matrix contains exactly those eight columns so the artefact on disk matches
+the model behind the results. The retained set carries 49\% of total attribution across all
+candidates. Chapter~\ref{ch:results} shows what that compression costs in transfer.
+
+\begin{table}[htbp]
+\centering
+\caption{The eight features the reported models use, in rank order by mean absolute SHAP on the
+training years.}
 \label{tab:selected}
 \small
 \begin{tabular}{@{}rlp{4.6cm}r@{}}
@@ -867,49 +818,114 @@ total attribution across all 42 candidates.}
 \end{tabular}
 \end{table}
 
-The set is deliberately small. 8 columns against 2,880 rows leaves an order of magnitude more
-rows than columns, which is what the positive count can support: with 169 events, a model
-given forty inputs has more directions to fit than it has events to learn from, and
-Chapter~\ref{ch:results} reports what that costs in transfer.
+\paragraph{What we removed, and why.}
+\texttt{equids} is dropped because it is exactly the sum of horses, asses and mules. Near-duplicate
+pairs and columns with no measurable label relationship are discarded. No principal component
+analysis is used: with eight retained features and 2,880 rows the binding constraint is signal
+rather than dimensionality.
 
-\subsection{What the ranking looks like}
+\section{What We Gave The Model (Features)}
+\label{sec:features}
 
-The eight retained features occupy the top of the conditional ordering; features that lead the
-marginal ordering sit far below it. The disagreement between the two rankings is the reason the
-selection uses attribution rather than association, as argued above.
+A feature is an input column, and every candidate uses information available in the current year or
+earlier. They fall into four groups before selection.
 
-\section{Models}
+\begin{itemize}
+\setlength{\itemsep}{0.15em}
+\item \textbf{Disease history (7 columns).} Outbreaks in previous years, the five-year running
+      total, years since the last event, and world and regional activity shares. The disease
+      persists once introduced, so this group carries the epidemiological prior.
+\item \textbf{Animal population (14 columns).} Log equid and total livestock stocks, equid share,
+      equid density, growth over one and three years, and the seven species counts.
+\item \textbf{Climate (10 columns).} Mean, maximum and minimum temperature, precipitation total and
+      its coefficient of variation, relative humidity and wind, each paired with an anomaly against
+      that country's own expanding mean.
+\item \textbf{Country context (11 columns).} Income band, agricultural land share, agricultural
+      value added, livestock production index, GDP per person, rural share, internet penetration,
+      fertiliser intensity, life expectancy, population and density. These mostly measure how well a
+      country detects disease.
+\end{itemize}
 
-Six families are compared: logistic regression is the additive baseline with balanced class weights,
-a single shallow decision tree is included because a non-specialist can read it, random forest and
-extra trees are bagged ensembles \cite{breiman2001} that differ in split randomisation, and XGBoost
-and LightGBM are boosted ensembles \cite{chen2016,ke2017}. Tuning used grouped cross-validation on
-country, and neural networks were excluded because with 169 positives and 8 features a network has
-more parameters than examples and would memorise the training period.
+Three derived columns are worth naming. Equid share is horses plus asses plus mules divided by all
+farm animals. Livestock units weight cattle and camels at 0.8 and small ruminants at 0.1, so one
+number expresses grazing pressure across species. Years since last event uses 99 to mean never
+recorded in the window.
 
-\section{Evaluation Design}
+\section{Models We Tried}
 
-Three schemes answer different questions. A temporal holdout trains on 2005 to 2017 and tests on 2018
-to 2023, with the test period never observed during fitting, which answers whether the model can be
-used in following years. Leave-country-out uses five folds grouped by country, so every prediction is
-for an unseen country; it answers whether the model transfers and it governs selection, being the
-harsher test and the closer approximation of deployment. Repeated stratified cross-validation, five
-folds three times, is a stability check.
+Six families are compared, including a deliberately simple baseline.
 
-Precision-recall AUC is the primary metric: at 5.87\% prevalence ROC-AUC is dominated by the
-true-negative mass and overstates performance \cite{saito2015,davis2006}, so it is reported only for
-comparability. Brier score and expected calibration error are reported because an uncalibrated
-probability cannot support a threshold-based alert \cite{niculescu2005,huang2020}. Precision, recall,
-specificity, F1 and the Matthews correlation use a threshold tuned on training data only, with
-bootstrap percentile intervals over one thousand resamples. Grouped rather than random splitting is
-essential, since a random row split would let the model memorise country identity \cite{roberts2017}.
+\begin{table}[htbp]
+\centering
+\caption{The six models and what each is for.}
+\label{tab:models-tried}
+\small
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{3.0cm}
+                >{\raggedright\arraybackslash}p{2.4cm}
+                >{\raggedright\arraybackslash}p{8.4cm}@{}}
+\toprule
+\textbf{Model} & \textbf{Family} & \textbf{What it does} \\
+\midrule
+Logistic regression & linear & Adds the inputs with fixed weights and maps the total to a 0--1
+score; the honest baseline, with balanced class weights. \\
+Decision tree & tree & A shallow flowchart of yes/no splits that a non-specialist can read; weak on
+its own, which is why it is included. \\
+Random forest & bagged trees & Many trees trained on random subsets, then averaged
+\cite{breiman2001}. \\
+Extra trees & bagged trees & Like random forest, with extra split randomisation
+\cite{breiman2001}. \\
+XGBoost & boosted trees & Trees trained in sequence, each fitting residual error
+\cite{chen2016}. \\
+LightGBM & boosted trees & A faster boosted variant with leaf-wise growth \cite{ke2017}. \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\section{Leakage Controls}
+Forest models train trees in parallel on random subsets and average them, which reduces variance.
+Boosted models train trees in sequence, each fitting the error left by the last, which reduces bias.
+Neural networks are left out because with 169 positives and eight features a network has more
+parameters than examples and would memorise the training period. Tuning uses grouped
+cross-validation on country. We do not stack the families into a meta-learner: the gap between
+scores is smaller than the uncertainty on any single score, so that effort goes into calibration
+instead.
 
-Six controls apply: features use year $t$ or earlier and only the target uses $t+1$; the split is
-chronological; hyperparameters are tuned inside training folds; calibration is fitted on training
-folds only; the alert threshold is fixed on training; and imputation values and missing indicators
-are generated inside the pipeline.
+\paragraph{How the final model is chosen.}
+On leave-country-out precision-recall AUC, because deployment means an unseen country rather than an
+unseen year. Chapter~\ref{ch:results} reports that ranking: logistic regression leads under that
+criterion even when a tree ensemble leads on the easier temporal holdout.
+
+\section{How We Trained And Tested It}
+
+Several measures keep anything from the test period out of training.
+
+Three schemes answer different questions. A temporal holdout trains on 2005 to 2017 and tests on
+2018 to 2023, asking whether the model can be used in following years. Leave-country-out uses five
+folds grouped by country, so every prediction is for an unseen country; that is the harsher test and
+the one that governs selection. Repeated stratified cross-validation (five folds, three repeats) is
+a stability check. A random row split would let the model memorise country identity, which is why
+splits are grouped \cite{roberts2017}.
+
+Precision-recall AUC is the primary metric: at 5.87\% prevalence, ROC-AUC is dominated by the
+true-negative mass and overstates performance \cite{saito2015,davis2006}, so ROC-AUC is reported only
+for comparability. Brier score and expected calibration error check whether predicted probabilities
+can support a threshold-based alert \cite{niculescu2005,huang2020}. Precision, recall, specificity,
+F1 and Matthews correlation use a threshold tuned on training data only, with bootstrap percentile
+intervals over one thousand resamples.
+
+\paragraph{Leakage controls.}
+Features use year $t$ or earlier and only the target uses $t{+}1$; the split is chronological;
+hyperparameters are tuned inside training folds; calibration is fitted on training folds only; the
+alert threshold is fixed on training; and imputation values and missing indicators are generated
+inside the pipeline.
+
+\paragraph{Why PR-AUC, calibration and SHAP.}
+PR-AUC asks how quickly ranking the riskiest rows surfaces real events; a method with no skill scores
+the prevalence (0.0587 here). Calibration groups predictions into buckets and compares each bucket's
+average prediction with how often the event happened; the averaged gap is expected calibration error.
+SHAP assigns each input a fair share of one prediction by averaging marginal contributions over
+feature orderings \cite{lundberg2017}: the values sum to the gap between the base rate and that
+prediction, which is why the same numbers support both global feature ranking and the per-prediction
+factor list the risk engine returns.
 
 % =====================================================================
 \chapter{The RAG Question-Answering Layer}
