@@ -50,7 +50,7 @@
 \begin{tikzpicture}[x=1cm,y=1cm]
 
 % ================= TITLE =================
-\node[anchor=west, font=\Large\bfseries, text=gwnavy] at (0.4,18.9) {GlandersWatch --- Alerting System Architecture};
+\node[anchor=west, font=\Large\bfseries, text=gwnavy] at (0.4,18.9) {GlandersWatch: Alerting System Architecture};
 \node[anchor=west, font=\small, text=gwslate] at (0.4,18.25) {From a calibrated risk probability to a message in an owner's hand: threshold $\rightarrow$ suppression $\rightarrow$ deduplication $\rightarrow$ notification};
 
 % ================= TOP LANE =================
@@ -82,7 +82,7 @@ $\bullet$ hand $(area,\,p,\,prev)$ to the rules\\[2pt]
 Areas with no registered users are skipped.}
 
 % ---- rules engine ----
-\cont{gwamber}{10.8}{5.5}{17.8}{14.5}{\sn{3}\ Rules Engine --- decides whether to send}
+\cont{gwamber}{10.8}{5.5}{17.8}{14.5}{\sn{3}\ Rules Engine: decides whether to send}
 \blk{rA}{gwamber}{11.1}{11.7}{17.5}{13.8}{}{\textbf{A\ \ Threshold}\\[2pt]
 calibrated $p \rightarrow$ LOW / MEDIUM / HIGH\\
 cut-offs configurable (set from validation results)\\
@@ -128,7 +128,7 @@ Risk level + short preventive action + veterinary contact.\\
 
 % ================= DATA LAYER =================
 \draw[draw=gwslate!70!black, fill=gwslate!6, rounded corners=5pt, line width=1pt] (0.4,0.5) rectangle (17.8,3.7);
-\node[anchor=north west, font=\small\bfseries, text=gwslate!80!black] at (0.6,3.62) {Data layer --- PostgreSQL / PostGIS};
+\node[anchor=north west, font=\small\bfseries, text=gwslate!80!black] at (0.6,3.62) {Data layer: PostgreSQL / PostGIS};
 \foreach \c/\n/\d in {2.1/predictions/{from ML},5.55/users/{phone, area, language},9.0/alert\_state/{last level, last sent},12.45/alerts/{+ decision log},15.9/delivery\_logs/{per message}}{
   \draw[draw=gwslate!75!black, fill=white, line width=0.8pt] (\c-1.4,0.75) -- (\c-1.4,2.5) arc (180:360:1.4 and 0.22) -- (\c+1.4,0.75) arc (360:180:1.4 and 0.22);
   \draw[draw=gwslate!75!black, fill=gwslate!8, line width=0.8pt] (\c,2.5) ellipse (1.4 and 0.22);

@@ -760,7 +760,7 @@ livestock stocks, climate levels and anomalies, and country context). That widen
 the sixty-column assembled table above. Selection then keeps eight numeric inputs by mean absolute
 SHAP on the training years alone (Section~\ref{sec:analysis}), because marginal association and
 model attribution disagree about what matters. Section~\ref{sec:features} describes only those eight
-retained features---the ones the models actually receive.
+retained features, the ones the models actually receive.
 
 \section{Dataset Analysis}
 \label{sec:analysis}
@@ -1118,7 +1118,7 @@ relevance above 0.90 and 0.85, citation precision above 0.95, a false refusal ra
 and p95 latency under two seconds.
 
 % =====================================================================
-% GlandersWatch Technical Writing Report — Alerting System chapter
+% GlandersWatch Technical Writing Report: Alerting System chapter
 %
 %
 % The two supplied standalone TikZ diagrams must remain in:
@@ -1280,7 +1280,7 @@ Transient failures, such as temporary timeouts, may be retried with exponential 
 Evaluation should include: (i) alert precision/false-alert rate; (ii) event coverage/missed-event rate; (iii) notification noise per recipient per month and year; (iv) delivery success by channel; (v) time from \texttt{predictions\_ready} to decision and provider acceptance; and (vi) idempotency tests using event replay, worker restart, concurrent evaluation and provider-timeout simulation. These are proposed measures, not measured production results.
 
 \subsection{Limitations and Summary}
-Alert-specific limits --- no production delivery yet, and a send that is not proof of reading --- are stated with the platform-wide list in Section~\ref{sec:limitations}. In short, the service is a period-aware rules core that turns a calibrated prediction into a controlled notification: thresholding and hysteresis set the level, suppression and deduplication keep the volume readable, and ports keep storage and channels replaceable.
+Alert-specific limits (no production delivery yet, and a send that is not proof of reading) are stated with the platform-wide list in Section~\ref{sec:limitations}. In short, the service is a period-aware rules core that turns a calibrated prediction into a controlled notification: thresholding and hysteresis set the level, suppression and deduplication keep the volume readable, and ports keep storage and channels replaceable.
 % =====================================================================
 \chapter{Results and Discussion}
 \label{ch:results}
@@ -1391,46 +1391,41 @@ record. It predicts where glanders will be documented, not where it is.
 Five limits cut across the platform; each is stated once and held for every claim that follows.
 
 \begin{enumerate}
-  \item \textbf{Risk model --- documentation, not incidence.} A positive means glanders was reported
-        in the literature for that country-year; a negative may mean no disease or simply no report.
-        With 169 positives at country-year resolution, leave-country-out skill is weaker than
-        temporal skill, and the drop is largest where early warning would help most.
-  \item \textbf{Risk model --- extractor unvalidated.} The 263 occurrence events come from an
-        automated pipeline that has not been checked against a hand-annotated reference, so
-        extractor error is not separately quantified.
-  \item \textbf{RAG --- specified, not measured.} Retrieval quality, faithfulness, citation
-        precision and refusal behaviour have fixed targets and an evaluation protocol, but no scored
-        run against the guidance corpus or against real officer questions.
-  \item \textbf{Alerts --- no production delivery.} Thresholds, hysteresis and deduplication are
-        designed against the calibration curve, yet SMS/WhatsApp providers, durable workers and a
-        consented subscriber set are not yet in place, so delivery success and alert fatigue remain
-        unmeasured.
-  \item \textbf{Alerts --- send is not the same as read.} A logged acceptance from a provider does
-        not prove that an owner saw the warning or took action; acknowledgement and escalation are
-        not yet part of the service.
+  \item A positive means glanders was reported in the literature for that country-year; a negative
+        may mean no disease or simply no report. With 169 positives at country-year resolution,
+        leave-country-out skill is weaker than temporal skill, and the drop is largest where early
+        warning would help most.
+  \item The 263 occurrence events come from an automated pipeline that has not been checked against
+        a hand-annotated reference, so extractor error is not separately quantified.
+  \item For the RAG layer, retrieval quality, faithfulness, citation precision and refusal behaviour
+        have fixed targets and an evaluation protocol, but no scored run against the guidance corpus
+        or against real officer questions.
+  \item Thresholds, hysteresis and deduplication are designed against the calibration curve, yet
+        SMS/WhatsApp providers, durable workers and a consented subscriber set are not yet in place,
+        so delivery success and alert fatigue remain unmeasured.
+  \item A logged acceptance from a provider does not prove that an owner saw the warning or took
+        action; acknowledgement and escalation are not yet part of the service.
 \end{enumerate}
 
 \section{Future Work}
 
-Five next steps, one cluster per gap above, cover the model, the RAG layer and the alert service.
+Five next steps cover the model, the RAG layer and the alert service.
 
 \begin{enumerate}
-  \item \textbf{Model reporting capacity.} Treat surveillance effort as a quantity --- an offset on
-        publication volume, or a joint detection-and-occurrence model --- so gains in score reflect
-        disease rather than publishing. Cross-check the literature label against WOAH WAHIS where
-        the two overlap \cite{wahis}.
-  \item \textbf{Validate the extractor and raise resolution.} Annotate a stratified sample of the
-        263 events for extractor precision and recall, then move toward district-month prediction for
-        India once public district covariates can be assembled.
-  \item \textbf{Measure the RAG layer.} Score recall@5, faithfulness, citation precision and
-        refusal rates on a fixed question set, then ask district officers to rate answer usefulness
-        on real questions.
-  \item \textbf{Production alerts on real channels.} Put durable storage and workers behind the
-        rules core, integrate approved SMS/WhatsApp for a consented pilot, and keep monthly and
-        yearly states separate once a monthly prediction pipeline exists.
-  \item \textbf{Field-evaluate warnings.} Measure alert precision, missed events, messages per
-        recipient, delivery latency and whether owners acknowledge HIGH alerts; escalate
-        unacknowledged warnings only under a veterinary-approved policy.
+  \item Treat surveillance effort as a quantity, for example an offset on publication volume or a
+        joint detection-and-occurrence model, so gains in score reflect disease rather than
+        publishing, and cross-check the literature label against WOAH WAHIS where the two overlap
+        \cite{wahis}.
+  \item Annotate a stratified sample of the 263 events for extractor precision and recall, then move
+        toward district-month prediction for India once public district covariates can be assembled.
+  \item Score recall@5, faithfulness, citation precision and refusal rates on a fixed question set,
+        then ask district officers to rate answer usefulness on real questions.
+  \item Put durable storage and workers behind the rules core, integrate approved SMS/WhatsApp for a
+        consented pilot, and keep monthly and yearly states separate once a monthly prediction
+        pipeline exists.
+  \item Measure alert precision, missed events, messages per recipient, delivery latency and whether
+        owners acknowledge HIGH alerts; escalate unacknowledged warnings only under a
+        veterinary-approved policy.
 \end{enumerate}
 
 % ============================== REFERENCES ==============================

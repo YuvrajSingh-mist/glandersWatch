@@ -39,7 +39,7 @@
 \fi
 \begin{tikzpicture}[x=1cm,y=1cm]
 
-\node[anchor=west, font=\Large\bfseries, text=gwnavy] at (0.4,18.9) {Modular alerting engine --- core, ports and adapters};
+\node[anchor=west, font=\Large\bfseries, text=gwnavy] at (0.4,18.9) {Modular alerting engine: core, ports and adapters};
 \node[anchor=west, font=\small, text=gwslate] at (0.4,18.25) {The core knows four small interfaces (violet). Everything else plugs in from outside, so it can sit in any tech stack.};
 
 % ============ CALLERS (left) ============
@@ -52,7 +52,7 @@
 3\ \ command line / cron job}
 
 % ============ CORE ============
-\cont{gwamber}{9.6}{3.9}{20.4}{14.2}{alert\_engine --- the core (no database, no web framework, no SDK)}{}
+\cont{gwamber}{9.6}{3.9}{20.4}{14.2}{alert\_engine: the core (no database, no web framework, no SDK)}{}
 \blk{sA}{gwamber}{9.9}{11.0}{13.0}{13.0}{}{\textbf{A\ \ Threshold}\\[2pt]$p \rightarrow$ LOW / MEDIUM / HIGH\\hysteresis}
 \blk{sB}{gwamber}{13.4}{11.0}{16.5}{13.0}{}{\textbf{B\ \ Suppression}\\[2pt]unchanged level, cooldown,\\stale data, mute}
 \blk{sC}{gwamber}{16.9}{11.0}{20.0}{13.0}{}{\textbf{C\ \ Deduplication}\\[2pt]key: area + period\\+ level}
