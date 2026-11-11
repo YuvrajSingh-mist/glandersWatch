@@ -223,9 +223,7 @@ development indicators and NASA POWER reanalysis climatology. 6,700 country-year
 training years alone, and six model families are compared under temporal and leave-country-out
 validation. On unseen years the strongest precision-recall AUC is 0.495 against a 5.87\% base rate;
 on unseen countries the ranking inverts and Logistic Regression leads at 0.381 with calibration
-error 0.025, so it is the champion for deployment. Asking instead whether a country reports glanders
-at all raises discrimination to about 0.95, which reflects stable reporting status rather than finer
-predictive skill.
+error 0.025, so it is the champion for deployment.
 
 \vspace{0.5em}
 \noindent
@@ -701,11 +699,14 @@ throughout.
 
 \paragraph{The assembled panel.}
 All four sources are keyed on ISO-3 country code and calendar year, so they join once names are
-reconciled. The full panel has 6,700 country-year rows covering 268 countries from 2000 to 2024. For
-modelling we keep only equine-holding countries (maximum equid stock of at least 1{,}000), the years
-2005 to 2023, and rows where next year's answer is observable. That leaves
-\textbf{2,880 rows, 8 retained input columns and 169 positive labels}, written as
-\texttt{model\_matrix.csv} under \texttt{data/processed/} by the same loader the training script uses.
+reconciled. The joined panel starts at about \textbf{6,700 country-year rows and 60 columns}
+(identifiers, engineered candidate features, label fields and intermediate quantities) across 268
+countries from 2000 to 2024. Preprocessing then reduces the row count: only equine-holding countries
+(maximum equid stock of at least 1{,}000), the years 2005 to 2023, and rows where next year's answer
+is observable are kept, which leaves 2,880 rows. Feature selection then reduces the column count
+further, from the engineered candidates down to the \textbf{8 input features} used for modelling,
+with 169 positive labels. That matrix is written as \texttt{model\_matrix.csv} under
+\texttt{data/processed/} by the same loader the training script uses.
 
 \paragraph{Preprocessing.}
 Five steps, in this order.
@@ -726,14 +727,13 @@ Five steps, in this order.
       blank is never read as proof that disease was absent.
 \end{enumerate}
 
-\paragraph{Feature engineering.}
-Four groups of columns are built from information available in year $t$ or earlier: disease history
-(lags, five-year totals, years since last event), animal population (stocks, equid share, density,
-growth), climate (levels and country-specific anomalies), and country context (income, agriculture,
-connectivity). Section~\ref{sec:features} lists the groups. Selection keeps eight of the numeric
-candidates by mean absolute SHAP on the training years alone
-(Section~\ref{sec:analysis}), because marginal association and model attribution disagree about what
-matters.
+\paragraph{Feature engineering and selection.}
+Candidate columns are built from information available in year $t$ or earlier (disease history,
+livestock stocks, climate levels and anomalies, and country context). That widens the panel toward
+the sixty-column assembled table above. Selection then keeps eight numeric inputs by mean absolute
+SHAP on the training years alone (Section~\ref{sec:analysis}), because marginal association and
+model attribution disagree about what matters. Section~\ref{sec:features} describes only those eight
+retained features---the ones the models actually receive.
 
 \section{Dataset Analysis}
 \label{sec:analysis}
@@ -826,29 +826,13 @@ rather than dimensionality.
 \section{Features}
 \label{sec:features}
 
-A feature is an input column, and every candidate uses information available in the current year or
-earlier. They fall into four groups before selection.
-
-\begin{itemize}
-\setlength{\itemsep}{0.15em}
-\item \textbf{Disease history (7 columns).} Outbreaks in previous years, the five-year running
-      total, years since the last event, and world and regional activity shares. The disease
-      persists once introduced, so this group carries the epidemiological prior.
-\item \textbf{Animal population (14 columns).} Log equid and total livestock stocks, equid share,
-      equid density, growth over one and three years, and the seven species counts.
-\item \textbf{Climate (10 columns).} Mean, maximum and minimum temperature, precipitation total and
-      its coefficient of variation, relative humidity and wind, each paired with an anomaly against
-      that country's own expanding mean.
-\item \textbf{Country context (11 columns).} Income band, agricultural land share, agricultural
-      value added, livestock production index, GDP per person, rural share, internet penetration,
-      fertiliser intensity, life expectancy, population and density. These mostly measure how well a
-      country detects disease.
-\end{itemize}
-
-Three derived columns are worth naming. Equid share is horses plus asses plus mules divided by all
-farm animals. Livestock units weight cattle and camels at 0.8 and small ruminants at 0.1, so one
-number expresses grazing pressure across species. Years since last event uses 99 to mean never
-recorded in the window.
+The models are given exactly the eight features in Table~\ref{tab:selected}, all computed from year
+$t$ or earlier so they can predict the year-$t{+}1$ label. In rank order they are total population,
+years since the last documented event (99 if none in the window), mean-temperature anomaly relative
+to that country's own expanding baseline, internet penetration, humidity anomaly, precipitation
+coefficient of variation, log total livestock (LSU), and goat headcount. Earlier engineering built a
+wider candidate pool from history, stocks, climate and country context; those candidates are not
+passed to the fitted models once SHAP selection has chosen this set of eight.
 
 \section{Models}
 
@@ -1329,82 +1313,22 @@ regression holds 0.381 and becomes the strongest model on the criterion that gov
 Its temporal score is 0.461, about a 8-fold lift.
 
 Because deployment means an unseen country rather than an unseen year, the champion is
-Logistic Regression, and every number quoted below refers to it. The inversion is the more informative result.
-With 8 retained features the relationships are close enough to additive that a regularised linear
-model transfers best, and the flexible ensembles pay for their extra capacity in exactly the setting
-the project cares about. The single decision tree is weakest on both schemes, which confirms that the
-signal is not concentrated in one or two splits.
-
-\section{The Alert Service as a Warning System}
-
-The alert layer turns the calibrated probability into messages, so its economics are reported
-separately from model skill.
-
-Alerting the six per cent of country-years at highest predicted risk captures 43 per cent of
-observed events, half of them are reached at an alert budget of 9 per cent, and eighty per
-cent at 37 per cent (Figure~\ref{fig:alerts}). Uniform alerting would need full coverage for
-the same recall, so the model is about 5.5 times more efficient than arbitrary selection at the
-fifty per cent point.
-
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=0.78\textwidth]{fig07_alert_budget.png}
-\caption{Alert economics. Panel A gives the fraction of events captured as the alert budget grows,
-against random alerting. Panel B gives the alert volume required to reach a target recall.}
-\label{fig:alerts}
-\end{figure}
-
-For the retrieval-augmented layer no measured results are reported: it is specified in
-Section~\ref{ch:rag} but has not been run against the corpus, so its five metrics have no values.
-
-\section{The Country-Level View}
-
-The results above answer a year-by-year question. A surveillance planner often asks a coarser one:
-which countries are glanders countries at all? That reframing is worth reporting because it changes
-the answer, and because it shows where the model's information comes from.
-
-Collapsing the panel to one row per country, with features averaged over 2005 to 2023 and the label
-defined as whether the country reports glanders in any year, leaves 161 rows and 56 positives, a
-prevalence of 34.8 per cent rather than 5.62. Validation is leave-one-out over countries, since with
-one row per country there is no grouping left to hold out.
-
-\begin{table}[htbp]
-\centering
-\caption{Country-level classification on the same twelve features, validated leave-one-country-out.
-The task is easier than the country-year problem, and the scores say so.}
-\label{tab:countrylevel}
-\small
-\begin{tabular}{@{}lcc@{}}
-\toprule
-\textbf{Model} & \textbf{ROC-AUC} & \textbf{PR-AUC} \\
-\midrule
-Logistic regression & 0.951 & 0.914 \\
-Random forest & 0.968 & 0.963 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-Discrimination rises to about 0.95, and the temptation is to read that as a much better model. It is
-not a better model; it is an easier question. Asking whether a country reports glanders ever is
-largely asking whether it has a veterinary reference laboratory, publishes in indexed journals and
-has a large equid population, and those three properties are almost perfectly separable at country
-granularity. The year-by-year target was hard precisely because reporting status is stable while
-incidence is not.
-
-This is why the country code is not used as a feature anywhere in this report. As an identifier it
-cannot transfer to a country the model has not seen, which is the deployment case, and in-sample it
-would simply memorise the reporting capacity that the discussion identifies as the confounder. The
-country-level table reports the effect of that confounder rather than exploiting it.
+Logistic Regression. The inversion is the more informative result: with eight retained features the
+relationships are close enough to additive that a regularised linear model transfers best, and the
+flexible ensembles pay for their extra capacity in exactly the setting the project cares about. The
+single decision tree is weakest on both schemes, which confirms that the signal is not concentrated
+in one or two splits.
 
 \section{Discussion}
 
-The risk model has predictive skill: Logistic Regression reaches a precision-recall AUC of 0.461 against a base
-rate of 5.87\% on the forward split, and holds 0.381 across unseen countries, with
-calibration error 0.025. The gap between those two figures is smaller than the full-feature model
-showed, which is the practical gain from selecting features on conditional evidence. The signal it
-learns is surveillance rather than biology: the leading features are population, connectivity and
-reporting measures, the label concentrates in countries with reference laboratories, and the
-best-scoring cells are India, the United States and Australia.
+All measured results above are for one task only: given features from year $t$, predict whether
+glanders is documented in that country in year $t{+}1$. Logistic Regression reaches a
+precision-recall AUC of 0.461 against a base rate of 5.87\% on the forward split, and holds 0.381
+across unseen countries, with calibration error 0.025. The gap between those two figures is smaller
+than the full-feature model showed, which is the practical gain from selecting features on
+conditional evidence. The signal it learns is surveillance rather than biology: the leading features
+are population, connectivity and reporting measures, the label concentrates in countries with
+reference laboratories, and the best-scoring cells are India, the United States and Australia.
 
 % =====================================================================
 \chapter{Conclusion and Future Work}
@@ -1420,11 +1344,10 @@ equine-holding countries, and six model families were trained under three valida
 the model, the platform is split into three components with fixed contracts: a risk engine, a RAG
 question-answering layer and an alert service.
 
-Prediction is possible, and the performance is moderate: Logistic Regression reaches a precision-recall AUC of
-0.461 against a base rate of 5.87\% on a forward split, about a 8-fold lift with a
-calibration error of 0.025, and holds 0.381 across unseen countries. Alerting six per cent of
-country-years captures 43 per cent of events. The skill is fragile across geography, and the
-decline concentrates where early warning would help most.
+Prediction is possible, and the performance is moderate: Logistic Regression reaches a
+precision-recall AUC of 0.461 against a base rate of 5.87\% on a forward split, about an 8-fold lift
+with a calibration error of 0.025, and holds 0.381 across unseen countries. The skill is fragile
+across geography, and the decline concentrates where early warning would help most.
 
 What the model learns is less encouraging. Three analyses converge: the highest-ranked features are
 population size and reporting capacity rather than biological drivers, the label concentrates in
