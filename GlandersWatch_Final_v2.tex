@@ -197,22 +197,21 @@ Glanders is a bacterial zoonosis of equids caused by \textit{Burkholderia mallei
 notifiable, frequently fatal, and remains endemic in parts of Africa, Asia and South America.
 Indian surveillance between 2019 and 2023 identified 728 seropositive equids across 138 districts,
 with strong geographic concentration. A district officer and an equine owner both need more than a
-retrospective case count: they need a usable answer to whether the disease is likely in the next
-period, why that answer is given, and what to do, without being flooded by messages they learn to
-ignore. The published machine learning literature on this disease is confined to laboratory
-identification of the organism; no population-level geographic risk model, and no owner-facing
-warning path, has been reported.
+retrospective case count: they need a usable forecast for the next period, a way to ask what official
+guidance requires, and messages sparse enough that people still read them. The published machine
+learning literature on this disease is confined to laboratory identification of the organism; no
+population-level geographic risk model, and no owner-facing warning path, has been reported.
 
 \vspace{0.5em}
 \noindent
-This report presents GlandersWatch, built for that end-to-end need as three independently deployable
-components. A calibrated risk engine forecasts whether glanders is documented in a country in year
-$t{+}1$ from features observed in year $t$. A retrieval-augmented explanation layer turns that
-probability into cited guidance an officer or owner can check, and refuses when the corpus does not
-support an answer. An alert service decides whether a message should be sent at all---thresholding,
-hysteresis, suppression and deduplication---so volume stays low enough that messages are still read.
-Each component communicates through a versioned schema rather than shared internals, none hardcodes
-the disease, and each degrades without failing the others.
+This report presents GlandersWatch as three independently deployable components. A calibrated risk
+engine forecasts whether glanders is documented in a country in year $t{+}1$ from features observed
+in year $t$. A retrieval-augmented generation (RAG) layer answers questions from officers or owners
+using passages retrieved from official guidance: every claim must cite a retrieved passage, and the
+layer refuses when the corpus does not support an answer. An alert service decides whether a message
+should be sent at all (thresholding, hysteresis, suppression and deduplication) so volume stays low
+enough that messages are still read. Components talk through versioned schemas rather than shared
+internals; none hardcodes the disease; and each can degrade without taking the others down.
 
 \vspace{0.5em}
 \noindent
@@ -230,10 +229,10 @@ predictive skill.
 
 \vspace{0.5em}
 \noindent
-The explanation layer is specified as hybrid retrieval over official guidance with citation grounding
-and refusal rules; the alert service is specified as a period-aware rules engine with replaceable
-delivery adapters. Neither is reported with measured field performance because neither is deployed;
-their interfaces, rules and evaluation protocol are fixed so a pilot can score them later. The main
+The RAG layer is specified as hybrid retrieval over official guidance, with citation checks and
+refusal rules. The alert service is specified as a period-aware rules engine with replaceable
+delivery adapters. Neither has measured field performance yet, because neither is deployed; the
+interfaces, rules and evaluation protocol are fixed so a later pilot can score them. The main
 limitation of the model is the label itself: a positive means documentation, not incidence, so
 reporting effort is the principal confounder and the main target for future work.
 
@@ -303,23 +302,24 @@ the history of the disease nearby, the size of the susceptible population, and t
 permit transmission.
 
 Surveillance reports what has already happened, and forecasting systems exist for several livestock
-diseases but not for glanders. A prediction alone would still not be usable: an owner cannot act on a
-probability of 0.24, and an officer cannot defend a forecast whose basis is hidden. A warning that
-arrives for every area every month also teaches its recipients to ignore it.
+diseases but not for glanders. A probability alone is still hard to use in the field: an owner needs
+to ask what to do next, and an officer needs answers that can be checked against official guidance.
+A warning that arrives for every area every month also teaches its recipients to ignore it.
 
-The problem therefore has four parts. Two concern producing the prediction, two concern turning it
-into something a person can act on.
+The problem therefore has four parts. Two concern producing the prediction; two concern what happens
+after it.
 
 \begin{enumerate}
   \item \textbf{Data and label.} No public source records glanders occurrence completely, so
         occurrence must be reconstructed from the literature and joined to population and
         environmental covariates at a common resolution. The outcome is then rare, so accuracy is
-        useless and a negative observation needs an explicit meaning.
+        a poor summary statistic, and a negative observation needs an explicit meaning.
   \item \textbf{Model selection under distribution shift.} A model fitted on some countries must be
         evaluated on countries it has never seen, because that is the deployment condition.
-  \item \textbf{Grounded explanation.} The prediction must be explained in words a non-specialist
-        can act on, every claim must trace to official control guidance, and the layer must refuse
-        rather than generate an answer the corpus does not support.
+  \item \textbf{Grounded question answering.} Officers and owners need to ask questions about
+        control measures, reporting duties and next steps, and receive answers grounded in official
+        guidance. Claims must cite retrieved passages; if the corpus does not support an answer, the
+        system should refuse rather than invent one.
   \item \textbf{Delivery without alert fatigue.} A probability is not an alert. The operating point
         and the message rules must keep volume low enough that messages are read, while the
         threshold stays defensible against the events caught.
@@ -332,23 +332,23 @@ The project has three objectives.
 \begin{enumerate}
   \item \textbf{Prediction as a service.} Package a calibrated next-year risk model as a versioned
         artefact behind a REST interface, so any consumer can call it without knowing how it works.
-  \item \textbf{Cited explanation.} Build a retrieval-augmented layer that explains a prediction from
+  \item \textbf{Grounded Q\&A.} Build a retrieval-augmented layer that answers questions from
         official guidance, cites every claim, and refuses rather than guesses.
   \item \textbf{Owner alerts.} Convert a calibrated probability into few enough messages that they
         are read, using threshold, suppression and deduplication rules.
 \end{enumerate}
 
 All three share one requirement: each component must be independently testable and replaceable, and
-free of any hardcoded reference to glanders.
+must not hardcode glanders into its core logic.
 
 \section{Scope}
 
 The study is scoped to country-year resolution. District-level modelling for India was envisaged but
 is not attempted, because the covariates could not be assembled from public sources within the project
-period. The explanation and alert layers are resolution-agnostic and apply unchanged once a
-district-level model exists. The model is a population-level tool: it does not diagnose an individual
-animal and does not replace laboratory confirmation. Limitations that shape the results are collected
-in Section~\ref{sec:limitations}.
+period. The RAG and alert layers do not depend on that resolution and can sit in front of a
+district-level model later without redesign. The model is a population-level tool: it does not
+diagnose an individual animal and does not replace laboratory confirmation. Limitations that shape
+the results are collected in Section~\ref{sec:limitations}.
 
 % =====================================================================
 \chapter{Literature Review and Gap Analysis}
@@ -381,10 +381,10 @@ model family that overlaps with the one used here.
 
 This project differs in four complementary ways. It is glanders-specific, where a national system
 must spread effort across many diseases. It uses only public data, so anyone can reproduce and audit
-it. It attaches a cited explanation to each prediction, which matters when the reader is an owner
-rather than a trained analyst. And it delivers to the owner directly, with rules that suppress
-routine noise. NADRES has institutional access this project lacks; this project has a level of local
-explainability that a multi-disease platform does not attempt.
+it. It adds a question-answering layer over official guidance, which matters when the reader is an
+owner rather than a trained analyst. And it delivers to the owner directly, with rules that suppress
+routine noise. NADRES has institutional access this project lacks; this project spends that
+difference on local Q\&A and owner delivery that a multi-disease platform does not attempt.
 
 \section{Glanders Risk Modelling and Related Machine Learning}
 
@@ -466,19 +466,21 @@ Needed for alert thresholds; not glanders-specific \\
 \end{tabular}
 \end{table}
 
-\section{Cited Explanation and Retrieval-Augmented Generation}
+\section{Question Answering and Retrieval-Augmented Generation}
 
-No glanders-specific explanation system was found. The layer therefore follows general
-retrieval-augmented generation practice: retrieve passages, then generate only from those passages
+No glanders-specific question-answering system was found. The layer therefore follows general
+retrieval-augmented generation practice: retrieve passages, then answer only from those passages
 \cite{lewis2020}. Dense embeddings \cite{reimers2019}, lexical retrieval \cite{robertson2009} and
-reciprocal rank fusion \cite{cormack2009} are the standard building blocks; none of them is a
-glanders product. The gap that matters here is application: turning a calibrated risk score into an
-answer grounded in official control guidance, with refusal when the corpus does not support a claim.
+reciprocal rank fusion \cite{cormack2009} are the usual building blocks; none of them is a glanders
+product. What is missing is the application: a service that answers veterinary and owner questions
+from official control guidance, cites its sources, and refuses when the corpus does not support a
+claim. The risk score may be passed in as context for a question; the layer's job is still to answer
+the question, not to narrate the score.
 
 \begin{table}[htbp]
 \centering
-\caption{Related work for the explanation layer. There is no glanders-specific prior; rows are the
-methods adapted for cited guidance.}
+\caption{Related work for the RAG question-answering layer. There is no glanders-specific prior;
+rows are the methods adapted here.}
 \label{tab:rag-compare}
 \small
 \begin{tabular}{@{}>{\raggedright\arraybackslash}p{3.0cm}
@@ -491,7 +493,7 @@ methods adapted for cited guidance.}
 Lewis et al.\ (2020) &
 Retrieval-augmented generation &
 Knowledge-intensive NLP with evidence &
-Not wired to a disease risk score or statutory guidance corpus \\
+Not wired to a veterinary Q\&A workflow over statutory guidance \\
 Reimers and Gurevych (2019) &
 Sentence embeddings for semantic search &
 Dense passage retrieval &
@@ -503,7 +505,7 @@ Misses paraphrases; used here only as one hybrid channel \\
 Cormack et al.\ (2009) &
 Reciprocal rank fusion &
 Combining ranked lists &
-Fusion method; not an end-to-end veterinary explainer \\
+Fusion method; not an end-to-end veterinary Q\&A service \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -554,23 +556,23 @@ Audit & Varies & Reason-coded sent / skipped decisions and per-recipient deliver
 \end{tabular}
 \end{table}
 
-\section{Gaps and What This Project Offers}
+\section{Gaps and Contribution}
 
-\textbf{Risk-model gap.} Glanders epidemiology and lab identification exist; a calibrated next-year
-population risk model on a public country-year panel does not.
+Glanders epidemiology and laboratory identification are documented; a calibrated next-year
+population risk model on a public country-year panel is not.
 
-\textbf{Explanation gap.} Retrieval-augmented generation is mature as a method, but not as a
-glanders warning explainer that cites official guidance and refuses when unsupported.
+Retrieval-augmented generation is a mature method, but there is no glanders Q\&A service that
+answers from official guidance, cites its sources and refuses when unsupported.
 
-\textbf{Alert gap.} Warning and alert-management systems exist in other domains; none takes a
-calibrated glanders probability through hysteresis, suppression and deduplication to consented
-owner messages with an audit trail.
+Warning and alert-management systems exist in other domains. None of them takes a calibrated
+glanders probability through hysteresis, suppression and deduplication to consented owner messages
+with an audit trail.
 
-\textbf{What we offer.} A three-part platform with fixed contracts: a risk engine that compares
-model families under temporal and leave-country-out validation; an explanation layer specified for
-cited, refusible guidance; and an alert service that turns a probability into few enough messages
-to remain readable. Chapters~\ref{ch:method}--\ref{ch:alerts} develop each part; Chapter~\ref{ch:results}
-reports measured results only for the risk engine.
+This project specifies a three-part platform behind fixed contracts: a risk engine that compares
+model families under temporal and leave-country-out validation; a RAG layer for grounded question
+answering; and an alert service that sends few enough messages to remain readable.
+Chapters~\ref{ch:method}--\ref{ch:alerts} develop each part. Chapter~\ref{ch:results} reports measured
+results only for the risk engine.
 
 % =====================================================================
 \chapter{System Architecture}
@@ -579,38 +581,38 @@ reports measured results only for the risk engine.
 
 \section{What the Platform Has to Do}
 
-The platform answers one question: whether glanders is likely to be documented in an area next
-period. It produces three outputs from it, a number on a map, an explanation in words and a message to
-an owner, each read by a different person on a different device, and each able to fail without the
-others failing. One service serving all three would tie alert delivery to the latency of an LLM call
-and make the risk model impossible to test alone.
+The risk engine answers whether glanders is likely to be documented in an area next period. Beside
+that prediction the platform also answers questions through the RAG layer and, when policy allows,
+delivers a short message to an owner. Those three jobs have different readers and different failure
+modes. Putting them in one process would couple alert delivery to LLM latency and make the risk model
+hard to test on its own.
 
 \input{figures/fig_architecture.tex}
 
 \section{Design Principles}
 
-Five rules govern the decomposition, and every later design decision follows from them.
+The split follows five practical rules.
 
-\textbf{One responsibility per component.} The risk engine turns features into a calibrated
-probability, the RAG layer a prediction into a cited explanation, and the alert service a prediction
-into a delivered message. None computes what another could.
+Each component owns one job. The risk engine maps features to a calibrated probability. The RAG layer
+answers questions from the guidance corpus (optionally with the current prediction as context). The
+alert service decides whether a prediction becomes a delivered message. No component recalculates
+another's output.
 
-\textbf{Contracts before implementations.} Components exchange versioned schemas, never shared tables
-or in-process calls, so each side is built and tested against a fixture. That is what let the RAG
-layer be developed while the alert service was still being written.
+Components exchange versioned schemas rather than shared tables or in-process calls. Each side can
+be built and tested against a fixture; that is how the RAG layer could be designed while the alert
+service was still unfinished.
 
-\textbf{The core is disease-agnostic.} A disease is a configuration record: which label extractor,
-knowledge collection, templates and thresholds to use. A second disease is a configuration change plus
-a retrain, not a code fork.
+The core stays disease-agnostic. A disease is a configuration record: which label extractor,
+knowledge collection, templates and thresholds to use. Adding a second disease should mean new
+configuration and a retrain, not a code fork.
 
-\textbf{Fail soft, never fail silent.} A degraded component returns a degraded answer. If the RAG
-layer is unavailable the alert still goes out without its explanation; if retrieval finds nothing
-above the relevance floor, the layer returns a refusal plus the model's own SHAP factors. Neither
-case produces a wrong statement, and neither produces silence.
+Degradation is preferred over silence or invention. If the RAG layer is down, alerts still go out
+and chat returns a clear refusal. If retrieval finds nothing above the relevance floor, the layer
+refuses and can attach the model's SHAP factors for the current prediction rather than invent
+guidance. Callers always get an explicit outcome.
 
-\textbf{Every output is traceable.} Each prediction carries its model version, each explanation the
-documents it was grounded in, each alert the prediction and rule outcomes behind it, so a decision can
-be reconstructed afterwards.
+Outputs stay auditable. A prediction records its model version; an answer records the documents it
+used; an alert records the prediction and the rule outcomes behind the send-or-skip decision.
 
 \section{The Three Components}
 
@@ -624,7 +626,7 @@ be reconstructed afterwards.
 \textbf{Component} & \textbf{Responsibility} & \textbf{Interface} & \textbf{On failure} \\
 \midrule
 ML risk engine & Features to calibrated probability, with attribution & \texttt{POST /v1/predict}, \texttt{GET /v1/risk-map} & \texttt{503} with the champion id; the last good prediction is marked stale. \\
-RAG layer & Prediction plus question to a cited explanation & \texttt{POST /v1/explain}, \texttt{POST /v1/chat} & Alert text is sent without the explanation; chat returns a refusal. \\
+RAG layer & Answer questions from retrieved guidance (prediction optional as context) & \texttt{POST /v1/explain}, \texttt{POST /v1/chat} & Chat returns a refusal; alerts still send without a RAG answer. \\
 Alert service & Prediction to a delivered, deduplicated message & \texttt{POST /v1/alerts/evaluate} & Alerts queue in Redis and drain on recovery; map is unaffected. \\
 \bottomrule
 \end{tabular}
@@ -632,32 +634,33 @@ Alert service & Prediction to a delivered, deduplicated message & \texttt{POST /
 
 \section{Component Contracts}
 
-A contract is a JSON schema plus its guarantees, and a narrow contract is what makes a component
+A contract is a JSON schema plus its guarantees. Narrow contracts are what make a component
 replaceable. The risk engine emits a \texttt{PredictionRecord} with area, period, calibrated
-probability, risk level, model identifier, a freshness block and the top SHAP factors. Three
-guarantees follow: the probability is calibrated on held-out data and reads as a frequency; the risk
-level is derived from it by the threshold configuration, so the two cannot contradict each other; and
-the factors come from the model, so they survive the RAG layer being unavailable.
+probability, risk level, model identifier, a freshness block and the top SHAP factors. The
+probability is calibrated on held-out data and can be read as a frequency. The risk level comes from
+the same probability through the threshold configuration, so the two cannot contradict each other.
+The SHAP factors come from the model itself, so they remain available even if the RAG layer is down.
 
-The RAG layer takes an \texttt{ExplainRequest} and returns an \texttt{ExplainResponse} with an answer,
-resolved citations, a \texttt{grounded} flag and a refusal reason; a refusal carries no answer text.
-The alert service emits an \texttt{AlertEvent} with its identifier, area, period, both levels, source
-prediction, rule outcomes and recipient count. Components share a database but not tables, and spatial
-columns use PostGIS while embeddings use pgvector.
+The RAG layer accepts an \texttt{ExplainRequest} (a natural-language question, with optional
+prediction context) and returns an \texttt{ExplainResponse} with an answer, resolved citations, a
+\texttt{grounded} flag and a refusal reason. A refusal carries no answer text. The alert service
+emits an \texttt{AlertEvent} with its identifier, area, period, both levels, source prediction, rule
+outcomes and recipient count. Components share a database but not tables; spatial columns use
+PostGIS and embeddings use pgvector.
 
 \section{Modularity, Reuse and Status}
 
-The decomposition justifies its overhead only if the parts are reusable. A second disease supplies a
-new gazetteer, guidance collection and thresholds, while the modelling code, which never names
-glanders, does not change. A second LLM provider is a configuration value, because the RAG layer calls
-a single-method interface; a second channel is an adapter plus a template. The pipeline is a
+The split is worth the overhead only if the parts are reusable. A second disease needs a new
+gazetteer, guidance collection and thresholds; the modelling code never names glanders and does not
+change. A second LLM provider is a configuration value because the RAG layer calls a single-method
+interface. A second notification channel is an adapter plus a template. The pipeline is a
 scikit-learn compatible object \cite{pedregosa2011} exported with a manifest, so any Python process
-can load it without the API.
+can load it without going through the API.
 
-The report distinguishes throughout between what has been built and what has been specified: the risk
-engine is built and evaluated, with every number in Chapter~\ref{ch:results} reproducible from the
-committed scripts, while serving and the RAG and alert layers are specified but not deployed, so no
-measured performance is reported for them.
+This report separates what has been built from what has been specified. The risk engine is built and
+evaluated; every number in Chapter~\ref{ch:results} is reproducible from the committed scripts.
+Serving, the RAG layer and the alert service are specified but not deployed, so no measured
+performance is reported for them.
 
 % =====================================================================
 \chapter{Methodology}
@@ -828,7 +831,7 @@ proxy columns and drop the conditional signal.
 
 SHAP was the only attribution method used, for three reasons. It is additive and signed, so the same
 values supply both the global ranking that selection needs and the per-prediction top-factor list the
-risk engine returns, which keeps one explanation mechanism in the platform rather than two.
+risk engine returns, which keeps one attribution path in the platform rather than two.
 \texttt{TreeExplainer} is exact for the tree families in use and therefore cheap enough to recompute
 on every training run. And it carries the consistency guarantee above, which permutation importance
 and impurity-based gain do not: impurity gain is biased toward high-cardinality columns, and
@@ -912,34 +915,35 @@ folds only; the alert threshold is fixed on training; and imputation values and 
 are generated inside the pipeline.
 
 % =====================================================================
-\chapter{The RAG Explanation Layer}
+\chapter{The RAG Question-Answering Layer}
 \label{ch:rag}
 % =====================================================================
 
 \section{The Problem This Layer Solves}
 
-A calibrated probability of 0.24 is actionable for a veterinary officer and meaningless to an equine
-owner. The owner needs to know what happened and what to do next; the officer needs the factors behind
-the number, because a forecast they cannot interrogate is one they will not act on.
+A calibrated probability of 0.24 is useful to a veterinary officer and opaque to most equine owners.
+Both still have questions that the risk score does not answer: what the National Action Plan requires,
+how movement control works, what to do if an animal looks sick, whether a claim is still current
+guidance. Those are question-answering problems.
 
-Asking a large language model is the obvious answer and the obvious hazard. A model asked about
-glanders answers from training data that may be outdated, may conflate glanders with melioidosis, and
-may invent a treatment protocol; for a zoonosis under statutory control, an invented instruction is
-worse than none. Retrieval-augmented generation \cite{lewis2020} changes what the model may use: it is
-given a small set of passages from official guidance plus the prediction's own numbers, and required
-to answer only from those, so each claim traces to a passage the reader can see.
+Asking a large language model directly is the obvious shortcut and a real hazard. A model asked about
+glanders may answer from outdated training data, conflate glanders with melioidosis, or invent a
+treatment protocol. For a zoonosis under statutory control, an invented instruction is worse than no
+answer. Retrieval-augmented generation \cite{lewis2020} restricts what the model may use: it receives
+a small set of passages from official guidance (and, when relevant, the current prediction's numbers)
+and must answer only from those passages, so each claim traces to text the reader can check.
 
-The goal is narrow and testable: an answer a veterinary officer would accept as consistent with the
+The goal is narrow and testable: answers a veterinary officer would accept as consistent with the
 National Action Plan, and a refusal rather than a guess when the corpus does not support one.
 
-Fine-tuning would produce fluent text with no citations, no way to separate guidance from the base
-model's priors, and knowledge frozen at training time. Retrieval keeps knowledge in a corpus a
-re-ingestion can update, makes every answer auditable, and allows a refusal path, at the cost of
+Fine-tuning would give fluent text without citations, no clean line between guidance and the base
+model's priors, and knowledge frozen at training time. Retrieval keeps knowledge in a corpus that a
+re-ingestion can update, makes every answer auditable, and allows a refusal path. The costs are
 latency and possible retrieval failure.
 
 \section{Knowledge Base}
 
-The corpus is restricted to authoritative sources, because the layer's value is that it cites them.
+The corpus is restricted to authoritative sources so that answers can be checked against them.
 Each document carries an authority tier, used as a tie-breaker during retrieval.
 
 \begin{table}[htbp]
@@ -959,7 +963,7 @@ Open-access publications & 3 & Epidemiology, risk factors, regional situation. \
 \end{tabular}
 \end{table}
 
-Tier 3 may inform an explanation but never overrides tier 1 on a control instruction. Conflicts
+Tier 3 may inform an answer but never overrides tier 1 on a control instruction. Conflicts
 resolve to the higher tier and are logged, because a silent contradiction between sources is the
 failure this layer exists to prevent.
 
@@ -1021,17 +1025,17 @@ nothing.
 \section{Context, Generation and Guardrails}
 
 The prompt has three parts in fixed order: a system instruction, the retrieved passages with
-identifiers, and the structured prediction facts. Those facts make the answer specific to this
-forecast rather than to glanders in general, and are injected as structured data so the model cannot
-restate an association as a cause. The instruction states four constraints: answer only from the
-passages, cite every claim, never diagnose an individual animal, and state that the output is a
-population-level forecast.
+identifiers, and (when supplied) structured prediction facts for the area under discussion. The
+prediction block is context for questions about a specific forecast; it is not required for general
+guidance questions. Facts are injected as structured data so the model cannot rewrite an association
+as a cause. The instruction states four constraints: answer only from the passages, cite every claim,
+never diagnose an individual animal, and make clear when a population-level forecast is being
+discussed.
 
-Generation uses temperature 0.1 and a bounded output length, chosen for consistency rather than
-caution: two officers asking the same question about the same area should receive the same
-instruction. The provider sits behind a single-method interface, so one retrieval, grounding and
-citation path serves a local Ollama model or a hosted API, and switching model cannot silently
-disable the guardrails.
+Generation uses temperature 0.1 and a bounded output length so that two officers asking the same
+question about the same area tend to get the same instruction. The provider sits behind a
+single-method interface, so one retrieval, grounding and citation path can serve a local Ollama model
+or a hosted API; switching model cannot silently disable the guardrails.
 
 The layer is designed to refuse, and four checks can terminate a response.
 
@@ -1402,9 +1406,9 @@ best-scoring cells are India, the United States and Australia.
 This project set out to build a usable warning system for glanders: to establish whether
 population-level risk could be predicted from public data, and how a prediction reaches the person who
 owns the animals. Four sources new to the disease formed a country-year panel across 160
-equine-holding countries, and six model families were trained under three validation schemes. Around
-the model, delivery was decomposed into three components with fixed contracts: a risk engine, an
-explanation layer and an alert service.
+equine-holding countries, and six model families were trained under three validation schemes. Beside
+the model, the platform is split into three components with fixed contracts: a risk engine, a RAG
+question-answering layer and an alert service.
 
 Prediction is possible, and the performance is moderate: Logistic Regression reaches a precision-recall AUC of
 0.461 against a base rate of 5.87\% on a forward split, about a 8-fold lift with a
@@ -1440,8 +1444,8 @@ The following limits apply to every headline number in this report.
         individual animal and does not replace laboratory confirmation.
   \item \textbf{Geographic fragility.} Leave-country-out skill is weaker than temporal skill, and the
         drop is largest in regions where early warning would help most.
-  \item \textbf{Explanation and alerts are specified, not measured.} The RAG layer and alert service
-        have interfaces, rules and evaluation protocols, but no deployed pilot scores. Monthly
+  \item \textbf{RAG and alerts are specified, not measured.} The RAG layer and alert service have
+        interfaces, rules and evaluation protocols, but no deployed pilot scores. Monthly
         prediction, real SMS/WhatsApp delivery, and proof that recipients read or acted on a message
         remain future work (see also the alert-specific limits in Chapter~\ref{ch:alerts}).
 \end{enumerate}
@@ -1459,12 +1463,12 @@ recall.
 control is applied, but public district covariates would need assembling. The calibration here is one
 point estimate, so production also needs drift monitoring and a retraining trigger.
 
-\textbf{Measuring the explanation layer.} Its retrieval, guardrail and protocol targets are
-specified but unmeasured. Running it against the corpus would give recall@5 and mean reciprocal rank
-for retrieval, faithfulness and citation precision for grounding, and the out-of-scope refusal rate
-against the false refusal rate in scope. Two metrics belong on top: answer usefulness, rated by
-district officers on real predictions rather than a hand-built set, and citation age, which shows
-whether answers lean on guidance since revised.
+\textbf{Measuring the RAG layer.} Its retrieval, guardrail and protocol targets are specified but
+unmeasured. Running it against the corpus would give recall@5 and mean reciprocal rank for
+retrieval, faithfulness and citation precision for grounding, and the out-of-scope refusal rate
+against the false refusal rate in scope. Two further metrics matter in the field: answer usefulness,
+rated by district officers on real questions rather than a hand-built set, and citation age, which
+shows whether answers lean on guidance that has since been revised.
 
 \textbf{Monthly alert operation.} Extend the ML pipeline to produce and validate monthly predictions, then integrate them through the alert service's period-aware prediction contract. Keep monthly and yearly alert states separate, and tune thresholds, hysteresis margins and cooldown windows for each frequency. Evaluate temporal leakage, reporting delays, seasonality, calibration and freshness before enabling monthly notifications.
 
