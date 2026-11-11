@@ -99,6 +99,7 @@ Explanation and Owner Alerting\par}
 
 \vspace{1.0cm}
 \includegraphics[width=3.0cm]{iiit_logo.png}\par
+{\scriptsize Official emblem of IIIT Bhubaneswar.\par}
 
 \vfill
 
@@ -259,6 +260,13 @@ Modular System Design, Animal Health Surveillance.
 \noindent\underline{\textbf{List of Figures}}
 \vspace{0.55cm}
 
+{\small
+Architecture, training, evaluation, RAG and alert diagrams are authors' illustrations.
+Charts of stocks, literature events and the modelling panel cite FAOSTAT, Europe PMC and
+World Bank sources in their captions.
+\par}
+\vspace{0.45cm}
+
 \makeatletter
 \@starttoc{lof}
 \makeatother
@@ -311,7 +319,8 @@ on the other.
 largest countries, split by species, which sets the size of the exposed population. Panel B gives the
 occurrence events recovered from the literature each year, which sets the size of the label. The rise
 in panel B follows open-access publishing volume as much as disease, which is why the label is treated
-as documented activity throughout.}
+as documented activity throughout. Authors' plot from FAOSTAT livestock stocks \cite{faostat} (panel~A)
+and Europe PMC occurrence extraction \cite{europepmc} (panel~B).}
 \label{fig:background}
 \end{figure}
 
@@ -1158,7 +1167,7 @@ Figure~\ref{fig:alerts-pipeline} shows the supplied end-to-end architecture. The
 
 \begin{figure}[htbp]\centering
 \resizebox{\textwidth}{!}{\input{figures/alerts_pipeline.tex}}
-\caption[End-to-end GlandersWatch alert pipeline]{End-to-end GlandersWatch alert pipeline. The period field supports monthly or yearly predictions.}\label{fig:alerts-pipeline}
+\caption[End-to-end GlandersWatch alert pipeline]{End-to-end GlandersWatch alert pipeline. The period field supports monthly or yearly predictions. Authors' diagram.}\label{fig:alerts-pipeline}
 \end{figure}
 
 \subsubsection{Prediction Trigger and Alert Evaluator}
@@ -1258,7 +1267,7 @@ The first two protections should use database unique constraints, not only appli
 Figure~\ref{fig:alerting-modular} shows the internal modular structure. The alert engine core contains domain rules and does not directly depend on a database, web framework or messaging SDK. Four ports define what the core needs; adapters implement them for a demo or production stack.
 \begin{figure}[htbp]\centering
 \resizebox{\textwidth}{!}{\input{figures/alerting_modular_arch.tex}}
-\caption{Modular alerting engine: rules core, four ports and replaceable adapters.}\label{fig:alerting-modular}\end{figure}
+\caption{Modular alerting engine: rules core, four ports and replaceable adapters. Authors' diagram.}\label{fig:alerting-modular}\end{figure}
 
 \begin{description}
 \item[RecipientProvider.] Finds active subscriptions for an area. A demo may read a JSON file; production may query user/subscription tables or a registration service. Registration should capture verified contact details, area, language, consent and opt-out status.
@@ -1317,7 +1326,8 @@ hold 35.5\% of all positives.
 \centering
 \includegraphics[width=0.92\textwidth]{fig10a_label_volume.png}
 \caption[Annual positive counts and prevalence]{Annual positive country-year counts (bars)
-against prevalence on the secondary axis (line).}
+against prevalence on the secondary axis (line). Authors' plot from the assembled modelling
+matrix (Europe PMC labels \cite{europepmc}).}
 \label{fig:labels-volume}
 \end{figure}
 
@@ -1325,14 +1335,15 @@ against prevalence on the secondary axis (line).}
 \centering
 \includegraphics[width=0.92\textwidth]{fig10b_label_concentration.png}
 \caption[Positive years per country]{Distribution of positive years per country among countries
-with at least one positive.}
+with at least one positive. Authors' plot from the assembled modelling matrix.}
 \label{fig:labels-concentration}
 \end{figure}
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.92\textwidth]{fig10c_label_region.png}
-\caption[Prevalence by World Bank region]{Prevalence by World Bank region.}
+\caption[Prevalence by World Bank region]{Prevalence by World Bank region. Authors' plot; region
+names follow the World Bank classification \cite{wdi}.}
 \label{fig:labels-region}
 \end{figure}
 
