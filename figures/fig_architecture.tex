@@ -61,7 +61,7 @@
   \draw[fl] (c3) -- node[clbl,right=2pt]{fan-out} (ch.north);
 
 \end{tikzpicture}
-\caption{The platform decomposed into three components. The ML risk engine
+\caption[Platform architecture with three independently deployable components]{The platform decomposed into three components. The ML risk engine
 writes one \texttt{PredictionRecord} per area and period; the dashboard, the RAG
 layer and the alert service consume it independently. No component reads another
 component's tables, so any one of them can be replaced without touching the other

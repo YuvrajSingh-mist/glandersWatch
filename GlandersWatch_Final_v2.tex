@@ -252,6 +252,26 @@ Modular System Design, Animal Health Surveillance.
 \@starttoc{toc}
 \makeatother
 
+% ============================== LIST OF FIGURES ==============================
+\newpage
+\noindent\underline{\textbf{List of Figures}}
+\vspace{0.55cm}
+
+\makeatletter
+\@starttoc{lof}
+\makeatother
+
+% ============================== LIST OF TABLES ==============================
+\newpage
+\noindent\underline{\textbf{List of Tables}}
+\vspace{0.55cm}
+
+\makeatletter
+\@starttoc{lot}
+\makeatother
+
+% No algorithm environments appear in this report, so a List of Algorithms is omitted.
+
 % =====================================================================
 \chapter{Introduction}
 \label{ch:intro}
@@ -283,7 +303,7 @@ is acted on rather than monitored.
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.95\textwidth]{fig14_background.png}
-\caption{The two quantities behind the problem. Panel A gives the equid population of the fourteen
+\caption[Exposed population and documented occurrence events]{The two quantities behind the problem. Panel A gives the equid population of the fourteen
 largest countries, split by species, which sets the size of the exposed population. Panel B gives the
 occurrence events recovered from the literature each year, which sets the size of the label. The rise
 in panel B follows open-access publishing volume as much as disease, which is why the label is treated
@@ -416,7 +436,7 @@ glanders risk models.
 
 \begin{table}[htbp]
 \centering
-\caption{Comparative summary for the risk engine. Upper rows are glanders (or glanders-organism)
+\caption[Comparative summary for the risk engine]{Comparative summary for the risk engine. Upper rows are glanders (or glanders-organism)
 studies; lower rows are method papers that guide multi-model evaluation.}
 \label{tab:ml-compare}
 \small
@@ -477,7 +497,7 @@ the question, not to narrate the score.
 
 \begin{table}[htbp]
 \centering
-\caption{Related work for the RAG question-answering layer. There is no glanders-specific prior;
+\caption[Related work for the RAG question-answering layer]{Related work for the RAG question-answering layer. There is no glanders-specific prior;
 rows are the methods adapted here.}
 \label{tab:rag-compare}
 \small
@@ -671,7 +691,7 @@ Four public data sources are used, and none had previously been applied to gland
 
 \begin{table}[htbp]
 \centering
-\caption{The four data sources. Glanders events in Europe PMC were extracted by matching a country
+\caption[The four public data sources]{The four data sources. Glanders events in Europe PMC were extracted by matching a country
 name and an event term within the same sentence, which yielded 263 events across 2000 to 2024.}
 \label{tab:sources}
 \small
@@ -804,7 +824,7 @@ candidates. Chapter~\ref{ch:results} shows what that compression costs in transf
 
 \begin{table}[htbp]
 \centering
-\caption{The eight features the reported models use, in rank order by mean absolute SHAP on the
+\caption[Eight selected features by mean absolute SHAP]{The eight features the reported models use, in rank order by mean absolute SHAP on the
 training years.}
 \label{tab:selected}
 \small
@@ -1123,7 +1143,7 @@ Figure~\ref{fig:alerts-pipeline} shows the supplied end-to-end architecture. The
 
 \begin{figure}[htbp]\centering
 \resizebox{\textwidth}{!}{\input{figures/alerts_pipeline.tex}}
-\caption{End-to-end GlandersWatch alert pipeline. The period field supports monthly or yearly predictions.}\label{fig:alerts-pipeline}
+\caption[End-to-end GlandersWatch alert pipeline]{End-to-end GlandersWatch alert pipeline. The period field supports monthly or yearly predictions.}\label{fig:alerts-pipeline}
 \end{figure}
 
 \subsubsection{Prediction Trigger and Alert Evaluator}
@@ -1282,7 +1302,7 @@ hold 35.5\% of all positives.
 \begin{figure}[p]
 \centering
 \includegraphics[width=\textwidth]{fig10_label_anatomy.png}
-\caption{Label anatomy. Panel A gives annual positive counts against prevalence on the secondary
+\caption[Label anatomy of the modelling panel]{Label anatomy. Panel A gives annual positive counts against prevalence on the secondary
 axis. Panel B gives the distribution of positive years per country. Panel C gives prevalence by
 World Bank region.}
 \label{fig:labels}
@@ -1300,7 +1320,7 @@ Table~\ref{tab:level1} reports discrimination under all three schemes.
 
 \begin{table}[htbp]
 \centering
-\caption{Discrimination at the country-year level. Brackets give 95 per cent bootstrap intervals
+\caption[Discrimination at the country-year level]{Discrimination at the country-year level. Brackets give 95 per cent bootstrap intervals
 on the temporal holdout. Expected calibration error for the champion is 0.025 (Brier 0.0555).}
 \label{tab:level1}
 \small
