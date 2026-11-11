@@ -1280,9 +1280,7 @@ Transient failures, such as temporary timeouts, may be retried with exponential 
 Evaluation should include: (i) alert precision/false-alert rate; (ii) event coverage/missed-event rate; (iii) notification noise per recipient per month and year; (iv) delivery success by channel; (v) time from \texttt{predictions\_ready} to decision and provider acceptance; and (vi) idempotency tests using event replay, worker restart, concurrent evaluation and provider-timeout simulation. These are proposed measures, not measured production results.
 
 \subsection{Limitations and Summary}
-The current evaluated model is country-year based; district-level alerts require validated district-level predictions. Monthly prediction is not yet an evaluated model output: the monthly target, input pipeline, temporal validation and calibration remain ML future work. Thresholds and hysteresis require model validation and veterinary input. Real SMS/WhatsApp delivery requires provider integration and compliance. Delivery does not prove that a recipient read or acted on a message. Finally, local database constraints prevent duplicate internal records but cannot alone guarantee exactly-once external delivery.
-
-In summary, GlandersWatch proposes a period-aware, event-driven alert service connecting calibrated risk predictions to registered recipients. The same rules core supports monthly and yearly records through explicit period identities and separate state. Thresholding and hysteresis classify and stabilise risk; suppression controls unnecessary messages; deduplication protects alert creation, fan-out and retries; and modular ports allow storage and channel adapters to be replaced. The design adapts complementary lessons from surveillance, public warning, early-warning evaluation, alert management and standardised exchange. Monthly ML prediction, production delivery and field evaluation remain to be completed.
+Alert-specific limits --- no production delivery yet, and a send that is not proof of reading --- are stated with the platform-wide list in Section~\ref{sec:limitations}. In short, the service is a period-aware rules core that turns a calibrated prediction into a controlled notification: thresholding and hysteresis set the level, suppression and deduplication keep the volume readable, and ports keep storage and channels replaceable.
 % =====================================================================
 \chapter{Results and Discussion}
 \label{ch:results}
@@ -1390,68 +1388,50 @@ record. It predicts where glanders will be documented, not where it is.
 \section{Limitations}
 \label{sec:limitations}
 
-The following limits apply to every headline number in this report.
+Five limits cut across the platform; each is stated once and held for every claim that follows.
 
 \begin{enumerate}
-  \item \textbf{The label is documentation, not incidence.} A positive means glanders was reported in
-        the literature for that country-year; a negative may mean no disease or simply no report.
-        Reporting effort is therefore the principal confounder: countries with reference laboratories
-        and open-access publishing look riskier than countries with similar burden and weaker
-        surveillance.
-  \item \textbf{The extractor is unvalidated.} Occurrence events are reconstructed by an automated
-        pipeline that has not been checked against a hand-annotated reference set, so extractor error
-        is not separately quantified.
-  \item \textbf{Few positives.} With 169 positive country-years the uncertainty on every metric is
-        wide; bootstrap intervals are reported rather than hidden.
-  \item \textbf{Country-year resolution only.} District-level modelling for India was not attempted,
-        because public district covariates could not be assembled in time. Control is applied at a
-        finer scale than the model predicts.
-  \item \textbf{Not a clinical tool.} The model is population-level. It does not diagnose an
-        individual animal and does not replace laboratory confirmation.
-  \item \textbf{Geographic fragility.} Leave-country-out skill is weaker than temporal skill, and the
-        drop is largest in regions where early warning would help most.
-  \item \textbf{RAG and alerts are specified, not measured.} The RAG layer and alert service have
-        interfaces, rules and evaluation protocols, but no deployed pilot scores. Monthly
-        prediction, real SMS/WhatsApp delivery, and proof that recipients read or acted on a message
-        remain future work (see also the alert-specific limits in Section~\ref{ch:alerts}).
+  \item \textbf{Risk model --- documentation, not incidence.} A positive means glanders was reported
+        in the literature for that country-year; a negative may mean no disease or simply no report.
+        With 169 positives at country-year resolution, leave-country-out skill is weaker than
+        temporal skill, and the drop is largest where early warning would help most.
+  \item \textbf{Risk model --- extractor unvalidated.} The 263 occurrence events come from an
+        automated pipeline that has not been checked against a hand-annotated reference, so
+        extractor error is not separately quantified.
+  \item \textbf{RAG --- specified, not measured.} Retrieval quality, faithfulness, citation
+        precision and refusal behaviour have fixed targets and an evaluation protocol, but no scored
+        run against the guidance corpus or against real officer questions.
+  \item \textbf{Alerts --- no production delivery.} Thresholds, hysteresis and deduplication are
+        designed against the calibration curve, yet SMS/WhatsApp providers, durable workers and a
+        consented subscriber set are not yet in place, so delivery success and alert fatigue remain
+        unmeasured.
+  \item \textbf{Alerts --- send is not the same as read.} A logged acceptance from a provider does
+        not prove that an owner saw the warning or took action; acknowledgement and escalation are
+        not yet part of the service.
 \end{enumerate}
 
 \section{Future Work}
 
-\textbf{Reported activity.} The most important extension is to model surveillance capacity as a
-quantity, as an offset on publication volume or a joint detection-and-occurrence model; otherwise gains in score reflect reporting, not disease.
+Five next steps, one cluster per gap above, cover the model, the RAG layer and the alert service.
 
-\textbf{The label extractor.} The 263 extracted events have never been checked against a
-hand-annotated set; annotating a stratified sample would give the extractor's own precision and
-recall.
-
-\textbf{Resolution and drift.} District-month resolution for India matches the scale at which
-control is applied, but public district covariates would need assembling. The calibration here is one
-point estimate, so production also needs drift monitoring and a retraining trigger.
-
-\textbf{Measuring the RAG layer.} Its retrieval, guardrail and protocol targets are specified but
-unmeasured. Running it against the corpus would give recall@5 and mean reciprocal rank for
-retrieval, faithfulness and citation precision for grounding, and the out-of-scope refusal rate
-against the false refusal rate in scope. Two further metrics matter in the field: answer usefulness,
-rated by district officers on real questions rather than a hand-built set, and citation age, which
-shows whether answers lean on guidance that has since been revised.
-
-\textbf{Monthly alert operation.} Extend the ML pipeline to produce and validate monthly predictions, then integrate them through the alert service's period-aware prediction contract. Keep monthly and yearly alert states separate, and tune thresholds, hysteresis margins and cooldown windows for each frequency. Evaluate temporal leakage, reporting delays, seasonality, calibration and freshness before enabling monthly notifications.
-
-\textbf{Production alert infrastructure.} Replace demonstration storage and single-process execution with durable PostgreSQL persistence, background workers and a reliable queue. Test event replay, concurrent evaluation, worker restarts and provider timeouts. Measure duplicate-alert prevention, queue recovery and end-to-end processing latency.
-
-\textbf{Real notification channels.} Integrate approved SMS and WhatsApp providers for a consented pilot, while retaining the simulated or Telegram channel for development where appropriate. Complete provider onboarding and applicable message-template requirements. Measure provider acceptance, delivery receipts, latency, cost and failure reasons separately for each channel.
-
-\textbf{Recipient acknowledgement and escalation.} Add an acknowledgement mechanism so the system can distinguish a message being sent from a warning being seen. Under a veterinary-approved policy, escalate unacknowledged HIGH alerts to the responsible veterinary officer or field worker. Evaluate acknowledgement time and follow-up completion in a supervised pilot.
-
-\textbf{Low-connectivity reach.} Evaluate veterinary-officer and community field-worker relays, SMS and voice/IVR options for owners with limited smartphone or internet access. Measure whether warnings reach these recipients and whether the message is understood.
-
-\textbf{Alert quality and field evaluation.} Evaluate the service separately for monthly and yearly operation using alert precision, false-alert rate, event coverage, missed-event rate, messages per recipient per month/year, delivery reliability per channel and time from alert to owner contact. Field studies should also assess whether recipients understand the warning and take appropriate veterinary or preventive action. These outcomes cannot be claimed until a real pilot with subscribers has been completed.
-
-\textbf{Structured alert exchange.} If an external agency or partner requires interoperability, add an OASIS CAP export adapter for the structured alert record. Validate required fields and test exchange with a partner endpoint before claiming operational interoperability.
-
-A WOAH WAHIS record set \cite{wahis} would validate the literature-derived label where the two
-overlap, and a cost-sensitive threshold would match the operating point to programme priorities.
+\begin{enumerate}
+  \item \textbf{Model reporting capacity.} Treat surveillance effort as a quantity --- an offset on
+        publication volume, or a joint detection-and-occurrence model --- so gains in score reflect
+        disease rather than publishing. Cross-check the literature label against WOAH WAHIS where
+        the two overlap \cite{wahis}.
+  \item \textbf{Validate the extractor and raise resolution.} Annotate a stratified sample of the
+        263 events for extractor precision and recall, then move toward district-month prediction for
+        India once public district covariates can be assembled.
+  \item \textbf{Measure the RAG layer.} Score recall@5, faithfulness, citation precision and
+        refusal rates on a fixed question set, then ask district officers to rate answer usefulness
+        on real questions.
+  \item \textbf{Production alerts on real channels.} Put durable storage and workers behind the
+        rules core, integrate approved SMS/WhatsApp for a consented pilot, and keep monthly and
+        yearly states separate once a monthly prediction pipeline exists.
+  \item \textbf{Field-evaluate warnings.} Measure alert precision, missed events, messages per
+        recipient, delivery latency and whether owners acknowledge HIGH alerts; escalate
+        unacknowledged warnings only under a veterinary-approved policy.
+\end{enumerate}
 
 % ============================== REFERENCES ==============================
 \newpage
