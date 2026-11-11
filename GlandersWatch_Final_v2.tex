@@ -298,7 +298,9 @@ The damage that is documented is smaller and better measured. A national program
 roughly sixty per cent of them in Uttar Pradesh; earlier surveillance covering 2006 to 2018 reported
 1,145 positives among 128,404 sera. That is under one per cent of the equid population, concentrated
 in a few states, and because glanders is notifiable and frequently fatal once clinical, each positive
-is acted on rather than monitored.
+is acted on rather than monitored. Figure~\ref{fig:background} separates those two quantities: the
+exposed equid population on one side, and documented occurrence events recovered from the literature
+on the other.
 
 \begin{figure}[htbp]
 \centering
@@ -432,7 +434,7 @@ method papers that are not disease-specific: how to compare classifiers under im
 \cite{roberts2017}, how to attribute predictions across features \cite{lundberg2017}, and how to
 judge whether predicted probabilities are usable as probabilities \cite{niculescu2005,huang2020}.
 Those references justify the metrics and splits used in Chapter~\ref{ch:method}; they are not prior
-glanders risk models.
+glanders risk models. Table~\ref{tab:ml-compare} summarises both strands side by side.
 
 \begin{table}[htbp]
 \centering
@@ -493,7 +495,8 @@ reciprocal rank fusion \cite{cormack2009} are the usual building blocks; none of
 product. What is missing is the application: a service that answers veterinary and owner questions
 from official control guidance, cites its sources, and refuses when the corpus does not support a
 claim. The risk score may be passed in as context for a question; the layer's job is still to answer
-the question, not to narrate the score.
+the question, not to narrate the score. Table~\ref{tab:rag-compare} lists the methods adapted for that
+layer.
 
 \begin{table}[htbp]
 \centering
@@ -600,7 +603,7 @@ The risk engine answers whether glanders is likely to be documented in an area n
 the platform also answers questions through the RAG layer and, when policy allows, delivers a short
 message to an owner. Those three jobs have different readers and different failure modes, so putting
 them in one process would couple alert delivery to LLM latency and make the risk model hard to test
-on its own.
+on its own. Figure~\ref{fig:arch} shows the three components and the prediction record that links them.
 
 \input{figures/fig_architecture.tex}
 
@@ -629,6 +632,8 @@ Outputs stay auditable: a prediction records its model version, an answer record
 used, and an alert records the prediction and the rule outcomes behind the send-or-skip decision.
 
 \section{The Three Components}
+
+Table~\ref{tab:components} states each component's job, interface and behaviour on failure.
 
 \begin{table}[htbp]
 \centering
@@ -687,7 +692,8 @@ the retrieval-augmented question-answering layer, and the alerting service.
 \section{Dataset Used}
 
 Four public data sources are used, and none had previously been applied to glanders risk modelling
-\cite{europepmc,faostat,wdi,power}.
+\cite{europepmc,faostat,wdi,power}. Table~\ref{tab:sources} lists what each source contributes and at
+what size.
 
 \begin{table}[htbp]
 \centering
@@ -773,7 +779,8 @@ For every country and year the answer is yes or no: was glanders documented the 
 Occurrence is extracted from Europe PMC by matching, within one sentence, a country name and an
 occurrence term (\emph{outbreak}, \emph{case}, \emph{detected}, \emph{seropositive},
 \emph{surveillance}). Because the label depends on publication it is termed \emph{documented
-activity}: a negative may mean no disease or no report.
+activity}: a negative may mean no disease or no report. Table~\ref{tab:answer-key} records the counts
+that follow from that definition.
 
 \begin{table}[htbp]
 \centering
@@ -797,7 +804,7 @@ Share of all ``yes'' in the top 5 countries & 35.5\% \\
 \end{table}
 
 \paragraph{What the distribution tells us.}
-Three things follow from that table. First, yes is rare enough that always answering no would be
+Three things follow from Table~\ref{tab:answer-key}. First, yes is rare enough that always answering no would be
 right about 94\% of the time, so accuracy is useless and we need scores built for rare events.
 Second, the disease comes back: 30 of the 55 positive countries were positive in two or more years,
 so past activity is a fair input. Third, the yes answers cluster, with five countries holding 35.5\%
@@ -864,6 +871,7 @@ passed to the fitted models once SHAP selection has chosen this set of eight.
 \section{Models}
 
 Six families are compared, including a deliberately simple baseline.
+Table~\ref{tab:models-tried} lists each family and what it contributes.
 
 \begin{table}[htbp]
 \centering
@@ -972,6 +980,7 @@ of latency and possible retrieval failure.
 
 The corpus is restricted to authoritative sources so that answers can be checked against them, and
 each document carries an authority tier used as a tie-breaker during retrieval.
+Table~\ref{tab:corpus} shows the tiers.
 
 \begin{table}[htbp]
 \centering
@@ -1009,6 +1018,8 @@ vectors, with a multilingual variant for Hindi because an English-only embedding
 Devanagari. Vectors live in pgvector beside the relational tables, so re-ingestion and prediction share
 one transaction boundary. The index is HNSW with cosine distance \cite{malkov2020}; the reranker
 corrects recall at the head of the list, and the index keeps query cost flat as the corpus grows.
+Figure~\ref{fig:rag} shows the offline ingestion path above the per-request retrieval and generation
+path.
 
 \input{figures/fig_rag.tex}
 
@@ -1026,6 +1037,7 @@ without requiring comparable scores:
 The fused top fifty are reranked by a cross-encoder scoring each passage against the question
 jointly. It is far slower per pair than an embedding dot product, which is why it runs on fifty
 candidates rather than the corpus, and the top five become the context.
+Table~\ref{tab:retrieval} records the stage-wise settings.
 
 \begin{table}[htbp]
 \centering
@@ -1065,6 +1077,7 @@ single-method interface, so one retrieval, grounding and citation path can serve
 or a hosted API; switching model cannot silently disable the guardrails.
 
 The layer is designed to refuse, and four checks can terminate a response.
+Table~\ref{tab:guardrails} states each check and what happens when it fails.
 
 \begin{table}[htbp]
 \centering
@@ -1201,10 +1214,11 @@ Previous state&Monthly stream state&Yearly stream state\\
 Deduplication&Area + month + level&Area + year + level\\
 Policy&Monthly thresholds/cooldown as validated&Yearly thresholds/cooldown as validated\\\bottomrule
 \end{tabular}\end{table}
+Table~\ref{tab:monthly-yearly} summarises how the two frequencies stay distinct inside one service.
 
 \subsection{Rules Engine: Thresholding, Suppression and Deduplication}\label{sec:alert-rules}
 \subsubsection{Thresholding and Hysteresis}
-The calibrated probability is mapped to LOW, MEDIUM or HIGH. Numerical boundaries must be selected from model validation and the trade-off between false alerts and missed events; 0.5 must not be assumed to be the correct HIGH threshold.
+The calibrated probability is mapped to LOW, MEDIUM or HIGH. Numerical boundaries must be selected from model validation and the trade-off between false alerts and missed events; 0.5 must not be assumed to be the correct HIGH threshold. Table~\ref{tab:alert-levels} gives the intended meaning of each level.
 \begin{table}[htbp]\centering\small
 \caption{Meaning of the proposed alert levels.}\label{tab:alert-levels}
 \begin{tabular}{p{1.6cm}p{4.5cm}p{6.6cm}}\toprule
@@ -1254,7 +1268,7 @@ Figure~\ref{fig:alerting-modular} shows the internal modular structure. The aler
 This Ports-and-Adapters (Hexagonal) structure separates business rules from technology choices. Replacing SQLite with PostgreSQL or Telegram with an approved SMS provider changes an adapter, not the threshold and suppression logic. The core can initially run as a Python library and later be hosted behind an API; this design does not require every component to be a separate microservice.
 
 \subsection{Example Flow: Monthly and Yearly Predictions}
-The following monthly example uses fictional values only. Assume MEDIUM begins at 0.15, HIGH entry is 0.30, hysteresis is 0.05, and Area A has 40 owner subscriptions plus one veterinary officer.
+The following monthly example uses fictional values only. Assume MEDIUM begins at 0.15, HIGH entry is 0.30, hysteresis is 0.05, and Area A has 40 owner subscriptions plus one veterinary officer. Table~\ref{tab:monthly-example} walks through seven months of that sequence.
 \begin{table}[htbp]\centering\small
 \caption{Illustrative monthly state sequence for Area A.}\label{tab:monthly-example}
 \begin{tabular}{p{1.4cm}p{1.7cm}p{1.7cm}p{1.8cm}p{6.0cm}}\toprule
