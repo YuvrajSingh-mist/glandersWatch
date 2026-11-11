@@ -1,0 +1,65 @@
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  bx/.style={rectangle,rounded corners=2pt,draw=black!50,fill=black!4,
+             align=center,font=\scriptsize\sffamily,inner sep=2.5pt},
+  top/.style={rectangle,rounded corners=2pt,draw=blue!55!black,fill=blue!7,
+             align=center,font=\scriptsize\sffamily,inner sep=3pt},
+  fin/.style={rectangle,rounded corners=2pt,draw=teal!60!black,fill=teal!8,
+             align=center,font=\scriptsize\sffamily,inner sep=2.5pt},
+  fl/.style={-{Stealth[length=1.7mm]},thick,draw=black!60},
+]
+
+  \node[top,text width=4.6cm,minimum height=0.5cm] (m) at (0,0)
+       {\textbf{Trained model} + fixed alert threshold};
+
+  % three schemes
+  \node[bx,text width=3.0cm,minimum height=0.95cm] (s1) at (-5.0,-1.15)
+       {\textbf{A. Time split}\\train 2005--17\\test 2018--23};
+  \node[bx,text width=3.0cm,minimum height=0.95cm] (s2) at (0,-1.15)
+       {\textbf{B. Country split}\\5 folds grouped\\by ISO-3};
+  \node[bx,text width=3.0cm,minimum height=0.95cm] (s3) at (5.0,-1.15)
+       {\textbf{C. Repeated CV}\\5 folds $\times$ 3 seeds\\\tiny stability check};
+
+  \node[font=\tiny\sffamily,text=black!60,anchor=north,text width=3.0cm,align=center] (q1)
+       at (-5.0,-1.80) {can we use it next year?};
+  \node[font=\tiny\sffamily,text=black!60,anchor=north,text width=3.0cm,align=center] (q2)
+       at (0,-1.80) {does it work in a new country?};
+  \node[font=\tiny\sffamily,text=black!60,anchor=north,text width=3.0cm,align=center] (q3)
+       at (5.0,-1.80) {are the scores stable?};
+
+  % collector rail
+  \coordinate (railL) at (-5.0,-2.42);
+  \coordinate (railR) at (5.0,-2.42);
+  \draw[fl] (s1.south) -- (railL);
+  \draw[fl] (s2.south) -- (0,-2.42);
+  \draw[fl] (s3.south) -- (railR);
+  \draw[thick,draw=black!60] (railL) -- (railR);
+
+  \node[bx,text width=11.4cm,minimum height=0.78cm] (met) at (0,-3.05)
+       {\textbf{Predictions scored with}\\[1pt]
+        PR-AUC (main) $\;\cdot\;$ ROC-AUC $\;\cdot\;$ Brier $\;\cdot\;$ calibration error
+        $\;\cdot\;$ precision $\;\cdot\;$ recall $\;\cdot\;$ specificity $\;\cdot\;$ F1
+        $\;\cdot\;$ MCC};
+  \draw[fl] (0,-2.42) -- (met.north);
+
+  \node[bx,text width=4.6cm,minimum height=0.62cm] (boot) at (-2.85,-4.02)
+       {\textbf{1{,}000 bootstrap resamples}\\$\rightarrow$ 95\% interval};
+  \node[bx,text width=4.6cm,minimum height=0.62cm] (alert) at (2.85,-4.02)
+       {\textbf{Threshold metrics}\\precision, recall, F1, MCC};
+
+  \node[fin,text width=4.6cm,minimum height=0.55cm] (pick) at (-2.85,-4.90)
+       {\textbf{Pick model} by country-split PR-AUC};
+  \node[fin,text width=4.6cm,minimum height=0.55cm] (sub) at (2.85,-4.90)
+       {\textbf{Report scores}\\with uncertainty intervals};
+
+  \draw[fl] (met.south) -- ++(0,-0.16) -| (boot.north);
+  \draw[fl] (met.south) -- ++(0,-0.16) -| (alert.north);
+  \draw[fl] (boot) -- (pick);
+  \draw[fl] (alert) -- (sub);
+
+\end{tikzpicture}
+\caption{Evaluation pipeline. One trained model is scored three different ways, each
+answering a different question, then reported with uncertainty intervals.}
+\label{fig:evalflow}
+\end{figure}

@@ -708,6 +708,13 @@ further, from the engineered candidates down to the \textbf{8 input features} us
 with 169 positive labels. That matrix is written as \texttt{model\_matrix.csv} under
 \texttt{data/processed/} by the same loader the training script uses.
 
+\paragraph{Training and testing split.}
+The primary split is chronological, not a random 80/20 draw: models train on country-years from
+2005 to 2017 (about 68\% of the modelling window) and are tested on 2018 to 2023 (about 32\%), so
+later years never enter fitting. Model selection also uses leave-country-out folds so every score is
+for an unseen country; Section~\ref{sec:train-eval} and Figures~\ref{fig:trainflow}
+and~\ref{fig:evalflow} show the full training and evaluation pipelines.
+
 \paragraph{Preprocessing.}
 Five steps, in this order.
 
@@ -878,15 +885,21 @@ unseen year. Chapter~\ref{ch:results} reports that ranking: logistic regression 
 criterion even when a tree ensemble leads on the easier temporal holdout.
 
 \section{Training and Evaluation}
+\label{sec:train-eval}
 
-Several measures keep anything from the test period out of training.
+Several measures keep anything from the test period out of training. Figure~\ref{fig:trainflow}
+shows the steps from the four sources through the chronological split; Figure~\ref{fig:evalflow}
+shows how one trained model is scored.
 
-Three schemes answer different questions. A temporal holdout trains on 2005 to 2017 and tests on
-2018 to 2023, asking whether the model can be used in following years. Leave-country-out uses five
-folds grouped by country, so every prediction is for an unseen country; that is the harsher test and
-the one that governs selection. Repeated stratified cross-validation (five folds, three repeats) is
-a stability check. A random row split would let the model memorise country identity, which is why
-splits are grouped \cite{roberts2017}.
+\input{figures/fig_training.tex}
+\input{figures/fig_evaluation.tex}
+
+Three schemes answer different questions. A temporal holdout trains on 2005 to 2017 (about 68\% of
+rows) and tests on 2018 to 2023 (about 32\%), asking whether the model can be used in following
+years. Leave-country-out uses five folds grouped by country, so every prediction is for an unseen
+country; that is the harsher test and the one that governs selection. Repeated stratified
+cross-validation (five folds, three repeats) is a stability check. A random row split would let the
+model memorise country identity, which is why splits are grouped \cite{roberts2017}.
 
 Precision-recall AUC is the primary metric: at 5.87\% prevalence, ROC-AUC is dominated by the
 true-negative mass and overstates performance \cite{saito2015,davis2006}, so ROC-AUC is reported only
