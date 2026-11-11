@@ -8,7 +8,10 @@ This branch (`final-report`) holds the submitted project report and the figures 
 GlandersWatch_Final_v2.pdf      the report, 38 pages
 GlandersWatch_Final_v2.tex      LaTeX source for the PDF above
 figures/
-  fig10_label_anatomy.png       dataset / label anatomy chart
+  fig10a_label_volume.png       annual positives and prevalence
+  fig10b_label_concentration.png  positive years per country
+  fig10c_label_region.png       prevalence by World Bank region
+  fig10_label_anatomy.png       stacked archive of the three panels above
   fig07_alert_budget.png        alert economics
   fig14_background.png          background context chart
   iiit_logo.png                 institute logo on the title page

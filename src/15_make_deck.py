@@ -498,27 +498,39 @@ def build() -> pathlib.Path:
              "Coupling alert delivery to LLM latency would make the risk model hard to "
              "test on its own — so the three jobs stay separate.")
 
-    # ------------------------------------------------------------ data + fig 5.1
+    # ------------------------------------------------------------ data
     s = page(prs, "Four public sources, none built for this disease", "Data",
              title_size=26)
     srcs = [
-        ("01", "Europe PMC", "Occurrence events from abstracts — the label."),
-        ("02", "FAOSTAT", "Horse, ass and mule head counts — exposure."),
-        ("03", "World Bank", "Development and connectivity — context."),
-        ("04", "NASA POWER", "Temperature, humidity, rainfall — environment."),
+        ("01", "Europe PMC", "Occurrence events from abstracts: the label."),
+        ("02", "FAOSTAT", "Horse, ass and mule head counts: exposure."),
+        ("03", "World Bank", "Development and connectivity: context."),
+        ("04", "NASA POWER", "Temperature, humidity, rainfall: environment."),
     ]
     for i, (num, head, text) in enumerate(srcs):
         labeled(s, MG + i * Inches(3.1), Inches(1.35), Inches(2.95), Inches(1.45),
                 num, head, text, head_size=13, text_size=11)
 
-    stat(s, MG, Inches(3.05), Inches(2.9), f"{ROWS:,}", "modelling rows")
-    stat(s, MG + Inches(3.1), Inches(3.05), Inches(2.9), f"{NC}", "countries")
-    stat(s, MG + Inches(6.2), Inches(3.05), Inches(2.9), f"{POS}", "positives")
-    stat(s, MG + Inches(9.3), Inches(3.05), Inches(2.85), f"{PREV*100:.2f}%", "prevalence")
+    stat(s, MG, Inches(3.20), Inches(2.9), f"{ROWS:,}", "modelling rows")
+    stat(s, MG + Inches(3.1), Inches(3.20), Inches(2.9), f"{NC}", "countries")
+    stat(s, MG + Inches(6.2), Inches(3.20), Inches(2.9), f"{POS}", "positives")
+    stat(s, MG + Inches(9.3), Inches(3.20), Inches(2.85), f"{PREV*100:.2f}%", "prevalence")
+    takeaway(s, Inches(4.50),
+             "The next slide shows the three label charts from the report "
+             "(Figures 5.1 to 5.3), stacked for readability.")
 
-    pic(s, "report_fig5_1.png", MG + Inches(2.4), Inches(4.20), w=Inches(8.4), h=Inches(2.45))
-    caption(s, MG, Inches(6.70), CWD,
-            "Report Figure 5.1 — Label anatomy: annual positives, recurrence, regional prevalence.")
+    # ------------------------------------------------------------ label figs 5.1-5.3
+    s = page(prs, "How the label looks", "Data", title_size=26)
+    panels = [
+        ("fig10a_label_volume.png", "Fig 5.1  Annual positives and prevalence"),
+        ("fig10b_label_concentration.png", "Fig 5.2  Positive years per country"),
+        ("fig10c_label_region.png", "Fig 5.3  Prevalence by World Bank region"),
+    ]
+    y = Inches(1.30)
+    for name, cap in panels:
+        pic(s, name, MG + Inches(1.6), y, w=Inches(9.9), from_report=False)
+        caption(s, MG + Inches(1.6), y + Inches(1.55), Inches(9.9), cap)
+        y += Inches(1.85)
 
     # ------------------------------------------------------------ method + training fig
     s = page(prs, "From sources to a calibrated probability", "Method", title_size=26)
