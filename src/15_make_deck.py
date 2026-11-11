@@ -387,7 +387,7 @@ def build() -> pathlib.Path:
     ], col_w=[Inches(0.55), Inches(4.4), Inches(3.2), Inches(4.0)],
        size=13, row_h=0.42)
     takeaway(s, Inches(5.55),
-             "Aligned to Final_v2 (~42 pages). Charts on later slides are taken from the "
+             "Aligned to Final_v2 (~41 pages). Charts on later slides are taken from the "
              "report PDF itself. Measured results are only for next-year (t+1) prediction.")
 
     # ------------------------------------------------------------ 3 intro

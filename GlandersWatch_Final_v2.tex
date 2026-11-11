@@ -504,61 +504,62 @@ Needed for alert thresholds; not glanders-specific \\
 \end{table}
 
 \section{Question Answering and Retrieval-Augmented Generation}
+\label{sec:rag-related}
 
-No glanders-specific question-answering system was found. The layer therefore follows general
-retrieval-augmented generation practice: retrieve passages, then answer only from those passages
-\cite{lewis2020}. Dense embeddings \cite{reimers2019}, lexical retrieval \cite{robertson2009} and
-reciprocal rank fusion \cite{cormack2009} are the usual building blocks. Evaluation frameworks such as
-RAGAS \cite{es2024}, ARES \cite{saadfalcon2024} and RAGChecker \cite{ru2024} score faithfulness and
-relevance, while citation-focused work such as ALCE \cite{gao2023} treats attribution as its own
-dimension. Counterfactual and attribution-bias studies for RAG \cite{counterfactualrag2026,attrbias2024}
-show how to test whether answers stay tied to the right evidence when inputs change. None of that is a
+No glanders-specific question-answering system was found. The literature that the RAG explanation
+layer draws on is general RAG architecture, automated evaluation, citation quality and
+counterfactual attribution testing. \cref{tab:rag-compare} records that prior work; none of it is a
 glanders product. What is missing is the application: a service that answers veterinary and owner
 questions from official control guidance, cites its sources, refuses when unsupported, and keeps
-forecast facts separate from guidance claims. The risk score may be passed in as context; the layer's
-job is still to answer the question, not to narrate the score. \cref{tab:rag-compare} summarises the
-methods adapted here and the gap each leaves.
+forecast facts separate from guidance claims under controlled perturbations.
 
 \begin{table}[htbp]
 \centering
-\caption[Related work for the RAG question-answering layer]{Related work for the RAG question-answering layer. There is no glanders-specific prior;
-rows are the methods and evaluation tools adapted here.}
+\caption[RAG literature used by the explanation layer]{RAG and evaluation research used by the
+explanation layer (from the RAG proposal evidence notes). There is no glanders-specific prior.}
 \label{tab:rag-compare}
 \small
-\begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.7cm}
-                >{\raggedright\arraybackslash}p{3.2cm}
-                >{\raggedright\arraybackslash}p{2.9cm}
-                >{\raggedright\arraybackslash}p{3.5cm}@{}}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{1.0cm}
+                >{\raggedright\arraybackslash}p{5.6cm}
+                >{\raggedright\arraybackslash}p{7.4cm}@{}}
 \toprule
-\textbf{Work} & \textbf{Approach} & \textbf{Problem addressed} & \textbf{Gap for this project} \\
+\textbf{ID} & \textbf{Reference} & \textbf{What it supports / limit} \\
 \midrule
-Lewis et al.\ (2020) &
-Retrieval-augmented generation &
-Knowledge-intensive NLP with evidence &
-Not wired to veterinary Q\&A over statutory guidance \\
-Reimers and Gurevych (2019) &
-Sentence embeddings &
-Dense passage retrieval &
-Retrieval only; no citation or refusal protocol \\
-Robertson and Zaragoza (2009); Cormack et al.\ (2009) &
-BM25 and reciprocal rank fusion &
-Hybrid ranking &
-Building blocks, not an end-to-end disease Q\&A service \\
-Es et al.\ (2024); Saad-Falcon et al.\ (2024); Ru et al.\ (2024) &
-RAGAS, ARES, RAGChecker &
-Faithfulness, relevance, modular diagnosis &
-Do not test forecast-versus-guidance attribution for a risk model \\
-Gao et al.\ (2023) &
-ALCE citation evaluation &
-Citation quality as a metric &
-Not specialised to official animal-health guidance \\
-Counterfactual RAG / attribution-bias studies (2024--2026) &
-Perturb evidence and score attribution &
-Whether answers track the right source &
-Prior art; this project adapts it to paired forecast perturbations \\
+R1 &
+Lewis et al.\ (2020), retrieval-augmented generation for knowledge-intensive NLP \cite{lewis2020} &
+Established RAG architecture (retrieve, then generate from evidence). Not a veterinary Q\&A service. \\
+R2 &
+Es et al.\ (2024), RAGAS \cite{es2024} &
+Faithfulness, relevance and context evaluation. Does not test forecast-versus-guidance attribution. \\
+R3 &
+Saad-Falcon et al.\ (2024), ARES \cite{saadfalcon2024} &
+Automated judges with human-labelled calibration for RAG systems. \\
+R4 &
+Ru et al.\ (2024), RAGChecker \cite{ru2024} &
+Fine-grained modular retrieval/generation diagnostics. \\
+R5 &
+Gao et al.\ (2023), ALCE \cite{gao2023} &
+Citation quality as an evaluation dimension. Not specialised to animal-health guidance. \\
+R6 &
+Counterfactual reasoning for RAG (ICLR 2026) \cite{counterfactualrag2026} &
+Prior art for counterfactual RAG evaluation; this project does not claim to invent it. \\
+R7 &
+Attribution-bias evaluation in retrieval-augmented LLMs (2024) \cite{attrbias2024} &
+Prior work on attribution behaviour using counterfactual evaluation. \\
+R8 &
+NIST AI 600-1 (2024), Generative AI Profile \cite{nist2024} &
+Risk measurement and human-oversight reference for generative systems. \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+Dense embeddings \cite{reimers2019}, BM25 lexical ranking \cite{robertson2009} and reciprocal rank
+fusion \cite{cormack2009} are the usual retrieval building blocks behind hybrid RAG and appear in the
+methodology design checklist; they are not listed again as separate research rows above. Official
+disease context for the corpus (DAHD National Action Plan, WOAH disease information, NADRES as prior
+forecasting infrastructure) is cited where those sources are used
+\cite{dahd2025,wahis,nadres}. Research sources establish prior art for RAG evaluation and attribution;
+they do not prove that the GlandersWatch attribution audit is implemented or effective.
 
 \section{Alerting and Warning Systems}
 
@@ -981,9 +982,12 @@ prediction, which is why the same numbers support both global feature ranking an
 factor list the risk engine returns.
 
 % =====================================================================
-\section{Retrieval-Augmented Question Answering}
+\section{The RAG Explanation Layer}
 \label{ch:rag}
 % =====================================================================
+% Proposal insert (Shaktimayee Mohanty): purpose, existing design,
+% proposed evaluation, architecture, limitations. Related-work citations
+% live in Chapter 2; this section does not re-state that literature review.
 
 \subsection{Purpose and Scope}
 
@@ -991,10 +995,10 @@ GlandersWatch's risk engine produces a population-level estimate of whether glan
 documented for an area and period. That probability does not by itself tell a veterinary officer
 which official controls apply or tell an equine owner what steps to take. The RAG explanation layer
 is intended to answer those questions using retrieved, versioned veterinary guidance while showing
-where each factual statement came from \cite{lewis2020}.
+where each factual statement came from.
 
 The layer is an explanation and guidance interface. It does not calculate the risk score, diagnose
-an individual animal, replace a veterinary officer, or issue a statutory decision. The evaluated
+an individual animal, replace a veterinary officer, or issue a statutory decision. The evaluated ML
 model in this report is country-year based; district-level and monthly forecasts are future
 extensions, so district language in the architecture diagram should be read as an intended query
 example rather than a reported evaluation resolution.
@@ -1015,161 +1019,71 @@ Produce the ML forecast; make an individual diagnosis; prescribe treatment; turn
 \end{tabular}
 \end{table}
 
-\subsection{Evidence Separation}
+\subsection{Application Focus: Evidence Separation}
 
-The central task is evidence separation. Forecast facts (probability, risk tier and SHAP
-contributors) explain what the model output says. Veterinary guidance explains official disease
-facts and recommended controls. The answer should not imply that a retrieved recommendation caused
-the forecast, or that a forecast proves an individual animal is infected.
+The central task is evidence separation. Forecast facts (such as probability, risk tier and SHAP
+contributors) explain what the model output says. Veterinary guidance explains official disease facts
+and recommended controls. The answer should not imply that a retrieved recommendation caused the
+forecast, or that a forecast proves an individual animal is infected.
 
 For a specific forecast question, the system combines the query, area and period, structured model
 facts, and the most relevant approved passages. For a general guidance question, forecast facts need
 not be supplied. Answers should cite each factual claim, identify the guidance source, state the
 population-level limitation when relevant, and refuse requests the evidence or scope cannot support.
-The design rule is: use the forecast to explain the forecast; use official guidance to explain the
-recommended action; keep the evidence paths visible.
+
+\noindent\textit{Design principle.} Use the forecast to explain the forecast; use official guidance to
+explain the recommended action; keep the evidence paths visible.
 
 \subsection{Existing Design}
 
-The items below are the architecture and evaluation checklist already specified for this project.
-They describe a proposal and design. They do not establish that the RAG layer has been implemented
-or run against the corpus.
-
-\subsubsection{Knowledge base}
-
-The corpus is restricted to authoritative sources so that answers can be checked against them, and
-each document carries an authority tier used as a tie-breaker during retrieval.
-\cref{tab:corpus} shows the tiers.
+The following items are already specified for this project. They describe a proposal and design.
+They do not establish that the RAG layer has been implemented or run against the corpus.
+\cref{tab:rag-existing} summarises each element and its evidence limit. The project's existing RAG
+design and the attribution audit below are different layers of work: the former defines retrieval,
+generation and baseline evaluation; the latter tests whether evidence sources remain correctly
+attributed across controlled changes.
 
 \begin{table}[htbp]
 \centering
-\caption{Knowledge base, by authority tier.}
-\label{tab:corpus}
+\caption{Existing RAG design elements and evidence limits.}
+\label{tab:rag-existing}
 \small
-\begin{tabular}{@{}>{\raggedright\arraybackslash}p{5.0cm}>{\raggedright\arraybackslash}p{1.6cm}>{\raggedright\arraybackslash}p{7.0cm}@{}}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.6cm}
+                >{\raggedright\arraybackslash}p{6.2cm}
+                >{\raggedright\arraybackslash}p{5.2cm}@{}}
 \toprule
-\textbf{Source} & \textbf{Tier} & \textbf{Use} \\
+\textbf{Element} & \textbf{What is specified} & \textbf{Status / evidence limit} \\
 \midrule
-DAHD National Action Plan for Glanders, 2025 \cite{dahd2025} & 1 & Case definitions, surveillance obligations, movement control, quarantine, notification duties. \\
-WOAH and WHO disease information sheets & 1 & Disease biology, transmission, zoonotic risk, official status. \\
-ICAR and national laboratory guidance & 2 & Diagnostic sampling, laboratory referral. \\
-Open-access publications & 3 & Epidemiology, risk factors, regional situation. \\
+Knowledge base &
+Tiered sources: DAHD National Action Plan \cite{dahd2025}, WOAH/WHO, ICAR/lab guidance, then open-access literature. &
+Source hierarchy is described; corpus inventory, revision controls and document hashes are not evidenced. \\
+Ingestion and metadata &
+Offline ingestion; section-aware chunks around 400--700 tokens with 15\% overlap; citation metadata and section path retained. &
+Design settings, not a measured ingestion result. \\
+Embeddings and storage &
+384-dimensional sentence-transformer embeddings \cite{reimers2019}, multilingual Hindi variant, pgvector and HNSW/cosine index \cite{malkov2020}. &
+No supplied benchmark for embedding or index quality. \\
+Hybrid retrieval &
+Dense and BM25 lexical top-30 recall \cite{robertson2009}; reciprocal-rank fusion ($k=60$) \cite{cormack2009}; cross-encoder reranks top 50 to top 5; relevance floor 0.30 and minimum two passages. &
+Documented configuration; retrieval quality has not been measured on a labelled query set. \\
+Context and generation &
+Retrieved passage IDs plus optional structured risk probability/tier/SHAP facts; temperature 0.1; provider interface for local or hosted model. &
+Generation path and prompt rules are specified; no answer run or output benchmark supplied. \\
+Guardrails &
+Retrieval floor, citation resolution, no individual diagnosis/treatment, out-of-scope refusal and population-level forecast disclaimer. &
+Rules are specified; implementation artefacts and safety test results are not supplied. \\
+Baseline evaluation &
+Recall@5/MRR, faithfulness, answer relevance, citation precision and refusal/false-refusal rates \cite{es2024,saadfalcon2024,ru2024,gao2023}. &
+Proposed targets, not measured values; the RAG layer has not been run against the corpus. \\
 \bottomrule
 \end{tabular}
 \end{table}
-
-Tier 3 may inform an answer but never overrides tier 1 on a control instruction. Conflicts
-resolve to the higher tier and are logged, because a silent contradiction between sources is the
-failure this layer exists to prevent. Source hierarchy is described; a full corpus inventory,
-revision controls and document hashes remain to be evidenced in a pilot.
-
-\subsubsection{Ingestion, embedding and retrieval}
-
-Ingestion runs offline as a job and stores each chunk with enough metadata to be cited and filtered.
-Chunking is section-aware rather than fixed-width, because a fixed window cuts control instructions in
-half and lets the model complete a truncated sentence. The splitter respects headings first, then
-paragraphs, falling back to a sliding window only past the ceiling. Chunks target 400 to 700 tokens
-with 15 per cent overlap inside a section, and sections under 80 tokens merge into the parent. The
-full section path is retained, for example \texttt{NAP-2025 > 5.2 Movement control}, so a citation
-points to a subsection rather than a 90-page document.
-
-Chunks are embedded with a compact sentence-transformer \cite{reimers2019} producing 384-dimensional
-vectors, with a multilingual variant for Hindi because an English-only embedding degrades on
-Devanagari. Vectors live in pgvector beside the relational tables, so re-ingestion and prediction share
-one transaction boundary. The index is HNSW with cosine distance \cite{malkov2020}; the reranker
-corrects recall at the head of the list, and the index keeps query cost flat as the corpus grows.
-\cref{fig:rag} shows the offline ingestion path above the per-request retrieval and generation
-path.
-
-\input{figures/fig_rag.tex}
-
-Retrieval is hybrid, because dense and lexical search \cite{robertson2009} fail differently here. A
-dense query for ``movement control'' may miss a passage using ``restriction of equid movement'', where
-a lexical match succeeds; conversely a lexical query for a rare acronym retrieves noise a dense query
-ignores. Both lists are fused by reciprocal rank fusion \cite{cormack2009}, which combines rankings
-without requiring comparable scores:
-
-\[
-\mathrm{RRF}(d) = \sum_{i \in \{\text{dense},\text{lexical}\}} \frac{1}{k + \mathrm{rank}_i(d)},
-\qquad k = 60
-\]
-
-The fused top fifty are reranked by a cross-encoder scoring each passage against the question
-jointly. It is far slower per pair than an embedding dot product, which is why it runs on fifty
-candidates rather than the corpus, and the top five become the context.
-\cref{tab:retrieval} records the stage-wise settings.
-
-\begin{table}[htbp]
-\centering
-\caption{Retrieval parameters.}
-\label{tab:retrieval}
-\small
-\begin{tabular}{@{}lll@{}}
-\toprule
-\textbf{Stage} & \textbf{Setting} & \textbf{Reason} \\
-\midrule
-Dense recall & top 30, cosine & Semantic paraphrase coverage \\
-Lexical recall & top 30, BM25 & Exact terms, acronyms, section titles \\
-Fusion & reciprocal rank, $k=60$ & Scale-free combination of two rankings \\
-Rerank & cross-encoder, top 50 to 5 & Precision at the head of the list \\
-Relevance floor & rerank score below 0.30 discarded & Prevents padding the context with weak passages \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-The relevance floor drives the refusal path: if fewer than two passages clear it, the layer returns a
-refusal with the SHAP factors, because marginal passages produce a confident answer built on
-nothing. These are design settings; retrieval quality has not been measured on a labelled query set.
-
-\subsubsection{Context, generation and guardrails}
-
-The prompt has three parts in fixed order: a system instruction, the retrieved passages with
-identifiers, and (when supplied) structured prediction facts for the area under discussion. The
-prediction block is context for questions about a specific forecast; it is not required for general
-guidance questions. Facts are injected as structured data so the model cannot rewrite an association
-as a cause. The instruction states four constraints: answer only from the passages, cite every claim,
-never diagnose an individual animal, and make clear when a population-level forecast is being
-discussed.
-
-Generation uses temperature 0.1 and a bounded output length so that two officers asking the same
-question about the same area tend to get the same instruction. The provider sits behind a
-single-method interface, so one retrieval, grounding and citation path can serve a local Ollama model
-or a hosted API; switching model cannot silently disable the guardrails.
-
-The layer is designed to refuse, and four checks can terminate a response.
-\cref{tab:guardrails} states each check and what happens when it fails.
-
-\begin{table}[htbp]
-\centering
-\caption{Guardrails and their failure behaviour.}
-\label{tab:guardrails}
-\small
-\begin{tabular}{@{}>{\raggedright\arraybackslash}p{3.0cm}>{\raggedright\arraybackslash}p{5.2cm}>{\raggedright\arraybackslash}p{5.4cm}@{}}
-\toprule
-\textbf{Check} & \textbf{What it verifies} & \textbf{On failure} \\
-\midrule
-Retrieval floor & At least two passages above the relevance threshold & Refusal with the top SHAP factors, which need no retrieval \\
-Citation resolution & Every cited identifier exists in the retrieved set & Answer rejected and regenerated once, then refusal \\
-Diagnosis scope & No individual-animal diagnosis or treatment prescription & Response rewritten without the clinical claim, and the attempt logged \\
-Out-of-scope & Question is about glanders control, not unrelated topics & Refusal stating what the layer covers \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-The citation check is mechanical: the answer is parsed for identifiers and each is looked up in the
-retrieved set, and one that does not resolve means the model cited a document it was not given, which
-is a hallucination whether or not the sentence is true. Asking a model to be accurate is not a
-control; checking its output is. Rules are specified; implementation artefacts and safety test
-results are not yet supplied.
 
 \subsection{Proposed Attribution Audit}
 
 Two complementary evaluation components extend the existing RAG evaluation. They are
-GlandersWatch-specific adaptations of counterfactual and attribution evaluation
-\cite{counterfactualrag2026,attrbias2024}; counterfactual evaluation itself is prior research and is
-not claimed as a globally new technique. The existing design defines retrieval, generation and
-baseline metrics; the additions below test whether evidence sources remain correctly attributed
-across controlled changes.
+GlandersWatch-specific adaptations; counterfactual evaluation itself is prior research
+\cite{counterfactualrag2026,attrbias2024} and is not claimed as a globally new technique.
 
 \begin{table}[htbp]
 \centering
@@ -1184,19 +1098,19 @@ across controlled changes.
 \textbf{Component} & \textbf{Design and control} & \textbf{What it adds} & \textbf{Status} \\
 \midrule
 Paired Forecast Perturbation Test (PFPT) &
-Matched A/B cases keep question, area, period, corpus, retrieved passage IDs and retrieval settings fixed; change exactly one forecast field (tier, probability or one SHAP contributor); pre-label expected deltas and invariants before generation. &
-Checks that forecast-derived claims update with the perturbed model evidence while guidance claims stay tied to unchanged cited passages; yields pair-level pass/fail records. &
-Proposed offline evaluation on synthetic or controlled fixtures; never alter production predictions. \\
+Build matched test cases A/B. Keep question, area, period, guidance corpus, retrieved passage IDs and retrieval settings fixed. Change exactly one controlled forecast field (for example risk tier, probability or one SHAP contributor). Pre-label expected answer changes and invariants before generation. &
+Checks whether forecast-derived explanation claims update with the perturbed model evidence while guidance claims remain tied to the unchanged cited passages. Produces a reproducible pair-level pass/fail and expected-delta record. &
+Proposed offline evaluation; use synthetic or controlled fixtures, never alter production predictions. \\
 Claim Attribution and Invariance Score (CAIS) &
-Split both answers into atomic claims; tag each as F (forecast), G (guidance) or S (safety/limitation); score forecast consistency, guidance attribution and safety consistency separately; record failure category and reviewer agreement. &
-Produces the Counterfactual Attribution Consistency Score (CACS) plus F/G/S subscores; surfaces wrong-area/time, stale-SHAP, false-causal, unsupported-citation, unsafe-advice and missing-disclaimer failures. &
-Proposed diagnostic; no results or universal threshold until pilot data and reviewer agreement exist. \\
+Split both answers into atomic claims. Tag each claim F (forecast), G (guidance) or S (safety/limitation). Score forecast consistency, guidance attribution and safety consistency separately; record failure category and reviewer agreement. &
+Produces the Counterfactual Attribution Consistency Score (CACS) plus F/G/S subscores, and surfaces wrong-area/time, stale-SHAP, false-causal, unsupported-citation, unsafe-advice and missing-disclaimer failures. &
+Proposed diagnostic. No results or universal threshold until pilot data and reviewer agreement exist. \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-For $N$ matched pairs, $F_i$, $G_i$ and $S_i$ are binary pass/fail checks. Report the aggregate with
-every component score; never use the composite alone:
+\noindent\textit{CACS scoring rule.} For $N$ matched pairs, $F_i$, $G_i$ and $S_i$ are binary pass/fail
+checks. Report the aggregate with every component score; never use the composite alone:
 
 \[
 \mathrm{CACS} = 100 \times \frac{\sum_{i=1}^{N}(F_i + G_i + S_i)}{3N},
@@ -1207,14 +1121,17 @@ every component score; never use the composite alone:
 
 A critical safety failure must be highlighted independently of the aggregate score. Do not select a
 pass threshold before pilot data, reviewer agreement and stakeholder review. CACS supplements
-RAGAS-style faithfulness and relevance \cite{es2024,saadfalcon2024,ru2024} and citation metrics
-\cite{gao2023}; it does not measure whether the underlying ML forecast is accurate.
+RAGAS-style faithfulness/relevance and retrieval metrics; it does not measure whether the underlying
+ML forecast is accurate.
 
 \subsection{Architecture and Flow}
 
-\cref{fig:rag} shows two operational paths, offline knowledge preparation and online question
-answering, with forecast facts entering the online context from the risk pipeline. The RAG layer
-explains that output but does not produce the risk score. \cref{tab:rag-flow} summarises the stages.
+The architecture has two operational paths, offline knowledge preparation and online question
+answering, plus a baseline evaluation feedback loop. Forecast facts enter the online context from
+the ML risk pipeline; the RAG layer explains that output but does not produce the risk score.
+\cref{fig:rag} shows the paths; \cref{tab:rag-flow} summarises the stages.
+
+\input{figures/fig_rag.tex}
 
 \begin{table}[htbp]
 \centering
@@ -1229,58 +1146,29 @@ explains that output but does not produce the risk score. \cref{tab:rag-flow} su
 \midrule
 A. Offline knowledge preparation &
 Approved source documents are ingested, cleaned, split into section-aware chunks, embedded and stored with source metadata in PostgreSQL/pgvector. &
-Preserves provenance and makes evidence retrievable by meaning and by exact terms. \\
+Preserves provenance and makes evidence retrievable by both meaning and exact terms. \\
 B. Online question and retrieval &
-User question and context enter the API; hybrid semantic/keyword retrieval finds candidates; a reranker selects passages for context. &
+User question and context enter the API; hybrid semantic/keyword retrieval finds candidates; a reranker selects the passages for context. &
 Uses query-time evidence rather than unverified model memory; weak retrieval can trigger refusal. \\
 C. Context and generation &
 Context builder joins retrieved guidance with relevant risk score and top SHAP facts; the LLM generates a constrained response. &
 Keeps forecast evidence and official guidance available as distinct sources. \\
 D. Guardrails and response &
-Citation and scope checks verify claims, enforce non-diagnosis language and refuse unsupported requests before display. &
+Citation/scope checks verify claims, enforce non-diagnosis language and refuse unsupported requests before display. &
 Makes the answer auditable and bounds harmful overreach. \\
 E. Evaluation feedback &
-Recall@$k$, faithfulness/relevance, citation audit and PFPT/CAIS inform retrieval and chunking revisions. &
+Recall@$k$, faithfulness/relevance and citation audit inform retrieval/chunking revisions; PFPT/CAIS run in the same offline loop. &
 Evaluation is an offline improvement loop; it must not become a synchronous alert-send dependency. \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-PFPT and CAIS run offline alongside the existing evaluation loop. Freeze corpus, model, prompt and
-prediction versions; run both variants through the same RAG path; score claim-level changes;
-classify failures; fix and rerun locked cases. Do not insert the audit into live alert dispatch.
+\noindent\textit{How the proposed audit fits.} Run PFPT/CAIS offline alongside the existing evaluation
+loop. Freeze corpus, model, prompt and prediction versions; run both variants through the same RAG
+path; score claim-level changes; classify failures; fix and rerun locked cases. Do not insert the
+audit into live alert dispatch.
 
-\subsection{Baseline Evaluation and Targets}
-
-Five baseline quantities are defined below, following frameworks such as RAGAS and related work
-\cite{es2024,saadfalcon2024,ru2024,gao2023}. None is reported as a measurement, because the layer
-has not been run against the corpus; measuring them, together with PFPT/CAIS, is future work
-(Chapter~\ref{ch:concl}).
-
-\textbf{Retrieval quality.} Recall@$k$, the fraction of hand-built questions whose known relevant
-passage appears in the top $k$ results, at $k=5$, with mean reciprocal rank, which rewards returning it
-near the top rather than merely inside the cut-off. This isolates retrieval from generation, since no
-generation quality helps if the right passage is never retrieved.
-
-\textbf{Faithfulness.} The fraction of claims the retrieved context supports, scored by a judge model
-and reviewed by hand on a sample; the metric that catches a model citing a passage while saying
-something the passage does not say.
-
-\textbf{Answer relevance.} Whether the answer addresses the question asked rather than reciting
-correct but tangential guidance, scored on the same sample, since an answer can be grounded and still
-unhelpful.
-
-\textbf{Citation precision.} The fraction of citations resolving to a passage that supports the
-sentence, distinct from resolution, which only checks existence \cite{gao2023}.
-
-\textbf{Refusal behaviour.} The refusal rate on out-of-scope questions and the false refusal rate in
-scope: a layer that never refuses is unsafe and one that always refuses is useless.
-
-Deployment targets, so the claim is falsifiable: recall@5 above 0.85, faithfulness and answer
-relevance above 0.90 and 0.85, citation precision above 0.95, a false refusal rate below 10 per cent,
-and p95 latency under two seconds.
-
-\subsection{Limitations of the Layer}
+\subsection{Limitations and Summary}
 
 The layer is a proposed architecture and evaluation plan. No RAG results are reported because it has
 not been run against the corpus. \cref{tab:rag-limits} separates what the approach can check from
@@ -1295,14 +1183,14 @@ what it cannot establish.
                 >{\raggedright\arraybackslash}p{5.0cm}
                 >{\raggedright\arraybackslash}p{5.4cm}@{}}
 \toprule
-\textbf{Limitation} & \textbf{Implication} & \textbf{Control or reporting rule} \\
+\textbf{Limitation / risk} & \textbf{Implication} & \textbf{Control or reporting rule} \\
 \midrule
 Incomplete or outdated corpus &
 Relevant guidance may be absent or superseded. &
-Version sources, store dates and provenance, apply tier precedence, and test stale or conflicting guidance. \\
+Version sources, store dates and provenance, apply tier precedence, and test stale/conflicting guidance. \\
 Retrieval miss or weak passage &
 Grounded generation cannot help if the needed passage is not retrieved. &
-Measure recall@5/MRR; enforce relevance floor and minimum passage count; refuse when evidence is inadequate. \\
+Measure Recall@5/MRR; enforce relevance floor and minimum passage count; refuse when evidence is inadequate. \\
 Citation existence is not support &
 A valid ID may point to a passage that does not support the sentence. &
 Measure citation precision and audit claim-to-passage support, not only citation resolution. \\
@@ -1319,19 +1207,15 @@ Describe PFPT/CAIS as proposed; establish pilot protocol, reviewer agreement and
 \end{tabular}
 \end{table}
 
-In short, the existing proposal describes a tiered guidance corpus, hybrid retrieval, forecast-aware
-context, citations, refusal guardrails and baseline RAG metrics. The proposed addition is a
-controlled counterfactual evaluation: perturb one forecast input, then test whether only dependent
-claims change while cited guidance and required safety language remain correct. The project-specific
-value is this attribution audit for GlandersWatch, not a claim of inventing counterfactual RAG
-evaluation.
+\noindent\textit{Summary.} GlandersWatch's existing proposal describes a tiered guidance corpus,
+hybrid retrieval, forecast-aware context, citations, refusal guardrails and baseline RAG metrics.
+The proposed addition is a controlled counterfactual evaluation: perturb one forecast input, then
+test whether only dependent claims change while cited guidance and required safety language remain
+correct. The project-specific value is this attribution audit for GlandersWatch, not a claim of
+inventing counterfactual RAG evaluation. Research references for RAG evaluation and attribution are
+collected in \cref{sec:rag-related}; they establish prior art and do not prove that this audit is
+implemented or effective.
 
-% =====================================================================
-% GlandersWatch Technical Writing Report: Alerting System chapter
-%
-% The two supplied standalone TikZ diagrams must remain in:
-%   figures/alerts_pipeline.tex
-%   figures/alerting_modular_arch.tex
 % =====================================================================
 
 \section{Alerting System}
@@ -1684,23 +1568,23 @@ Five next steps cover the model, the RAG layer and the alert service.
 \bibitem{niculescu2005} Niculescu-Mizil A, Caruana R. Predicting good probabilities with supervised learning. In: \emph{Proceedings of the 22nd International Conference on Machine Learning}. 2005:625--632. doi:10.1145/1102351.1102430
 \bibitem{huang2020} Huang Y, Li W, Macheret F, et al. A tutorial on calibration measurements and calibration models for clinical prediction models. \emph{Journal of the American Medical Informatics Association}. 2020;27(4):621--633. doi:10.1093/jamia/ocz228
 \bibitem{lewis2020} Lewis P, Perez E, Piktus A, et al. Retrieval-augmented generation for knowledge-intensive NLP tasks. In: \emph{Advances in Neural Information Processing Systems 33 (NeurIPS)}. 2020:9459--9474. arXiv:2005.11401
-\bibitem{reimers2019} Reimers N, Gurevych I. Sentence-BERT: sentence embeddings using Siamese BERT-networks. In: \emph{Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing (EMNLP-IJCNLP)}. 2019:3982--3992. doi:10.18653/v1/D19-1410
-\bibitem{robertson2009} Robertson S, Zaragoza H. The probabilistic relevance framework: BM25 and beyond. \emph{Foundations and Trends in Information Retrieval}. 2009;3(4):333--389. doi:10.1561/1500000019
-\bibitem{cormack2009} Cormack GV, Clarke CLA, Buettcher S. Reciprocal rank fusion outperforms Condorcet and individual rank learning methods. In: \emph{Proceedings of the 32nd International ACM SIGIR Conference}. 2009:758--759. doi:10.1145/1571941.1572114
 \bibitem{es2024} Es S, James J, Espinosa-Anke L, Schockaert S. RAGAS: automated evaluation of retrieval augmented generation. In: \emph{Proceedings of the 18th Conference of the European Chapter of the Association for Computational Linguistics: System Demonstrations}. 2024:150--158. arXiv:2309.15217
 \bibitem{saadfalcon2024} Saad-Falcon J, Khattab O, Potts C, Zaharia M. ARES: an automated evaluation framework for retrieval-augmented generation systems. In: \emph{Proceedings of the 2024 Conference of the North American Chapter of the Association for Computational Linguistics}. 2024. arXiv:2311.09476
 \bibitem{ru2024} Ru D, et al. RAGChecker: a fine-grained framework for diagnosing retrieval-augmented generation. 2024. arXiv:2408.08067
 \bibitem{gao2023} Gao T, Yen H, Yu J, Chen D. Enabling large language models to generate text with citations. In: \emph{Proceedings of the 2023 Conference on Empirical Methods in Natural Language Processing}. 2023. arXiv:2305.14627
 \bibitem{counterfactualrag2026} Counterfactual reasoning for retrieval-augmented generation. In: \emph{International Conference on Learning Representations (ICLR)}. 2026.
 \bibitem{attrbias2024} Evaluation of attribution bias in retrieval-augmented large language models. 2024. arXiv:2410.12380
+\bibitem{nist2024} National Institute of Standards and Technology. \emph{Artificial Intelligence Risk Management Framework: Generative Artificial Intelligence Profile} (NIST AI 600-1). Gaithersburg, MD: NIST; 2024.
+\bibitem{reimers2019} Reimers N, Gurevych I. Sentence-BERT: sentence embeddings using Siamese BERT-networks. In: \emph{Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing (EMNLP-IJCNLP)}. 2019:3982--3992. doi:10.18653/v1/D19-1410
+\bibitem{robertson2009} Robertson S, Zaragoza H. The probabilistic relevance framework: BM25 and beyond. \emph{Foundations and Trends in Information Retrieval}. 2009;3(4):333--389. doi:10.1561/1500000019
+\bibitem{cormack2009} Cormack GV, Clarke CLA, Buettcher S. Reciprocal rank fusion outperforms Condorcet and individual rank learning methods. In: \emph{Proceedings of the 32nd International ACM SIGIR Conference}. 2009:758--759. doi:10.1145/1571941.1572114
+\bibitem{dahd2025} Department of Animal Husbandry and Dairying, Government of India. \emph{National Action Plan for Control and Eradication of Glanders in India} (Revised 2025). New Delhi: DAHD; 2025.
 \bibitem{pedregosa2011} Pedregosa F, Varoquaux G, Gramfort A, et al. Scikit-learn: machine learning in Python. \emph{Journal of Machine Learning Research}. 2011;12:2825--2830.
 \bibitem{wdi} World Bank. World Development Indicators. \url{https://databank.worldbank.org}
 \bibitem{power} NASA Langley Research Center. POWER agroclimatology API. \url{https://power.larc.nasa.gov}
 \bibitem{breiman2001} Breiman L. Random forests. \emph{Machine Learning}. 2001. doi:10.1023/A:1010933404324
 \bibitem{chen2016} Chen T, Guestrin C. XGBoost: a scalable tree boosting system. In: \emph{Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining}. 2016:785--794. doi:10.1145/2939672.2939785
 \bibitem{ke2017} Ke G, Meng Q, Finley T, et al. LightGBM: a highly efficient gradient boosting decision tree. In: \emph{Advances in Neural Information Processing Systems 30 (NIPS)}. 2017:3146--3154.
-\bibitem{dahd2025} Department of Animal Husbandry and Dairying, Government of India. \emph{National Action Plan for Control and Eradication of Glanders in India} (Revised 2025). New Delhi: DAHD; 2025.
-\bibitem{malkov2020} Malkov YA, Yashunin DA. Efficient and robust approximate nearest neighbor search using hierarchical navigable small world graphs. \emph{IEEE Transactions on Pattern Analysis and Machine Intelligence}. 2020;42(4):824--836. doi:10.1109/TPAMI.2018.2889473
 \end{thebibliography}
 \end{multicols}
 
