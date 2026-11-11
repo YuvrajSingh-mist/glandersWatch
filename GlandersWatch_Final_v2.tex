@@ -297,9 +297,8 @@ as documented activity throughout.}
 \section{Problem Definition}
 
 A district veterinary officer faces a narrow question: is glanders likely to appear in this area
-in the coming year? That is a one-step-ahead forecasting problem framed as supervised classification
-on a country-year panel---features from year $t$ predict a binary label for year $t{+}1$---not a
-classical univariate time-series model that extrapolates a single series. Answering it means combining
+in the coming year? The task is framed as supervised classification on a country-year panel:
+features observed in year $t$ predict a binary label for year $t{+}1$. Answering it means combining
 the history of the disease nearby, the size of the susceptible population, and the conditions that
 permit transmission.
 
@@ -387,105 +386,191 @@ rather than a trained analyst. And it delivers to the owner directly, with rules
 routine noise. NADRES has institutional access this project lacks; this project has a level of local
 explainability that a multi-disease platform does not attempt.
 
-\section{Spatial Risk and Machine Learning}
+\section{Glanders Risk Modelling and Related Machine Learning}
 
 Spatial work on glanders is descriptive. Fonseca-Rodr\'iguez et al. applied spatiotemporal cluster
-detection to Brazilian data \cite{fonseca2019}, and species distribution models have been compared as
-tools for livestock disease \cite{hollings2017}. Cluster detection identifies where cases have already
-concentrated; it does not forecast which cells will be positive next period, which is the question an
-early warning system must answer.
+detection to Brazilian data \cite{fonseca2019}. Cluster detection identifies where cases have already
+concentrated; it does not predict which units will be positive in the next period.
 
-Predictive modelling is established for avian influenza. Kane et al. compared ARIMA and random forest
-models for H5N1 outbreaks \cite{kane2014}, Walsh et al. used machine learning to target active
-surveillance \cite{walsh2019}, and Yoo et al. and Alshatti et al. built farm-level risk models in Korea
-and Kuwait \cite{yoo2022,alshatti2026}. That literature supplies the methodological template used
-here: assemble occurrence, population and environmental covariates at a common unit, fit tree-based
-ensembles, and evaluate on held-out periods. The template has been applied to influenza, not to
-glanders.
+Indian surveillance studies establish prevalence and animal-level factors but stop short of a forward
+model: Malik et al.\ on 2006--2011 outbreaks \cite{malik2012}, Singha et al.\ on 2015--2018
+serology \cite{singha2020}, and the 2019--2023 national programme with risk analysis
+\cite{singha2026}. NADRES v2 issues multi-disease livestock forewarnings \cite{nadres}; it is the
+closest operational comparator, but is not glanders-specific and does not deliver cited owner alerts
+from public data alone.
 
-The only machine learning work specific to \textit{B. mallei} is spectroscopic identification. Moawad
-et al. built a Raman assay in which learned models classify spectra \cite{moawad2019}, and St\"ockel et
-al. reported spectroscopic detection of \textit{B. mallei} and \textit{B. pseudomallei}
-\cite{stoeckel2015}. Both are laboratory diagnostic problems; neither addresses geographic or temporal
-distribution, and neither produces a population risk estimate. Using published literature as
-structured occurrence data has precedent in epidemic intelligence \cite{collier2012,lejeune2015}, but
-here event extraction is the primary source of the label rather than a supplementary signal, because
-official outbreak records are incomplete for many countries. The label therefore inherits the
-reporting biases of the literature, which is analysed rather than assumed away.
+The only machine learning work specific to \textit{B. mallei} is spectroscopic identification.
+Moawad et al.\ built a Raman assay with learned classifiers \cite{moawad2019}, and St\"ockel et al.\
+reported spectroscopic detection of \textit{B. mallei} and \textit{B. pseudomallei}
+\cite{stoeckel2015}. Both are laboratory diagnostic problems; neither produces a population risk
+estimate. Using published literature as structured occurrence data has precedent in epidemic
+intelligence \cite{collier2012,lejeune2015}; here extraction is the primary label source because
+official outbreak records are incomplete for many countries, so reporting bias is analysed rather
+than assumed away.
 
-Table~\ref{tab:ml-compare} compares the machine-learning and predictive-modelling studies that shape
-the risk-engine design. Alerting systems are compared separately in Chapter~\ref{ch:alerts}; the
-explanation layer is specified from retrieval-augmented generation practice rather than from a
-glanders-specific prior.
+Because no glanders study compares model families on a shared panel, the evaluation design draws on
+method papers that are not disease-specific: how to compare classifiers under imbalance
+\cite{saito2015,davis2006}, how to split data with spatial structure so country identity cannot leak
+\cite{roberts2017}, how to attribute predictions across features \cite{lundberg2017}, and how to
+judge whether predicted probabilities are usable as probabilities \cite{niculescu2005,huang2020}.
+Those references justify the metrics and splits used in Chapter~\ref{ch:method}; they are not prior
+glanders risk models.
 
 \begin{table}[htbp]
 \centering
-\caption{Comparative summary of machine-learning and predictive studies relevant to the risk engine.
-Columns state the approach, the problem addressed, and the limitation that motivates this work.}
+\caption{Comparative summary for the risk engine. Upper rows are glanders (or glanders-organism)
+studies; lower rows are method papers that guide multi-model evaluation.}
 \label{tab:ml-compare}
 \small
-\begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.6cm}
-                >{\raggedright\arraybackslash}p{3.4cm}
-                >{\raggedright\arraybackslash}p{3.2cm}
-                >{\raggedright\arraybackslash}p{3.6cm}@{}}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.55cm}
+                >{\raggedright\arraybackslash}p{3.35cm}
+                >{\raggedright\arraybackslash}p{3.15cm}
+                >{\raggedright\arraybackslash}p{3.55cm}@{}}
 \toprule
-\textbf{Study} & \textbf{Approach / features} & \textbf{Problem addressed} & \textbf{Limitation} \\
+\textbf{Study} & \textbf{Approach} & \textbf{Problem addressed} & \textbf{Limitation} \\
 \midrule
 Fonseca-Rodr\'iguez et al.\ (2019) &
 Spatiotemporal cluster detection on Brazilian glanders records &
 Where cases have already concentrated &
-Describes past clusters; does not forecast the next period \\
-Hollings et al.\ (2017) &
-Comparison of species-distribution / statistical models for livestock disease &
-Which modelling family fits epidemic spatial data &
-Method survey; not a glanders risk model \\
-Kane et al.\ (2014) &
-ARIMA versus random forest on H5N1 time series &
-Outbreak prediction for avian influenza &
-Influenza, not glanders; classical time-series setup \\
-Walsh et al.\ (2019) &
-Machine learning to prioritise active avian-influenza surveillance &
-Where to sample next &
-Surveillance targeting, not owner-facing risk scores \\
-Yoo et al.\ (2021); Alshatti et al.\ (2026) &
-Tree-based / ML farm-level risk models with meteorological and farm covariates &
-Farm-level HPAI risk &
-Template applies; disease and unit are not glanders country-years \\
+Describes past clusters; no next-period prediction \\
+Singha et al.\ (2020, 2026); Malik et al.\ (2012) &
+Serological surveillance and outbreak description in India &
+Prevalence and risk factors in equids &
+No forward predictive model on a covariate panel \\
+NADRES v2 \cite{nadres} &
+Multi-disease livestock forewarning &
+District-level early warning across diseases &
+Not glanders-specific; owner-facing cited delivery out of scope \\
 Moawad et al.\ (2019); St\"ockel et al.\ (2015) &
 Raman / spectroscopic classifiers for \textit{B.\ mallei} &
 Laboratory identification of the organism &
-Diagnostic, not geographic or temporal risk \\
-NADRES v2 \cite{nadres} &
-Multi-disease livestock forewarning with meteo and remote-sensing covariates &
-District-level early warning across many diseases &
-Not glanders-specific; public reproducibility and owner delivery are out of scope \\
-Singha et al.\ (2020, 2026) &
-Serological surveillance and risk analysis for Indian equids &
-Prevalence and animal-level risk factors &
-Describes where disease was found; no forward predictive model \\
+Diagnostic, not geographic risk \\
+\midrule
+Saito and Rehmsmeier (2015); Davis and Goadrich (2006) &
+Precision--recall versus ROC analysis &
+How to score rare-event classifiers &
+Method only; no glanders application \\
+Roberts et al.\ (2017) &
+Cross-validation for structured spatial / temporal data &
+Honest holdouts when units are correlated &
+Method only; guides leave-country-out here \\
+Lundberg and Lee (2017) &
+SHAP feature attribution &
+Comparing what models use, across families &
+Attribution tool, not a disease model \\
+Niculescu-Mizil and Caruana (2005); Huang et al.\ (2020) &
+Probability calibration measures &
+When a score can be read as a probability &
+Needed for alert thresholds; not glanders-specific \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\section{What the Existing Work Leaves Open}
+\section{Cited Explanation and Retrieval-Augmented Generation}
 
-\textbf{The evidence gap.} The literature divides into three disjoint groups. Epidemiological studies
-describe where glanders occurs; machine learning studies of \textit{B. mallei} classify laboratory
-spectra; veterinary risk models exist but are built for influenza. No study joins an occurrence
-corpus, a livestock census, development indicators and reanalysis climatology into a single panel
-for glanders, and none evaluates a calibrated predictive model on that panel.
+No glanders-specific explanation system was found. The layer therefore follows general
+retrieval-augmented generation practice: retrieve passages, then generate only from those passages
+\cite{lewis2020}. Dense embeddings \cite{reimers2019}, lexical retrieval \cite{robertson2009} and
+reciprocal rank fusion \cite{cormack2009} are the standard building blocks; none of them is a
+glanders product. The gap that matters here is application: turning a calibrated risk score into an
+answer grounded in official control guidance, with refusal when the corpus does not support a claim.
 
-\textbf{Deployment gap.} A probability on a dashboard does not reach the person who owns the
-animals, and a risk score without a stated basis is not something a field officer will act on. The
-literature stops short of the delivery problem: how a forecast becomes a cited explanation, and how
-that becomes a message an owner trusts.
+\begin{table}[htbp]
+\centering
+\caption{Related work for the explanation layer. There is no glanders-specific prior; rows are the
+methods adapted for cited guidance.}
+\label{tab:rag-compare}
+\small
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{3.0cm}
+                >{\raggedright\arraybackslash}p{3.6cm}
+                >{\raggedright\arraybackslash}p{3.0cm}
+                >{\raggedright\arraybackslash}p{3.2cm}@{}}
+\toprule
+\textbf{Work} & \textbf{Approach} & \textbf{Problem addressed} & \textbf{Gap for this project} \\
+\midrule
+Lewis et al.\ (2020) &
+Retrieval-augmented generation &
+Knowledge-intensive NLP with evidence &
+Not wired to a disease risk score or statutory guidance corpus \\
+Reimers and Gurevych (2019) &
+Sentence embeddings for semantic search &
+Dense passage retrieval &
+Retrieval only; no citation or refusal protocol \\
+Robertson and Zaragoza (2009) &
+BM25 lexical ranking &
+Keyword retrieval &
+Misses paraphrases; used here only as one hybrid channel \\
+Cormack et al.\ (2009) &
+Reciprocal rank fusion &
+Combining ranked lists &
+Fusion method; not an end-to-end veterinary explainer \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-The contribution has three parts: a calibrated risk model, evaluated under forward temporal and
-country-holdout splits and served as a versioned artefact; a retrieval-augmented layer that grounds
-each prediction in official control guidance, cites every claim and refuses rather than generates;
-and an alert service whose threshold, suppression and deduplication rules turn a probability into a
-small number of messages. All three exchange fixed versioned contracts and none hardcodes the
-disease.
+\section{Alerting and Warning Systems}
+
+Related warning systems address pieces of delivery, not a glanders risk-to-owner path. NADRES
+emphasises structured disease reporting. Public flood warnings show how to name an area, a level and
+an action. Early-warning evaluation work stresses receipt and usefulness, not only message send.
+Software alert managers contribute grouping, silencing and routing. Standard public-warning formats
+support interchange. None of these is a complete substitute for the service designed here; Tables
+\ref{tab:alert-related-work} and \ref{tab:alert-comparison} summarise the lessons carried forward.
+Implementation detail remains in Chapter~\ref{ch:alerts}.
+
+\begin{table}[htbp]\centering\small
+\caption{Previous systems and the lessons applied in GlandersWatch.}\label{tab:alert-related-work}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.7cm}
+                >{\raggedright\arraybackslash}p{4.6cm}
+                >{\raggedright\arraybackslash}p{5.0cm}@{}}
+\toprule
+\textbf{Previous work} & \textbf{Main focus} & \textbf{Lesson for GlandersWatch} \\
+\midrule
+NADRES v2 & Animal-disease surveillance and reporting & Use structured disease information and preserve traceability \\
+Google / CWC flood warnings & Hazard communication to affected people & Name area, level and practical action, not only a probability \\
+J-PAL Bihar early-warning study & Reach and usefulness of warnings & Evaluate receipt, understanding and response, not only sending \\
+Prometheus Alertmanager & Grouping, silencing, inhibition and routing & Control repeats; separate decision from delivery \\
+OASIS CAP & Standardised public-warning exchange & Keep alert records structured for possible external integration \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]\centering\small
+\caption{Difference between reviewed warning work and the proposed alert design.}\label{tab:alert-comparison}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.6cm}
+                >{\raggedright\arraybackslash}p{4.9cm}
+                >{\raggedright\arraybackslash}p{4.9cm}@{}}
+\toprule
+\textbf{Aspect} & \textbf{Reviewed work provides} & \textbf{GlandersWatch proposes} \\
+\midrule
+Input & Surveillance reports, hazard feeds or monitoring alerts & Calibrated glanders risk with area, period, model version and freshness \\
+Period & Source-specific frequency & One period-aware contract for monthly and yearly records \\
+Risk state & Warning or alert-management primitives & LOW / MEDIUM / HIGH with hysteresis and previous-state comparison \\
+Notification control & Routing, silencing or distribution examples & Unchanged-level, cooldown, escalation, stale-data, mute, quiet-hour and daily-cap rules \\
+Duplicate control & Grouping or deduplication in some systems & Separate protection for alert, recipient job and send attempt \\
+Recipients / delivery & Domain- and platform-specific & Area subscriptions, preferences, queue fan-out and replaceable channel adapters \\
+Audit & Varies & Reason-coded sent / skipped decisions and per-recipient delivery history \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Gaps and What This Project Offers}
+
+\textbf{Risk-model gap.} Glanders epidemiology and lab identification exist; a calibrated next-year
+population risk model on a public country-year panel does not.
+
+\textbf{Explanation gap.} Retrieval-augmented generation is mature as a method, but not as a
+glanders warning explainer that cites official guidance and refuses when unsupported.
+
+\textbf{Alert gap.} Warning and alert-management systems exist in other domains; none takes a
+calibrated glanders probability through hysteresis, suppression and deduplication to consented
+owner messages with an audit trail.
+
+\textbf{What we offer.} A three-part platform with fixed contracts: a risk engine that compares
+model families under temporal and leave-country-out validation; an explanation layer specified for
+cited, refusible guidance; and an alert service that turns a probability into few enough messages
+to remain readable. Chapters~\ref{ch:method}--\ref{ch:alerts} develop each part; Chapter~\ref{ch:results}
+reports measured results only for the risk engine.
 
 % =====================================================================
 \chapter{System Architecture}
@@ -1018,50 +1103,9 @@ The GlandersWatch alerting system converts a machine-learning risk prediction in
 
 The design is period-aware and uses one workflow for monthly and yearly predictions. Monthly prediction is future work for the ML component; the currently evaluated model is country-year based. The alert service is designed to accept monthly records once a monthly model, target and data pipeline have been developed and validated. Its output is a population-level warning, not an individual-animal diagnosis or a replacement for veterinary examination and laboratory testing.
 
-\section{Related Alerting and Warning Systems}
-The reviewed systems address different parts of warning and alert management. They provide useful design lessons, but none should be presented as implementing the complete GlandersWatch workflow.
-
-\subsection{NADRES v2}
-NADRES v2 is associated with India's animal-disease reporting and surveillance activities. It highlights the importance of organised disease information and institutional reporting. GlandersWatch uses this surveillance context as background, but adds a predictive risk input and a separate process for deciding whether recipients should be notified.
-
-\subsection{Google and Central Water Commission Flood Warnings}
-Public flood-warning services demonstrate how hazard information can be communicated to affected people in a timely and understandable way. The lesson for GlandersWatch is to communicate the affected area, risk level and practical action, rather than expose only a probability. Flood-specific thresholds and procedures cannot simply be transferred to animal-disease warnings.
-
-\subsection{J-PAL Bihar Flood-Warning Study}
-The J-PAL Bihar work is relevant because it considers whether early-warning information reaches people and supports preparedness. It suggests that warning effectiveness should be assessed beyond message generation: whether people receive, understand and act on a warning also matters. GlandersWatch can use this evaluation perspective, while recognising that animal-disease response differs from flood preparedness.
-
-\subsection{Prometheus Alertmanager}
-Prometheus Alertmanager provides software-alert concepts such as grouping, inhibition, silencing and routing to reduce repeated notifications during an incident. GlandersWatch adapts the general idea of separating alert conditions from notification routing. It additionally needs disease-risk periods, recipient subscriptions, veterinary guidance and clear forecast disclaimers.
-
-\subsection{OASIS Common Alerting Protocol (CAP)}
-CAP is a standard format for exchanging public-warning information between systems. Its relevance is interoperability: external systems can consume structured alert information without depending on the sender's internal implementation. CAP may be a future export/integration format; it is not part of the internal risk-classification rules.
-
-\subsection{Lessons and Comparison}
-\begin{table}[htbp]\centering\small
-\caption{Previous systems and the lessons applied in GlandersWatch.}\label{tab:alert-related-work}
-\begin{tabular}{p{2.8cm}p{4.8cm}p{5.1cm}}\toprule
-\textbf{Previous work}&\textbf{Main focus}&\textbf{Lesson for GlandersWatch}\\\midrule
-NADRES v2&Animal-disease surveillance and reporting.&Use structured disease information and preserve traceability.\\
-Google/CWC warnings&Communication of hazard information to affected people.&Provide understandable, action-oriented messages.\\
-J-PAL Bihar study&Reach and usefulness of early warnings.&Evaluate receipt, understanding and response, not only sending.\\
-Prometheus Alertmanager&Grouping, silencing, inhibition and routing.&Control repeated notifications and separate alerting from delivery.\\
-OASIS CAP&Standardised public-warning exchange.&Keep alert information structured for possible external integration.\\\bottomrule
-\end{tabular}\end{table}
-
-The proposed contribution is the integration and adaptation of these ideas around GlandersWatch's calibrated area-period disease-risk prediction. The design combines prediction-aware risk-state transitions, configurable suppression, three-level duplicate protection, area-based subscriptions, asynchronous delivery and an audit trail. This is not a claim that the individual mechanisms are new or that every previous system lacks them; the systems solve different problems, while GlandersWatch organises the relevant mechanisms for its animal-disease use case.
-
-\begin{table}[htbp]\centering\small
-\caption{Difference between reviewed work and the proposed design.}\label{tab:alert-comparison}
-\begin{tabular}{p{2.8cm}p{5.0cm}p{5.0cm}}\toprule
-\textbf{Aspect}&\textbf{Reviewed work provides}&\textbf{GlandersWatch proposes}\\\midrule
-Input&Surveillance reports, hazard information, monitoring conditions or prepared alerts.&Calibrated Glanders risk prediction with area, period, model version and freshness.\\
-Period&Frequency depends on each source system.&Common period-aware contract for monthly and yearly predictions.\\
-Risk state&Individual warning or alert-management capabilities.&LOW/MEDIUM/HIGH classification, hysteresis and previous-state comparison.\\
-Notification control&Examples include routing, silencing, grouping or warning distribution.&Combined unchanged-level, cooldown, escalation, stale-data, mute, quiet-hour and daily-cap policy.\\
-Duplicate control&Alert grouping or deduplication in selected systems.&Separate alert, recipient-job and send-attempt protection.\\
-Recipients/delivery&Depends on the domain and platform.&Area subscriptions, preferences, queue-based fan-out and replaceable channel adapters.\\
-Audit&Varies by system.&Reason-coded sent/skipped decisions and per-recipient delivery history.\\\bottomrule
-\end{tabular}\end{table}
+Related warning systems, design lessons and the comparison with this service are reviewed in
+Chapter~\ref{ch:lit} (Tables~\ref{tab:alert-related-work} and~\ref{tab:alert-comparison}). This
+chapter specifies the architecture and rules that implement that design.
 
 \section{Proposed End-to-End Architecture}
 Figure~\ref{fig:alerts-pipeline} shows the supplied end-to-end architecture. The flow begins with user registration and prediction generation, then proceeds through evaluation, rules, alert creation, fan-out and notification. The data layer stores predictions, subscriptions, period-specific alert state, alerts and delivery logs. The approval gate is optional and may hold selected HIGH alerts for veterinary review; its use requires agreement with project and veterinary stakeholders.
@@ -1457,11 +1501,6 @@ overlap, and a cost-sensitive threshold would match the operating point to progr
 \bibitem{singha2020} Singha H, Shanmugasundaram K, Tripathi BN, et al. Serological surveillance and clinical investigation of glanders among indigenous equines in India from 2015 to 2018. \emph{Transboundary and Emerging Diseases}. 2020. doi:10.1111/tbed.13475
 \bibitem{malik2012} Malik P, Singha H, Khurana SK, et al. Emergence and re-emergence of glanders in India: a description of outbreaks from 2006 to 2011. \emph{Veterinaria Italiana}. 2012. PMID:22718333
 \bibitem{fonseca2019} Fonseca-Rodr\'iguez O, Pinheiro J\'unior JW, Mota RA. Spatiotemporal analysis of glanders in Brazil. \emph{Journal of Equine Veterinary Science}. 2019. doi:10.1016/j.jevs.2019.03.216
-\bibitem{hollings2017} Hollings T, Robinson A, van Andel M, et al. Species distribution models: a comparison of statistical approaches for livestock and disease epidemics. \emph{PLOS ONE}. 2017;12(8):e0183626. doi:10.1371/journal.pone.0183626
-\bibitem{alshatti2026} Alshatti M, Al-Hemoud A, Othman A, et al. A risk prediction model for highly pathogenic avian influenza outbreaks in Kuwait. \emph{Frontiers in Veterinary Science}. 2026. doi:10.3389/fvets.2026.1843962
-\bibitem{kane2014} Kane MJ, Price N, Scotch M, Rabinowitz P. Comparison of ARIMA and Random Forest time series models for prediction of avian influenza H5N1 outbreaks. \emph{BMC Bioinformatics}. 2014;15:276. doi:10.1186/1471-2105-15-276
-\bibitem{walsh2019} Walsh DP, Ma TF, Ip HS, Zhu J. Artificial intelligence and avian influenza: using machine learning to enhance active surveillance for avian influenza viruses. \emph{Transboundary and Emerging Diseases}. 2019. doi:10.1111/tbed.13318
-\bibitem{yoo2022} Yoo DS, Song YH, Choi DW, et al. Machine learning-driven dynamic risk prediction for highly pathogenic avian influenza at poultry farms in the Republic of Korea. \emph{Transboundary and Emerging Diseases}. 2021. doi:10.1111/tbed.14419
 \bibitem{moawad2019} Moawad AA, Silge A, Bocklitz T, Fischer K, R\"osch P, Roesler U, Elschner MC, Popp J, Neubauer H. A machine learning-based Raman spectroscopic assay for the identification of \emph{Burkholderia mallei} and related species. \emph{Molecules}. 2019;24(24):4516. doi:10.3390/molecules24244516
 \bibitem{stoeckel2015} St\"ockel S, Meisel S, Elschner M, Melzer F, R\"osch P, Popp J. Raman spectroscopic detection and identification of \emph{Burkholderia mallei} and \emph{Burkholderia pseudomallei}. \emph{Analytical and Bioanalytical Chemistry}. 2015;407(3):833--843. doi:10.1007/s00216-014-7906-5
 \bibitem{collier2012} Collier N. Uncovering text mining: a survey of current work on web-based epidemic intelligence. \emph{Global Public Health}. 2012. doi:10.1080/17441692.2012.699975
