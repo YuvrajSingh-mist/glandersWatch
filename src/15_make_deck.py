@@ -418,8 +418,8 @@ def build() -> pathlib.Path:
 
     pic(s, "report_fig1_1.png", MG, Inches(2.50), w=Inches(12.2))
     caption(s, MG, Inches(5.55), CWD,
-            "Report Figure 1.1 — Panel A: exposed population by species. "
-            "Panel B: documented events per year (tracks publishing as much as disease).")
+            "Report Figure 1: Panel A exposed population by species; "
+            "Panel B documented events per year (tracks publishing as much as disease).")
     takeaway(s, Inches(6.05),
              "The target is a documented event rather than raw incidence, because "
              "documentation follows publishing capacity.")
@@ -492,7 +492,7 @@ def build() -> pathlib.Path:
              title_size=26)
     pic(s, "fig_architecture.png", MG + Inches(1.8), Inches(1.35), w=Inches(8.6))
     caption(s, MG, Inches(5.45), CWD,
-            "Report Figure 3.1 — ML risk engine, RAG Q&A layer, and alert service; "
+            "Report Figure 2: ML risk engine, RAG Q&A layer, and alert service; "
             "each independently deployable.")
     takeaway(s, Inches(5.95),
              "Coupling alert delivery to LLM latency would make the risk model hard to "
@@ -536,7 +536,7 @@ def build() -> pathlib.Path:
     s = page(prs, "From sources to a calibrated probability", "Method", title_size=26)
     pic(s, "fig_training.png", MG, Inches(1.35), w=Inches(6.3))
     caption(s, MG, Inches(5.00), Inches(6.3),
-            "Report Figure 4.1 — Training pipeline (chronological split before any model sees data).")
+            "Report Figure 3: Training pipeline (chronological split before any model sees data).")
 
     prose(s, MG + Inches(6.55), Inches(1.40), Inches(5.5), Inches(4.2), [
         "Temporal split: train 2005–2017 (~68%), test 2018–2023 (~32%).",
@@ -555,7 +555,7 @@ def build() -> pathlib.Path:
     s = page(prs, "How one trained model is scored", "Evaluation", title_size=26)
     pic(s, "fig_evaluation.png", MG + Inches(2.2), Inches(1.30), w=Inches(8.8))
     caption(s, MG, Inches(5.55), CWD,
-            "Report Figure 4.2 — Evaluation pipeline: three scoring paths for one fitted model.")
+            "Report Figure 4: Evaluation pipeline: three scoring paths for one fitted model.")
     takeaway(s, Inches(6.05),
              "PR-AUC is the headline metric. ROC-AUC stays high for all families and "
              "cannot separate them on this imbalance.")
@@ -618,7 +618,7 @@ def build() -> pathlib.Path:
              title_size=26)
     pic(s, "fig_rag.png", MG + Inches(2.6), Inches(1.25), w=Inches(8.0), h=Inches(4.6))
     caption(s, MG, Inches(5.95), CWD,
-            "Report Figure 4.3 — Offline ingestion (top); retrieval, assembly, generation (below).")
+            "Report Figure 5: Offline ingestion (top); retrieval, assembly, generation (below).")
     takeaway(s, Inches(6.40),
              "If fewer than two passages clear the relevance floor, the layer refuses "
              "rather than inventing an answer.", h=Inches(0.48))
@@ -647,7 +647,7 @@ def build() -> pathlib.Path:
     s = page(prs, "End-to-end alert pipeline", "Alerting", title_size=26)
     pic(s, "fig_alerts_pipeline.png", MG + Inches(1.2), Inches(1.30), w=Inches(10.8))
     caption(s, MG, Inches(4.85), CWD,
-            "Report Figure 4.4 — Prediction → level → dedupe → deliver → log.")
+            "Report Figure 6: Prediction to level to dedupe to deliver to log.")
     prose(s, MG, Inches(5.30), CWD, Inches(0.9), [
         f"Budget for half the events: {AE['b50']*100:.0f}% of ranked areas.  "
         f"Budget for 80%: {AE['b80']*100:.0f}%.  "
@@ -661,7 +661,7 @@ def build() -> pathlib.Path:
     s = page(prs, "Rules core, ports and adapters", "Alerting", title_size=26)
     pic(s, "fig_alerts_modular.png", MG + Inches(2.4), Inches(1.25), w=Inches(8.4), h=Inches(4.7))
     caption(s, MG, Inches(6.10), CWD,
-            "Report Figure 4.5 — Modular alerting engine: core rules, four ports, replaceable adapters.")
+            "Report Figure 7: Modular alerting engine: core rules, four ports, replaceable adapters.")
     takeaway(s, Inches(6.50),
              "The core does not know SMS vendors or databases — adapters plug in from outside.",
              h=Inches(0.42))
